@@ -1,0 +1,26 @@
+{
+  "extends": "gts/tsconfig-google.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": false,
+    "declaration": true,
+    "declarationMap": true,
+    "noEmit": false,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "lib": ["es2019", "dom"],
+    "incremental": true,
+    "rootDir": ".",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@*": ["./*"]
+    }
+  },
+  "include": ["types/**/*.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "**/*.js"]
+}
