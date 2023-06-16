@@ -1,0 +1,103 @@
+@keyframes op {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 1000px;
+  margin-inline: auto;
+  padding-bottom: 40px;
+}
+
+.container {
+  padding: 16px;
+}
+
+.title {
+  font-size: 2.5rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: op 0.35s ease-in-out 0.5s forwards;
+}
+
+.subtitle {
+  margin-top: 32px;
+  font-size: 1.75rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: op 0.35s ease-in-out 0.5s forwards;
+}
+
+.ul {
+  margin-top: 16px;
+  margin-left: 1rem;
+}
+
+.li {
+  line-height: 1.5;
+  margin-block: 1rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: op 0.35s ease-in-out 0.5s forwards;
+
+  & + & {
+    margin-top: 32px;
+  }
+}
+
+.historyName {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.historyJobTitle {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.historyDate {
+  margin-top: 8px;
+  font-size: 0.75rem;
+}
+
+.historyCompanyUrl {
+  margin-top: 8px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.75rem;
+}
+
+.serviceUl {
+  margin-top: 16px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0px, 1fr));
+}
+
+.serviceUrl {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+}
+
+.serviceImage {
+  aspect-ratio: 1200 / 630;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sideServiceUl {
+  margin-top: 16px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0px, 1fr));
+  gap: 8px;
+}

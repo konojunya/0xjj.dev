@@ -43,7 +43,10 @@ export default function Index() {
         </ul>
       </div>
 
-      <Navigation prev={{ label: "Home", href: "/" }} />
+      <Navigation
+        prev={{ label: "Home", href: "/" }}
+        next={{ label: "Resume", href: "/resume" }}
+      />
     </div>
   );
 }
