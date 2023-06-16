@@ -1,3 +1,4 @@
+import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
 import { SNS } from "@constants/url";
 export default function Index() {
@@ -24,6 +25,8 @@ export default function Index() {
           </li>
         ))}
       </ul>
+
+      <Navigation next={{ label: "About", href: "/about" }} />
     </div>
   );
 }

@@ -1,0 +1,42 @@
+@keyframes op {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  backdrop-filter: blur(16px);
+}
+
+.ul {
+  width: 100%;
+  padding: 16px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  opacity: 0;
+  animation: op 0.35s ease-in-out 2s forwards;
+}
+
+.link {
+  font-size: 0.875rem;
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.svg {
+  fill: var(--text);
+}

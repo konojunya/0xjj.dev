@@ -16,8 +16,10 @@
   "rules": {
     // this app using Next.js
     "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-unused-vars": "error",
+    "@next/next/no-img-element": "off",
     "react-hooks/rules-of-hooks": "error",
     // https://eslint.org/docs/latest/rules/eqeqeq#allow-null
     "eqeqeq": ["error", "always", { "null": "ignore" }],
