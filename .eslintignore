@@ -1,3 +1,4 @@
 .next/
 next-env.d.ts
 next.config.js
+*.module.scss.d.ts

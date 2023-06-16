@@ -1,9 +1,13 @@
-import Head from "next/head";
 import "./global.scss";
+import type { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "0xjj.dev",
   description: "All of me",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({
@@ -13,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <Head>
+      <head>
         <link
           href="https://fonts.cdnfonts.com/css/sf-pro-display"
           rel="stylesheet"
@@ -22,7 +26,7 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
           rel="stylesheet"
         />
-      </Head>
+      </head>
       <body>
         <main>{children}</main>
       </body>
