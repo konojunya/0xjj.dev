@@ -1,0 +1,40 @@
+{
+  "extends": "gts/tsconfig-google.json",
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2020",
+    "module": "esnext",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": false,
+    "declaration": false,
+    "declarationMap": false,
+    "noEmit": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "lib": ["es2019", "dom"],
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "rootDir": ".",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@*": ["./*"]
+    }
+  },
+  "include": [
+    "types/**/*.d.ts",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "mock/index.js",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", "**/*.js"]
+}
