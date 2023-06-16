@@ -1,0 +1,36 @@
+:root {
+  // global token
+  --black: rgb(22, 22, 22);
+  --white: rgb(237, 237, 237);
+
+  // semantic token
+  --background: var(--white);
+  --text: var(--black);
+
+  @media (prefers-color-scheme: dark) {
+    --background: var(--black);
+    --text: var(--white);
+  }
+}
+
+html,
+body {
+  min-width: 320px;
+  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--text);
+  }
+}
