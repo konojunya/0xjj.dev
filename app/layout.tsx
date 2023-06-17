@@ -37,12 +37,6 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <head>
-        <meta
-          httpEquiv="Content-Security-Policy"
-          // support normalize.min.css
-          content="default-src 'self'; img-src *; style-src cdnjs.cloudflare.com;"
-        />
-
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
           rel="stylesheet"
