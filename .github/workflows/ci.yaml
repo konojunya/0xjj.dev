@@ -1,0 +1,80 @@
+name: CI
+
+env:
+  TZ: Asia/Tokyo
+
+on: pull_request
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: pnpm setup composite
+        uses: ./.github/actions/pnpm-setup
+
+      - name: Install Deps
+        run: pnpm install --frozen-lockfile
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs:
+      - setup
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: pnpm setup composite
+        uses: ./.github/actions/pnpm-setup
+
+      - name: build
+        run: pnpm build
+
+  lint-markup:
+    name: Markup Lint
+    runs-on: ubuntu-latest
+    needs:
+      - setup
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: pnpm setup composite
+        uses: ./.github/actions/pnpm-setup
+
+      - name: build
+        run: pnpm lint:markup
+
+  lint-eslint:
+    name: ESlint
+    runs-on: ubuntu-latest
+    needs:
+      - setup
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: pnpm setup composite
+        uses: ./.github/actions/pnpm-setup
+
+      - name: build
+        run: pnpm lint:eslint
+
+  approve:
+    if: |
+      github.event.pull_request.user.login == github.repository_owner && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    needs:
+      - setup
+      - build
+      - lint-markup
+      - lint-eslint
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: hmarr/auto-approve-action@v3
