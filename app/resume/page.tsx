@@ -1,21 +1,36 @@
 import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
-import { HISTORY, SUB_HISTORY } from "@constants/resume";
+import { MIAIN_JOB, SIDE_JOB, TECH_STACK, SPEAKER } from "@constants";
 export default function Index() {
   return (
     <div className={styles.wrapper}>
       <div className={styles.container}>
         <h1 className={styles.title}>Resume.</h1>
 
-        <h2 className={styles.subtitle}>職歴</h2>
+        <h2 className={styles.subtitle}>Love</h2>
+        <ul className={styles.ul}>
+          {TECH_STACK.map((item, index) => (
+            <li
+              key={item.label}
+              className={styles.techStackLi}
+              style={{
+                animationDelay: `${index * 0.1 + 1.3}s`,
+              }}
+            >
+              {item.label}({item.date})
+            </li>
+          ))}
+        </ul>
+
+        <h2 className={styles.subtitle}>Main Job</h2>
 
         <ul className={styles.ul}>
-          {HISTORY.map((history, index) => (
+          {MIAIN_JOB.map((history, index) => (
             <li
               key={history.name}
               className={styles.li}
               style={{
-                animationDelay: `${index * 0.1 + 1.3}s`,
+                animationDelay: `${index * 0.1 + 1.5}s`,
               }}
             >
               <p className={styles.historyName}>{history.name}</p>
@@ -55,10 +70,16 @@ export default function Index() {
           ))}
         </ul>
 
-        <h2 className={styles.subtitle}>副業 / お手伝い</h2>
+        <h2 className={styles.subtitle}>Side Job</h2>
         <ul className={styles.sideServiceUl}>
-          {SUB_HISTORY.map((service) => (
-            <li key={service.title}>
+          {SIDE_JOB.map((service, index) => (
+            <li
+              key={service.title}
+              className={styles.serviceLi}
+              style={{
+                animationDelay: `${index * 0.1 + 2}s`,
+              }}
+            >
               <a
                 href={service.url}
                 target="_blank"
@@ -75,6 +96,20 @@ export default function Index() {
                 />
               </a>
             </li>
+          ))}
+        </ul>
+
+        <h2 className={styles.subtitle}>Speaker</h2>
+        <ul className={styles.speakerUl}>
+          {SPEAKER.map((speaker, index) => (
+            <li
+              key={speaker.title}
+              className={styles.speakerLi}
+              style={{
+                animationDelay: `${index * 0.1 + 2.5}s`,
+              }}
+              dangerouslySetInnerHTML={{ __html: speaker.embed }}
+            />
           ))}
         </ul>
       </div>

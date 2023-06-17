@@ -25,7 +25,10 @@ body {
   text-size-adjust: 100%;
   background: var(--background);
   color: var(--text);
-  padding-inline: 16px;
+
+  @media (orientation: landscape) {
+    padding-inline: 16px;
+  }
 }
 
 * {

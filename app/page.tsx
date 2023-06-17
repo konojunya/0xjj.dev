@@ -1,6 +1,6 @@
 import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
-import { SNS } from "@constants/url";
+import { SNS } from "@constants/sns";
 export default function Index() {
   return (
     <div className={styles.wrapper}>

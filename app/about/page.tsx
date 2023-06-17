@@ -1,6 +1,6 @@
 import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
-import { BASIC_INFO, TECH_STACK } from "@constants/resume";
+import { BASIC_INFO, HOBBY } from "@constants";
 export default function Index() {
   return (
     <div className={styles.wrapper}>
@@ -27,17 +27,18 @@ export default function Index() {
           ))}
         </ul>
 
-        <h2 className={styles.subtitle}>技術スタック</h2>
+        <h2 className={styles.subtitle}>Hobby</h2>
+
         <ul className={styles.ul}>
-          {TECH_STACK.map((item, index) => (
+          {HOBBY.map((hobby, index) => (
             <li
-              key={item}
+              key={hobby}
               className={styles.li}
               style={{
                 animationDelay: `${index * 0.1 + 1.3}s`,
               }}
             >
-              {item}
+              {hobby}
             </li>
           ))}
         </ul>
