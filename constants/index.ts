@@ -1,4 +1,4 @@
-import { SNS } from "./url";
+import { SNS } from "./sns";
 
 export const BASIC_INFO = [
   { label: "名前", value: "河野純也(Junya Kono)" },

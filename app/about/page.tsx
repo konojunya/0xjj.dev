@@ -1,6 +1,6 @@
 import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
-import { BASIC_INFO } from "@constants/resume";
+import { BASIC_INFO } from "@constants";
 export default function Index() {
   return (
     <div className={styles.wrapper}>

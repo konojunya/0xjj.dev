@@ -1,6 +1,6 @@
 import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
-import { HISTORY, SUB_HISTORY, TECH_STACK } from "@constants/resume";
+import { HISTORY, SUB_HISTORY, TECH_STACK } from "@constants";
 export default function Index() {
   return (
     <div className={styles.wrapper}>
