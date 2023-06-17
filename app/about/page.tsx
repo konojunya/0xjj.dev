@@ -1,6 +1,6 @@
 import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
-import { BASIC_INFO, TECH_STACK } from "@constants/resume";
+import { BASIC_INFO } from "@constants/resume";
 export default function Index() {
   return (
     <div className={styles.wrapper}>
@@ -23,21 +23,6 @@ export default function Index() {
                 <br />
                 {info.value}
               </span>
-            </li>
-          ))}
-        </ul>
-
-        <h2 className={styles.subtitle}>技術スタック</h2>
-        <ul className={styles.ul}>
-          {TECH_STACK.map((item, index) => (
-            <li
-              key={item}
-              className={styles.li}
-              style={{
-                animationDelay: `${index * 0.1 + 1.3}s`,
-              }}
-            >
-              {item}
             </li>
           ))}
         </ul>
