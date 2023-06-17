@@ -22,7 +22,7 @@
   backdrop-filter: blur(100px) saturate(400%) brightness(100%);
   box-shadow: var(--shadows-large);
   opacity: 0;
-  animation: op 0.35s ease-in-out 2s forwards;
+  animation: op 0.35s ease-in-out 1s forwards;
   transform: translate(-50%, 20px);
   overflow: hidden;
 
