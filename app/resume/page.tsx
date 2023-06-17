@@ -54,7 +54,7 @@ export default function Index() {
                       className={styles.serviceUrl}
                     >
                       <img
-                        className={styles.serviceImage}
+                        className={styles.ogpImage}
                         src={service.image}
                         alt={service.title}
                         width={1200}
@@ -86,7 +86,7 @@ export default function Index() {
                 className={styles.serviceUrl}
               >
                 <img
-                  className={styles.serviceImage}
+                  className={styles.ogpImage}
                   src={service.image}
                   alt={service.title}
                   width={1200}
@@ -107,8 +107,24 @@ export default function Index() {
               style={{
                 animationDelay: `${index * 0.1 + 2.5}s`,
               }}
-              dangerouslySetInnerHTML={{ __html: speaker.embed }}
-            />
+            >
+              <a
+                href={speaker.href}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.speakerUrl}
+              >
+                <img
+                  className={styles.ogpImage}
+                  src={speaker.image}
+                  alt={speaker.title}
+                  width={1200}
+                  height={630}
+                  decoding="async"
+                />
+                <span className={styles.speakerTitle}>{speaker.title}</span>
+              </a>
+            </li>
           ))}
         </ul>
       </div>

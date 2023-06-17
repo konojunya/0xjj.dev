@@ -109,22 +109,32 @@ export const SIDE_JOB = [
 export const SPEAKER = [
   {
     title: "FUJIMI の Fastly 活用事例",
-    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/957725a927f747e2ac61b3687565dfa4" title="FUJIMIのFastly活用事例集" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 314;" data-ratio="1.78343949044586"></iframe>`,
+    href: "https://speakerdeck.com/konojunya/fastly-case-studies-at-fujimi",
+    image:
+      "https://files.speakerdeck.com/presentations/957725a927f747e2ac61b3687565dfa4/slide_0.jpg?20920207",
   },
   {
     title: "Progressive Release by using Fastly",
-    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/fffaff3afd93415d88df96b0a4219ecc" title="Progressive Release by using Fastly" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 314;" data-ratio="1.78343949044586"></iframe>`,
+    href: "https://speakerdeck.com/konojunya/progressive-release-by-using-fastly-8a9fc1f5-8730-44f3-8981-986e47498c6d",
+    image:
+      "https://files.speakerdeck.com/presentations/fffaff3afd93415d88df96b0a4219ecc/slide_0.jpg?18839933",
   },
   {
     title: "WinTicketにおけるPWA at PWA Night vol.9 の Fastly 活用事例",
-    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/038e10e9e39d48ccb48388d58eb1933f" title="WinTicketにおけるPWA at PWA Night vol.9" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 420;" data-ratio="1.3333333333333333"></iframe>`,
+    href: "https://speakerdeck.com/konojunya/winticketniokerupwa-at-pwa-night-vol-dot-9",
+    image:
+      "https://files.speakerdeck.com/presentations/038e10e9e39d48ccb48388d58eb1933f/slide_0.jpg?13893203",
   },
   {
     title: "新卒研修を終えて",
-    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/0143e6d662a0486c9c32c5949cf3be76" title="新卒研修を終えて" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 420;" data-ratio="1.3333333333333333"></iframe>`,
+    href: "https://speakerdeck.com/konojunya/xin-zu-yan-xiu-wozhong-ete",
+    image:
+      "https://files.speakerdeck.com/presentations/0143e6d662a0486c9c32c5949cf3be76/slide_0.jpg?12552400",
   },
   {
     title: "大規模なWebの開発手法",
-    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/1d9ebd7714d8431ca2fc1c6da70f5445" title="大規模なWebの開発手法" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 420;" data-ratio="1.3333333333333333"></iframe>`,
+    href: "https://speakerdeck.com/konojunya/da-gui-mo-nawebfalsekai-fa-shou-fa",
+    image:
+      "https://files.speakerdeck.com/presentations/1d9ebd7714d8431ca2fc1c6da70f5445/slide_0.jpg?10112424",
   },
 ];

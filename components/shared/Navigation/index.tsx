@@ -15,7 +15,7 @@ const MENU_ITEMS = [
   { icon: <GrHomeOption className={styles.svg} />, label: "Home", href: "/" },
   { icon: <GrUser className={styles.svg} />, label: "About", href: "/about" },
   { icon: <GrNote className={styles.svg} />, label: "Resume", href: "/resume" },
-  { id: "hr" },
+  { id: "hr", label: "hr1" },
   {
     icon: <SiTwitter className={styles.siIcon} />,
     label: "Twitter",
