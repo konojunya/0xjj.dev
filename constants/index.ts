@@ -30,7 +30,7 @@ export const HOBBY = ["Apex", "シーシャ", "ヴァイオリン", "OSS"];
 
 export const MAIN_JOB = [
   {
-    name: "microverse inc.",
+    name: "microverse株式会社",
     jobTitle: "CTO",
     date: "2022/07 - ",
     url: "https://microverse.co.jp",
