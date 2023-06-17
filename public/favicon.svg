@@ -2,12 +2,12 @@
   <style>
     @media (prefers-color-scheme: dark) {
       #rect {
-        fill: white;
+        fill: rgb(237, 237, 237);
       }
     } 
     @media (prefers-color-scheme: light) {
       #rect {
-        fill: black;
+        fill: #101010;
       }
     }
   </style>

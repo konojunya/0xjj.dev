@@ -10,6 +10,11 @@
   // shadows
   --shadows-large: 0 30px 60px rgba(0, 0, 0, 0.12);
 
+  // radius
+  --radius-md: 16px;
+  --radius-circle: 50%;
+  --radius-maximum: 9999px;
+
   @media (prefers-color-scheme: dark) {
     --background: var(--black);
     --text: var(--white);

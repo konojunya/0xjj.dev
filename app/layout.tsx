@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "JJ",
   description: "All of me",
   authors: { name: "Junya Kono" },
+  icons: ["/favicon.svg"],
   viewport: {
     width: "device-width, initial-scale=1.0, viewport-fit=cover",
   },
