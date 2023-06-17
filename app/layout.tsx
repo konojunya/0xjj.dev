@@ -3,12 +3,9 @@ import "./global.scss";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "0xjj.dev",
+  title: "JJ",
   description: "All of me",
-  robots: {
-    index: false,
-    follow: false,
-  },
+  authors: { name: "Junya Kono" },
   viewport: {
     width: "device-width, initial-scale=1.0, viewport-fit=cover",
   },
