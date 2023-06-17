@@ -20,6 +20,7 @@
 .ul {
   width: 100%;
   padding: 16px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
   list-style: none;
   display: flex;
   align-items: center;
