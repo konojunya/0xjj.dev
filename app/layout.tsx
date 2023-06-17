@@ -38,10 +38,6 @@ export default function RootLayout({
     <html lang="ja">
       <head>
         <link
-          href="https://fonts.cdnfonts.com/css/sf-pro-display"
-          rel="stylesheet"
-        />
-        <link
           href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
           rel="stylesheet"
         />
