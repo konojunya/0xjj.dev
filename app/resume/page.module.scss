@@ -29,6 +29,11 @@
 
 .subtitle {
   margin-top: 32px;
+
+  &:not(:first-of-type) {
+    margin-top: 64px;
+  }
+
   font-size: 1.75rem;
   opacity: 0;
   transform: translateY(20px);
@@ -117,4 +122,23 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0px, 1fr));
   gap: 8px;
+}
+
+.speakerUl {
+  margin-top: 16px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0px, 1fr));
+
+  @media (min-width: 800px) {
+    grid-template-columns: repeat(2, minmax(0px, 1fr));
+    gap: 1rem;
+  }
+}
+
+.speakerLi {
+  margin-block: 1rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: op 0.35s ease-in-out 0.5s forwards;
 }

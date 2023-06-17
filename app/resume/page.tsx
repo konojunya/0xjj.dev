@@ -1,6 +1,6 @@
 import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
-import { MIAIN_JOB, SIDE_JOB, TECH_STACK } from "@constants";
+import { MIAIN_JOB, SIDE_JOB, TECH_STACK, SPEAKER } from "@constants";
 export default function Index() {
   return (
     <div className={styles.wrapper}>
@@ -96,6 +96,20 @@ export default function Index() {
                 />
               </a>
             </li>
+          ))}
+        </ul>
+
+        <h2 className={styles.subtitle}>Speaker</h2>
+        <ul className={styles.speakerUl}>
+          {SPEAKER.map((speaker, index) => (
+            <li
+              key={speaker.title}
+              className={styles.speakerLi}
+              style={{
+                animationDelay: `${index * 0.1 + 2.5}s`,
+              }}
+              dangerouslySetInnerHTML={{ __html: speaker.embed }}
+            />
           ))}
         </ul>
       </div>

@@ -26,7 +26,7 @@ export const TECH_STACK = [
   { label: "Blockchain", date: "2022 - " },
 ];
 
-export const HOBBY = ["Apex", "シーシャ", "ヴァイオリン"];
+export const HOBBY = ["Apex", "シーシャ", "ヴァイオリン", "OSS"];
 
 export const MIAIN_JOB = [
   {
@@ -103,5 +103,28 @@ export const SIDE_JOB = [
     title: "Ameba",
     url: "https://www.ameba.jp/",
     image: "https://stat100.ameba.jp/www/img/ogp/ogp_ameba.png",
+  },
+];
+
+export const SPEAKER = [
+  {
+    title: "FUJIMI の Fastly 活用事例",
+    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/957725a927f747e2ac61b3687565dfa4" title="FUJIMIのFastly活用事例集" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 314;" data-ratio="1.78343949044586"></iframe>`,
+  },
+  {
+    title: "Progressive Release by using Fastly",
+    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/fffaff3afd93415d88df96b0a4219ecc" title="Progressive Release by using Fastly" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 314;" data-ratio="1.78343949044586"></iframe>`,
+  },
+  {
+    title: "WinTicketにおけるPWA at PWA Night vol.9 の Fastly 活用事例",
+    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/038e10e9e39d48ccb48388d58eb1933f" title="WinTicketにおけるPWA at PWA Night vol.9" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 420;" data-ratio="1.3333333333333333"></iframe>`,
+  },
+  {
+    title: "新卒研修を終えて",
+    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/0143e6d662a0486c9c32c5949cf3be76" title="新卒研修を終えて" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 420;" data-ratio="1.3333333333333333"></iframe>`,
+  },
+  {
+    title: "大規模なWebの開発手法",
+    embed: `<iframe class="speakerdeck-iframe" frameborder="0" src="https://speakerdeck.com/player/1d9ebd7714d8431ca2fc1c6da70f5445" title="大規模なWebの開発手法" allowfullscreen="true" style="border: 0px; background: padding-box padding-box rgba(0, 0, 0, 0.1); margin: 0px; padding: 0px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 40px; width: 100%; height: auto; aspect-ratio: 560 / 420;" data-ratio="1.3333333333333333"></iframe>`,
   },
 ];
