@@ -55,7 +55,6 @@ export default function Index() {
                       className={styles.serviceUrl}
                     >
                       <Image
-                        loading="lazy"
                         className={styles.ogpImage}
                         src={service.image}
                         alt={service.title}
@@ -88,7 +87,6 @@ export default function Index() {
                 className={styles.serviceUrl}
               >
                 <Image
-                  loading="lazy"
                   className={styles.ogpImage}
                   src={service.image}
                   alt={service.title}
@@ -118,7 +116,6 @@ export default function Index() {
                 className={styles.speakerUrl}
               >
                 <Image
-                  loading="lazy"
                   className={styles.ogpImage}
                   src={speaker.image}
                   alt={speaker.title}
