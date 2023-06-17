@@ -1,5 +1,6 @@
 import styles from "./page.module.scss";
 import { MAIN_JOB, SIDE_JOB, TECH_STACK, SPEAKER } from "@constants";
+import Image from "next/image";
 export default function Index() {
   return (
     <div className={styles.wrapper}>
@@ -53,7 +54,7 @@ export default function Index() {
                       rel="noreferrer"
                       className={styles.serviceUrl}
                     >
-                      <img
+                      <Image
                         className={styles.ogpImage}
                         src={service.image}
                         alt={service.title}
@@ -85,7 +86,7 @@ export default function Index() {
                 rel="noreferrer"
                 className={styles.serviceUrl}
               >
-                <img
+                <Image
                   className={styles.ogpImage}
                   src={service.image}
                   alt={service.title}
@@ -114,7 +115,7 @@ export default function Index() {
                 rel="noreferrer"
                 className={styles.speakerUrl}
               >
-                <img
+                <Image
                   className={styles.ogpImage}
                   src={speaker.image}
                   alt={speaker.title}
