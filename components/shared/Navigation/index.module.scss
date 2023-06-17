@@ -29,6 +29,12 @@
   @media (prefers-color-scheme: dark) {
     background: rgba(22, 22, 22, 0.8);
   }
+
+  @media (prefers-reduced-motion) {
+    opacity: 1;
+    transform: translate(-50%, 0px);
+    animation-name: none;
+  }
 }
 
 .ul {

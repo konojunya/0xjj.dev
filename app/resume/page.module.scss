@@ -25,6 +25,12 @@
   opacity: 0;
   transform: translateY(20px);
   animation: op 0.35s ease-in-out 0.5s forwards;
+
+  @media (prefers-reduced-motion) {
+    animation-name: none;
+    opacity: 1;
+    transform: translateY(0px);
+  }
 }
 
 .subtitle {
@@ -38,6 +44,12 @@
   opacity: 0;
   transform: translateY(20px);
   animation: op 0.35s ease-in-out 0.5s forwards;
+
+  @media (prefers-reduced-motion) {
+    animation-name: none;
+    opacity: 1;
+    transform: translateY(0px);
+  }
 }
 
 .ul {
@@ -51,6 +63,12 @@
   transform: translateY(20px);
   animation: op 0.35s ease-in-out 0.5s forwards;
 
+  @media (prefers-reduced-motion) {
+    animation-name: none;
+    opacity: 1;
+    transform: translateY(0px);
+  }
+
   & + & {
     margin-top: 8px;
   }
@@ -62,6 +80,12 @@
   opacity: 0;
   transform: translateY(20px);
   animation: op 0.35s ease-in-out 0.5s forwards;
+
+  @media (prefers-reduced-motion) {
+    animation-name: none;
+    opacity: 1;
+    transform: translateY(0px);
+  }
 
   & + & {
     margin-top: 32px;
@@ -101,6 +125,12 @@
   opacity: 0;
   transform: translateY(20px);
   animation: op 0.35s ease-in-out 0.5s forwards;
+
+  @media (prefers-reduced-motion) {
+    animation-name: none;
+    opacity: 1;
+    transform: translateY(0px);
+  }
 }
 
 .serviceUrl {
@@ -142,6 +172,12 @@
   opacity: 0;
   transform: translateY(20px);
   animation: op 0.35s ease-in-out 0.5s forwards;
+
+  @media (prefers-reduced-motion) {
+    animation-name: none;
+    opacity: 1;
+    transform: translateY(0px);
+  }
 }
 
 .speakerUrl {
@@ -182,5 +218,9 @@
 
   &:hover {
     opacity: 0;
+  }
+
+  @media (prefers-reduced-motion) {
+    transition: none;
   }
 }
