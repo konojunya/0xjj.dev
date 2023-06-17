@@ -12,15 +12,18 @@ for (const sns of SNS) {
 }
 
 export const TECH_STACK = [
-  "HTML",
-  "CSS",
-  "JavaScript",
-  "TypeScript",
-  "Solidity",
-  "Next.js",
-  "React",
-  "CDN",
-  "Vercel",
+  { label: "HTML", date: "2015 - " },
+  { label: "CSS", date: "2015 - " },
+  { label: "JavaScript", date: "2015 - " },
+  { label: "TypeScript", date: "2017 - " },
+  { label: "React", date: "2017 - " },
+  { label: "Fastly", date: "2019 - " },
+  { label: "GCP", date: "2019 - " },
+  { label: "Go", date: "2019 - 🤔" },
+  { label: "Vim Script", date: "2019 - 🤔" },
+  { label: "Next.js", date: "2020 - " },
+  { label: "Rust", date: "2020 - 🤔" },
+  { label: "Blockchain", date: "2022 - " },
 ];
 
 export const HISTORY = [
@@ -100,3 +103,5 @@ export const SUB_HISTORY = [
     image: "https://stat100.ameba.jp/www/img/ogp/ogp_ameba.png",
   },
 ];
+
+export const HOBBY = ["Apex", "シーシャ", "ヴァイオリン"];

@@ -7,22 +7,22 @@ export default function Index() {
       <div className={styles.container}>
         <h1 className={styles.title}>Resume.</h1>
 
-        <h2 className={styles.subtitle}>技術スタック</h2>
+        <h2 className={styles.subtitle}>Love</h2>
         <ul className={styles.ul}>
           {TECH_STACK.map((item, index) => (
             <li
-              key={item}
+              key={item.label}
               className={styles.techStackLi}
               style={{
                 animationDelay: `${index * 0.1 + 1.3}s`,
               }}
             >
-              {item}
+              {item.label}({item.date})
             </li>
           ))}
         </ul>
 
-        <h2 className={styles.subtitle}>職歴</h2>
+        <h2 className={styles.subtitle}>Main Job</h2>
 
         <ul className={styles.ul}>
           {HISTORY.map((history, index) => (
@@ -70,7 +70,7 @@ export default function Index() {
           ))}
         </ul>
 
-        <h2 className={styles.subtitle}>副業 / お手伝い</h2>
+        <h2 className={styles.subtitle}>Side Job</h2>
         <ul className={styles.sideServiceUl}>
           {SUB_HISTORY.map((service, index) => (
             <li
