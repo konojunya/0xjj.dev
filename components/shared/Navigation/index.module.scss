@@ -24,6 +24,7 @@
   opacity: 0;
   animation: op 0.35s ease-in-out 2s forwards;
   transform: translate(-50%, 20px);
+  overflow: hidden;
 
   @media (prefers-color-scheme: dark) {
     background: rgba(22, 22, 22, 0.8);
@@ -45,16 +46,26 @@
 }
 
 .button {
+  cursor: pointer;
   width: 40px;
   height: 40px;
-  background: transparent;
+  background: rgb(243, 243, 243);
   border: none;
   border-radius: var(--radius-circle);
   display: grid;
   place-items: center;
+  transition: transform 0.2s ease-in-out;
+
+  @media (prefers-color-scheme: dark) {
+    background: rgb(35, 35, 35);
+  }
 
   &:focus-visible {
     box-shadow: 0 0 0 2px var(--text);
+  }
+
+  &:hover {
+    transform: scale(1.1);
   }
 }
 
