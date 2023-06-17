@@ -1,3 +1,4 @@
+import { Navigation } from "@components/shared/Navigation";
 import "./global.scss";
 import type { Metadata } from "next";
 
@@ -31,6 +32,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <Navigation />
         <main>{children}</main>
       </body>
     </html>

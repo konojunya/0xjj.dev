@@ -28,7 +28,7 @@ export const TECH_STACK = [
 
 export const HOBBY = ["Apex", "シーシャ", "ヴァイオリン", "OSS"];
 
-export const MIAIN_JOB = [
+export const MAIN_JOB = [
   {
     name: "microverse inc.",
     jobTitle: "CTO",

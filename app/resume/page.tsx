@@ -1,6 +1,5 @@
-import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
-import { MIAIN_JOB, SIDE_JOB, TECH_STACK, SPEAKER } from "@constants";
+import { MAIN_JOB, SIDE_JOB, TECH_STACK, SPEAKER } from "@constants";
 export default function Index() {
   return (
     <div className={styles.wrapper}>
@@ -25,7 +24,7 @@ export default function Index() {
         <h2 className={styles.subtitle}>Main Job</h2>
 
         <ul className={styles.ul}>
-          {MIAIN_JOB.map((history, index) => (
+          {MAIN_JOB.map((history, index) => (
             <li
               key={history.name}
               className={styles.li}
@@ -113,8 +112,6 @@ export default function Index() {
           ))}
         </ul>
       </div>
-
-      <Navigation prev={{ label: "About", href: "/about" }} />
     </div>
   );
 }
