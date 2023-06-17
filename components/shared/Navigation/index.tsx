@@ -1,26 +1,8 @@
-"use client";
-
 import styles from "./index.module.scss";
-import { useRouter } from "next/navigation";
 import { MENU_ITEMS } from "./constants";
+import Link from "next/link";
 
 export const Navigation: React.FC = () => {
-  const router = useRouter();
-
-  const navigation = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const href = e.currentTarget.dataset.href;
-    if (href == null) {
-      return;
-    }
-
-    if (href.startsWith("https")) {
-      window.open(href, "_blank");
-      return;
-    }
-
-    router.push(href);
-  };
-
   return (
     <header>
       <nav className={styles.nav}>
@@ -32,14 +14,19 @@ export const Navigation: React.FC = () => {
 
             return (
               <li key={item.label}>
-                <button
-                  className={styles.button}
-                  tabIndex={0}
-                  data-href={item.href}
-                  onClick={navigation}
+                <Link
+                  className={styles.link}
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  href={item.href!}
+                  target={
+                    item.href?.startsWith("https://") ? "_blank" : "_self"
+                  }
+                  rel={
+                    item.href?.startsWith("https://") ? "noreferrer" : undefined
+                  }
                 >
                   {item.icon}
-                </button>
+                </Link>
               </li>
             );
           })}
