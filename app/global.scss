@@ -7,6 +7,9 @@
   --background: var(--white);
   --text: var(--black);
 
+  // shadows
+  --shadows-large: 0 30px 60px rgba(0, 0, 0, 0.12);
+
   @media (prefers-color-scheme: dark) {
     --background: var(--black);
     --text: var(--white);

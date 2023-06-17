@@ -1,4 +1,3 @@
-import { Navigation } from "@components/shared/Navigation";
 import styles from "./page.module.scss";
 import { BASIC_INFO, HOBBY } from "@constants";
 export default function Index() {
@@ -43,11 +42,6 @@ export default function Index() {
           ))}
         </ul>
       </div>
-
-      <Navigation
-        prev={{ label: "Home", href: "/" }}
-        next={{ label: "Resume", href: "/resume" }}
-      />
     </div>
   );
 }
