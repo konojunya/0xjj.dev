@@ -26,7 +26,9 @@ export const TECH_STACK = [
   { label: "Blockchain", date: "2022 - " },
 ];
 
-export const HISTORY = [
+export const HOBBY = ["Apex", "シーシャ", "ヴァイオリン"];
+
+export const MIAIN_JOB = [
   {
     name: "microverse inc.",
     jobTitle: "CTO",
@@ -69,7 +71,7 @@ export const HISTORY = [
   },
 ];
 
-export const SUB_HISTORY = [
+export const SIDE_JOB = [
   {
     title: "株式会社タイミー",
     url: "https://timee.co.jp/",
@@ -103,5 +105,3 @@ export const SUB_HISTORY = [
     image: "https://stat100.ameba.jp/www/img/ogp/ogp_ameba.png",
   },
 ];
-
-export const HOBBY = ["Apex", "シーシャ", "ヴァイオリン"];
