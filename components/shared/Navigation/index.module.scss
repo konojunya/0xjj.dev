@@ -17,7 +17,7 @@
   width: calc(100% - 32px);
   height: 58px;
   max-width: 500px;
-  border-radius: 999px;
+  border-radius: var(--radius-maximum);
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(100px) saturate(400%) brightness(100%);
   box-shadow: var(--shadows-large);
@@ -51,7 +51,7 @@
   height: 40px;
   background: rgb(243, 243, 243);
   border: none;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   display: grid;
   place-items: center;
   transition: transform 0.2s ease-in-out;
