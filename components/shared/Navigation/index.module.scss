@@ -46,6 +46,7 @@
 }
 
 .button {
+  cursor: pointer;
   width: 40px;
   height: 40px;
   background: rgb(243, 243, 243);
@@ -53,6 +54,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
+  transition: transform 0.2s ease-in-out;
 
   @media (prefers-color-scheme: dark) {
     background: rgb(35, 35, 35);
@@ -60,6 +62,10 @@
 
   &:focus-visible {
     box-shadow: 0 0 0 2px var(--text);
+  }
+
+  &:hover {
+    transform: scale(1.1);
   }
 }
 
