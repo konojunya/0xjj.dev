@@ -2,12 +2,11 @@ import styles from "./page.module.scss";
 
 // crafts
 import { TwitterLikeButton } from "./twitter-like-button";
+import { DashedLine } from "./dashed-line";
 
 const Crafts = [
-  {
-    id: "twitter-like-button",
-    component: <TwitterLikeButton />,
-  },
+  { id: "twitter-like-button", component: <TwitterLikeButton /> },
+  { id: "dashed-line", component: <DashedLine /> },
 ];
 export default function Index() {
   return (
