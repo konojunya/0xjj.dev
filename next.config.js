@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-module.exports = {
+const config = {
   reactStrictMode: true,
   swcMinify: true,
   poweredByHeader: false,
@@ -18,4 +18,9 @@ module.exports = {
     ],
   },
   output: "standalone",
+  experimental: {
+    mdxRs: true,
+  },
 };
+
+module.exports = config;
