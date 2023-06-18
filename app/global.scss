@@ -1,23 +1,24 @@
 :root {
   // global token
-  --black: #101010;
-  --white: rgb(237, 237, 237);
+  --black-100: #101010;
+  --white-100: rgb(237, 237, 237);
 
   // semantic token
-  --background: var(--white);
-  --text: var(--black);
+  --background: var(--white-100);
+  --text: var(--black-100);
 
   // shadows
   --shadows-large: 0 30px 60px rgba(0, 0, 0, 0.12);
 
   // radius
+  --radius-xs: 4px;
   --radius-md: 16px;
   --radius-circle: 50%;
   --radius-maximum: 9999px;
 
   @media (prefers-color-scheme: dark) {
-    --background: var(--black);
-    --text: var(--white);
+    --background: var(--black-100);
+    --text: var(--white-100);
   }
 }
 
