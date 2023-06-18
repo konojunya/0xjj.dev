@@ -51,8 +51,6 @@
   opacity: 0;
   transform: translateY(20px);
   animation: op 0.35s ease-in-out 0.75s forwards;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--text);
 
   @media (prefers-reduced-motion) {
     opacity: 1;
