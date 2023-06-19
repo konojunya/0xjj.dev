@@ -1,4 +1,4 @@
-import { GrHomeOption, GrUser, GrNote } from "react-icons/gr";
+import { GrHomeOption, GrUser, GrNote, GrCube } from "react-icons/gr";
 import {
   SiTwitter,
   SiFacebook,
@@ -12,8 +12,7 @@ export const MENU_ITEMS = [
   { icon: <GrHomeOption className={styles.svg} />, label: "Home", href: "/" },
   { icon: <GrUser className={styles.svg} />, label: "About", href: "/about" },
   { icon: <GrNote className={styles.svg} />, label: "Resume", href: "/resume" },
-  // TODO: ある程度作ってから navigaiton に追加する
-  // { icon: <GrCube className={styles.svg} />, label: "Craft", href: "/craft" },
+  { icon: <GrCube className={styles.svg} />, label: "Craft", href: "/craft" },
   { id: "hr" },
   {
     icon: <SiTwitter className={styles.siIcon} />,
