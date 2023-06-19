@@ -1,4 +1,5 @@
 import { Navigation } from "@components/shared/Navigation";
+import { Analytics } from "@vercel/analytics/react";
 import "./global.scss";
 import type { Metadata } from "next";
 
@@ -45,6 +46,7 @@ export default function RootLayout({
       <body>
         <Navigation />
         <main>{children}</main>
+        <Analytics />
       </body>
     </html>
   );
