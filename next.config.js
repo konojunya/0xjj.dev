@@ -15,6 +15,7 @@ const config = {
       "prog-8.com",
       "stat100.ameba.jp",
       "files.speakerdeck.com",
+      "meumeu-shisha.com",
     ],
   },
   output: "standalone",

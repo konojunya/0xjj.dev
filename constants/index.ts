@@ -79,6 +79,11 @@ export const SIDE_JOB = [
       "https://timee.co.jp/wp-content/themes/taimee-hp/img/OGP20191126.png",
   },
   {
+    title: "めうめうシーシャ",
+    url: "https://meumeu-shisha.com/",
+    image: "https://meumeu-shisha.com/ogp.png",
+  },
+  {
     title: "TOMIE by Junji Ito",
     url: "https://nft.ji-anime.com/ja",
     image: "https://nft.ji-anime.com/image/ogp.png",
