@@ -19,9 +19,6 @@ const config = {
     ],
   },
   output: "standalone",
-  experimental: {
-    mdxRs: true,
-  },
 };
 
 module.exports = config;
