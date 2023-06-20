@@ -1,11 +1,14 @@
 :root {
   // global token
   --black-100: #101010;
+  --black-70: #505050;
   --white-100: rgb(237, 237, 237);
+  --white-70: #bdbdbd;
 
   // semantic token
   --background: var(--white-100);
   --text: var(--black-100);
+  --text-article: var(--black-70);
 
   // shadows
   --shadows-large: 0 30px 60px rgba(0, 0, 0, 0.12);
@@ -19,6 +22,7 @@
   @media (prefers-color-scheme: dark) {
     --background: var(--black-100);
     --text: var(--white-100);
+    --text-article: var(--white-70);
   }
 }
 

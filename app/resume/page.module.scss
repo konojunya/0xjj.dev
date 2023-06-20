@@ -95,11 +95,13 @@
 .historyName {
   font-size: 1.25rem;
   font-weight: bold;
+  line-height: 2;
 }
 
 .historyJobTitle {
   font-size: 1rem;
   font-weight: bold;
+  line-height: 2;
 }
 
 .historyDate {
@@ -117,11 +119,21 @@
 .serviceUl {
   margin-top: 16px;
   list-style: none;
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0px, 1fr));
+  display: flex;
+  gap: 16px;
+  overflow-x: scroll;
+
+  @media (min-width: 800px) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .serviceLi {
+  min-width: 90%;
+}
+
+.sideJobLi {
   opacity: 0;
   transform: translateY(20px);
   animation: op 0.35s ease-in-out 0.5s forwards;
@@ -135,7 +147,6 @@
 
 .serviceUrl {
   display: block;
-  height: 100%;
   text-decoration: none;
 }
 

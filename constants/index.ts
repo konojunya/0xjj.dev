@@ -1,3 +1,4 @@
+import { loadPublicMarkdown } from "@utils/MarkdownUtils";
 import { SNS } from "./sns";
 
 export const BASIC_INFO = [
@@ -38,7 +39,26 @@ export const MAIN_JOB = [
       {
         title: "Stella",
         url: "https://stella-app.io",
-        image: "https://stella-app.io/ogp.png",
+        image: "/resume/main-job/microverse/stella/ogp.png",
+        markdown: loadPublicMarkdown(
+          "/resume/main-job/microverse/stella/description.md"
+        ),
+      },
+      {
+        title: "Crypto Pokers",
+        url: "https://crypto-pokers.club",
+        image: "/resume/main-job/microverse/crypto-pokers/ogp.png",
+        markdown: loadPublicMarkdown(
+          "/resume/main-job/microverse/crypto-pokers/description.md"
+        ),
+      },
+      {
+        title: "asitis",
+        url: "https://asitis.me/",
+        image: "/resume/main-job/microverse/asitis/ogp.png",
+        markdown: loadPublicMarkdown(
+          "/resume/main-job/microverse/asitis/description.md"
+        ),
       },
     ],
   },
@@ -51,8 +71,10 @@ export const MAIN_JOB = [
       {
         title: "FUJIMI",
         url: "https://fujimi.me",
-        image:
-          "https://assets.fujimi.me/kmi/0daccb74-c22b-4341-9040-c67f3f0f2adc.jpeg?width=1200&height=630",
+        image: "/resume/main-job/tricot/fujimi/ogp.png",
+        markdown: loadPublicMarkdown(
+          "/resume/main-job/tricot/fujimi/description.md"
+        ),
       },
     ],
   },
@@ -65,7 +87,10 @@ export const MAIN_JOB = [
       {
         title: "WINTICKET",
         url: "https://www.winticket.jp/",
-        image: "https://www.winticket.jp/assets/1b11d0/ogp.png",
+        image: "/resume/main-job/cyberagent/winticket/ogp.png",
+        markdown: loadPublicMarkdown(
+          "/resume/main-job/cyberagent/winticket/description.md"
+        ),
       },
     ],
   },
@@ -75,39 +100,37 @@ export const SIDE_JOB = [
   {
     title: "株式会社タイミー",
     url: "https://timee.co.jp/",
-    image:
-      "https://timee.co.jp/wp-content/themes/taimee-hp/img/OGP20191126.png",
+    image: "/resume/side-job/timee/timee/ogp.png",
   },
   {
     title: "めうめうシーシャ",
     url: "https://meumeu-shisha.com/",
-    image: "https://meumeu-shisha.com/ogp.png",
+    image: "/resume/side-job/mellowcoto/meumeu-shisha/ogp.png",
   },
   {
     title: "TOMIE by Junji Ito",
     url: "https://nft.ji-anime.com/ja",
-    image: "https://nft.ji-anime.com/image/ogp.png",
+    image: "/resume/side-job/lead-edge/tomie/ogp.png",
   },
   {
     title: "Lovegraph",
     url: "https://lovegraph.me/",
-    image: "https://s3-assets.lovegraph.me/og_image.jpg",
+    image: "/resume/side-job/lovegraph/lovegraph/ogp.jpg",
   },
   {
     title: "PATRA",
     url: "https://patra.store/",
-    image:
-      "https://patra.imgix.net/videos/2022-02-17/45fff08e-434d-478f-be6f-89031e6d2e1c.jpg",
+    image: "/resume/side-job/patra/patra/ogp.jpg",
   },
   {
     title: "Progate",
     url: "https://prog-8.com/",
-    image: "https://prog-8.com/images/ogp/default.png",
+    image: "/resume/side-job/progate/progate/ogp.png",
   },
   {
     title: "Ameba",
     url: "https://www.ameba.jp/",
-    image: "https://stat100.ameba.jp/www/img/ogp/ogp_ameba.png",
+    image: "/resume/side-job/cyberagent/ameba/ogp.png",
   },
 ];
 

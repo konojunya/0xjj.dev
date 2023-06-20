@@ -1,6 +1,8 @@
 import styles from "./page.module.scss";
 import { MAIN_JOB, SIDE_JOB, TECH_STACK, SPEAKER } from "@constants";
 import Image from "next/image";
+import { JobDescription } from "./JobDescription";
+
 export default function Index() {
   return (
     <div className={styles.wrapper}>
@@ -47,7 +49,7 @@ export default function Index() {
 
               <ul className={styles.serviceUl}>
                 {history.services.map((service) => (
-                  <li key={service.title}>
+                  <li key={service.title} className={styles.serviceLi}>
                     <a
                       href={service.url}
                       target="_blank"
@@ -63,6 +65,8 @@ export default function Index() {
                         decoding="async"
                       />
                     </a>
+
+                    <JobDescription markdown={service.markdown} />
                   </li>
                 ))}
               </ul>
@@ -75,7 +79,7 @@ export default function Index() {
           {SIDE_JOB.map((service, index) => (
             <li
               key={service.title}
-              className={styles.serviceLi}
+              className={styles.sideJobLi}
               style={{
                 animationDelay: `${index * 0.1 + 2}s`,
               }}
