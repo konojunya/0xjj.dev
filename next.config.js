@@ -16,6 +16,7 @@ const config = {
       "stat100.ameba.jp",
       "files.speakerdeck.com",
       "meumeu-shisha.com",
+      "crypto-pokers.club",
     ],
   },
   output: "standalone",
