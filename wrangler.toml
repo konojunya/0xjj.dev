@@ -1,0 +1,10 @@
+name = "tools"
+account_id = "98d942613f0e458d661f5cedf95f420a"
+
+workers_dev = true
+main = "packages/tools.0xjj.dev/build/index.js"
+# https://developers.cloudflare.com/workers/platform/compatibility-dates
+compatibility_date = "2023-04-20"
+
+[site]
+  bucket = "./public"
