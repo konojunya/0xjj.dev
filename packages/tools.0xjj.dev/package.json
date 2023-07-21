@@ -8,7 +8,7 @@
     "dev": "remix dev --manual -c \"pnpm start\"",
     "start": "wrangler dev ./build/index.js",
     "typecheck": "tsc",
-    "release": "remix build && wrangler publish"
+    "release": "remix build && wrangler deploy"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.3.0",

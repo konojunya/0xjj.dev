@@ -56,7 +56,11 @@ jobs:
       - name: pnpm setup composite
         uses: ./.github/actions/pnpm-setup
 
+      - name: Build
+        run: pnpm --filter tools.0xjj.dev build
+
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@2.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}
+          command: deploy deploy packages/tools.0xjj.dev/build/index.js
