@@ -9,6 +9,6 @@
     ".tsx$": "@markuplint/react-spec"
   },
   "excludeFiles": [
-    "./**/layout.tsx"
+    "./packages/0xjj.dev/**/layout.tsx"
   ]
 }

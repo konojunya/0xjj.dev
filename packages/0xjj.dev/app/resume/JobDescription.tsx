@@ -5,7 +5,7 @@ interface Props {
   markdown: string;
 }
 
-export const JobDescription: React.FC<Props> = async ({ markdown }) => {
+export const JobDescription = async ({ markdown }: Props) => {
   const html = await compileMarkdown(markdown);
 
   return (
