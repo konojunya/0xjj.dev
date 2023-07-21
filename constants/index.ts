@@ -60,6 +60,14 @@ export const MAIN_JOB = [
           "/resume/main-job/microverse/asitis/description.md"
         ),
       },
+      {
+        title: "夜が明けたら、いちばんに君に会いにいく",
+        url: "https://yorukiminft.com",
+        image: "/resume/main-job/microverse/yorukimi/ogp.png",
+        markdown: loadPublicMarkdown(
+          "/resume/main-job/microverse/yorukimi/description.md"
+        ),
+      },
     ],
   },
   {
