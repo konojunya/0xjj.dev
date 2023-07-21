@@ -37,8 +37,8 @@ jobs:
       - name: build
         run: pnpm build
 
-  lint-markup:
-    name: Markup Lint
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     needs:
       - setup
@@ -49,21 +49,7 @@ jobs:
         uses: ./.github/actions/pnpm-setup
 
       - name: build
-        run: pnpm lint:markup
-
-  lint-eslint:
-    name: ESlint
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: pnpm setup composite
-        uses: ./.github/actions/pnpm-setup
-
-      - name: build
-        run: pnpm lint:eslint
+        run: pnpm lint
 
   approve:
     if: |
@@ -72,8 +58,7 @@ jobs:
     needs:
       - setup
       - build
-      - lint-markup
-      - lint-eslint
+      - lint
     permissions:
       pull-requests: write
     steps:

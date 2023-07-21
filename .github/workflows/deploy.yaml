@@ -1,0 +1,46 @@
+name: Production Deploy
+
+env:
+  TZ: Asia/Tokyo
+
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: pnpm setup composite
+        uses: ./.github/actions/pnpm-setup
+
+      - name: Install Deps
+        run: pnpm install --frozen-lockfile
+
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    needs:
+      - setup
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: pnpm setup composite
+        uses: ./.github/actions/pnpm-setup
+
+      - name: vercel cli install
+        run: npm i -g vercel
+
+      - name: vercel deploy
+        run: |
+          export VERCEL_ORG_ID=${{ secrets.VERCEL_ORG_ID }}
+          export VERCEL_PROJECT_ID=${{ secrets.VERCEL_PROJECT_ID }}
+          vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }} --cwd .
