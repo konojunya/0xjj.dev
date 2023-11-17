@@ -24,3 +24,10 @@ jobs:
 
       - name: Install Deps
         run: pnpm install --frozen-lockfile
+
+      # https://cloud.google.com/blog/ja/products/identity-security/enabling-keyless-authentication-from-github-actions
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}

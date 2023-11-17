@@ -19,15 +19,8 @@ resource "google_cloud_run_v2_service_iam_member" "github_actions" {
   member   = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
-### Workload Identity Service Account
-resource "google_service_account" "workload_identity" {
-  account_id   = "workload-identity"
-  display_name = "Workload Identity Service Account"
-  description  = "Service Account for Workload Identity"
-}
-
-resource "google_service_account_iam_member" "workload_identity" {
-  service_account_id = google_service_account.workload_identity.id
+resource "google_service_account_iam_member" "github_actions" {
+  service_account_id = google_service_account.github_actions.id
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/konojunya/0xjj.dev"
 }
