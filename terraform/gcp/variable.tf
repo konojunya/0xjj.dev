@@ -9,3 +9,9 @@ variable "default_region" {
   type        = string
   default     = "asia-northeast1"
 }
+
+variable "deployer_service_account" {
+  description = "Deploy service account"
+  type        = string
+  default     = "deployer_service_account"
+}
