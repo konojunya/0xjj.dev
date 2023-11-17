@@ -15,14 +15,30 @@ resource "google_cloud_run_v2_service_iam_member" "github_actions" {
   name     = google_cloud_run_v2_service.portfolio.name
   location = var.default_region
   project  = var.project_id
-  role     = "roles/run.invoker"
+  role     = "roles/run.developer"
   member   = "serviceAccount:${google_service_account.github_actions.email}"
+}
+
+resource "google_artifact_registry_repository_iam_member" "github_actions" {
+  project    = var.project_id
+  location   = var.default_region
+  repository = google_artifact_registry_repository.portfolio.name
+  role       = "roles/artifactregistry.createOnPushWriter"
+  member     = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
 resource "google_service_account_iam_member" "github_actions" {
   service_account_id = google_service_account.github_actions.id
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/konojunya/0xjj.dev"
+}
+
+## Artifact Registry
+resource "google_artifact_registry_repository" "portfolio" {
+  location      = var.default_region
+  repository_id = "portfolio"
+  description   = "Portfolio"
+  format        = "DOCKER"
 }
 
 ## Cloud Run
