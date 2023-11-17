@@ -1,6 +1,6 @@
 {
-  "name": "my-portfolio",
-  "version": "0.0.0",
+  "name": "0xjj.dev",
+  "version": "2.0.0",
   "description": "All of me",
   "private": true,
   "keywords": [
@@ -13,14 +13,38 @@
   "author": "Junya Kono",
   "license": "MIT",
   "scripts": {
-    "start": "turbo run start",
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint"
+    "start": "next start",
+    "build": "next build",
+    "dev": "run-p dev:*",
+    "dev:css": "hcm './**/*.module.scss' -w",
+    "dev:next": "next dev",
+    "lint": "run-p lint:*",
+    "lint:markup": "markuplint ./apps/**/*.tsx",
+    "lint:eslint": "eslint './**/*.{tsx,ts}'"
+  },
+  "dependencies": {
+    "next": "^13.4.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.9.0"
   },
   "devDependencies": {
+    "@types/react": "^18.2.12",
+    "@types/react-dom": "^18.2.5",
+    "eslint": "^8.42.0",
+    "eslint-config-next": "^13.4.6",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "@markuplint/jsx-parser": "^3.7.0",
+    "@markuplint/react-spec": "^3.8.0",
+    "markuplint": "^3.10.0",
+    "postcss": "^8.4.24",
+    "typescript": "^5.1.6",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.8.8",
-    "turbo": "^1.10.9"
+    "gts": "^3.1.1",
+    "prettier": "^2.8.8"
   }
 }
