@@ -39,15 +39,3 @@ jobs:
 
       - name: lint
         run: pnpm lint
-
-  approve:
-    if: |
-      github.event.pull_request.user.login == github.repository_owner && !github.event.pull_request.draft
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-      - build-and-lint
-    permissions:
-      pull-requests: write
-    steps:
-      - uses: hmarr/auto-approve-action@v3
