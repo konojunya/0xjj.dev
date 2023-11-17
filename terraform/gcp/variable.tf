@@ -9,9 +9,3 @@ variable "default_region" {
   type        = string
   default     = "asia-northeast1"
 }
-
-# variable "credential_file" {
-#   description = "credential file path"
-#   type        = string
-#   default     = "credential_file"
-# }
