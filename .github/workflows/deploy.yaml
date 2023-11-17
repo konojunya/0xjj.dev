@@ -1,66 +1,52 @@
-name: Production Deploy
+name: Deploy
 
 env:
   TZ: Asia/Tokyo
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  setup:
-    name: Setup
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
 
-      - name: pnpm setup composite
-        uses: ./.github/actions/pnpm-setup
-
-      - name: Install Deps
-        run: pnpm install --frozen-lockfile
-
-  deploy-0xjj:
-    name: Deploy(0xjj.dev)
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: pnpm setup composite
-        uses: ./.github/actions/pnpm-setup
-
-      - name: vercel cli install
-        run: npm i -g vercel
-
-      - name: vercel deploy
-        run: |
-          export VERCEL_ORG_ID=${{ secrets.VERCEL_ORG_ID }}
-          export VERCEL_PROJECT_ID=${{ secrets.VERCEL_PROJECT_ID }}
-          vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }} --cwd .
-
-  deploy-tools-0xjj:
-    name: Deploy(tools.0xjj.dev)
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: pnpm setup composite
-        uses: ./.github/actions/pnpm-setup
-
-      - name: Build
-        run: pnpm --filter tools.0xjj.dev build
-
-      - name: Deploy to Cloudflare
-        uses: cloudflare/wrangler-action@2.0.0
+      # https://cloud.google.com/blog/ja/products/identity-security/enabling-keyless-authentication-from-github-actions
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0.4.0
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}
-          command: deploy packages/tools.0xjj.dev/build/index.js
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          install_components: "beta"
+
+      - name: Docker use gcloud CLI as credential helper
+        run: gcloud auth configure-docker asia-north1-docker.pkg.dev
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v2
+        id: buildx
+        with:
+          install: true
+
+      - name: Build and Push
+        run: docker build -t ${{secrets.GCP_REGISTRY}}:$GITHUB_SHA --push .
+
+      - name: Deploy
+        run: |-
+          gcloud run deploy portfolio \
+          --project=${{secrets.GCP_PROJECT_ID}} \
+          --image=${{secrets.GCP_REGISTRY}}:$GITHUB_SHA \
+          --region=asia-northeast1

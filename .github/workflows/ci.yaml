@@ -23,8 +23,8 @@ jobs:
       - name: Install Deps
         run: pnpm install --frozen-lockfile
 
-  build:
-    name: Build
+  build-and-lint:
+    name: Build and Lint
     runs-on: ubuntu-latest
     needs:
       - setup
@@ -37,29 +37,5 @@ jobs:
       - name: build
         run: pnpm build
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: pnpm setup composite
-        uses: ./.github/actions/pnpm-setup
-
-      - name: build
+      - name: lint
         run: pnpm lint
-
-  approve:
-    if: |
-      github.event.pull_request.user.login == github.repository_owner && !github.event.pull_request.draft
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-      - build
-      - lint
-    permissions:
-      pull-requests: write
-    steps:
-      - uses: hmarr/auto-approve-action@v3
