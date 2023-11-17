@@ -48,7 +48,7 @@ jobs:
       - name: pnpm setup composite
         uses: ./.github/actions/pnpm-setup
 
-      - name: build
+      - name: lint
         run: pnpm lint
 
   approve:
