@@ -132,3 +132,8 @@ dist
 # css modules
 *.scss.d.ts
 *.scss.d.ts.map
+
+# terraform
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
