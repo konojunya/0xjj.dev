@@ -20,13 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # https://cloud.google.com/blog/ja/products/identity-security/enabling-keyless-authentication-from-github-actions
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        id: auth
+      # # https://cloud.google.com/blog/ja/products/identity-security/enabling-keyless-authentication-from-github-actions
+      # - name: Authenticate to Google Cloud
+      #   uses: google-github-actions/auth@v1
+      #   id: auth
+      #   with:
+      #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -35,12 +40,6 @@ jobs:
 
       - name: Docker use gcloud CLI as credential helper
         run: gcloud auth configure-docker asia-north1-docker.pkg.dev
-
-      - name: Echo Auth list
-        run: gcloud auth list
-
-      - name: Echo Roles
-        run: gcloud iam roles list --project portfolio-0xjj
 
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v2
