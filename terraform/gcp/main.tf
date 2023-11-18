@@ -23,14 +23,14 @@ resource "google_artifact_registry_repository_iam_member" "github_actions" {
   project    = var.project_id
   location   = var.default_region
   repository = google_artifact_registry_repository.portfolio.name
-  role       = "roles/artifactregistry.createOnPushWriter"
+  role       = "roles/artifactregistry.admin"
   member     = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
 resource "google_service_account_iam_member" "github_actions" {
-  service_account_id = google_service_account.github_actions.id
+  service_account_id = google_service_account.github_actions.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/subject/${local.github_repo_owner}/${local.github_repo_name}"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/konojunya/0xjj.dev"
 }
 
 ## Artifact Registry
@@ -52,7 +52,7 @@ resource "google_cloud_run_v2_service" "portfolio" {
     }
     scaling {
       min_instance_count = 0
-      max_instance_count = 2
+      max_instance_count = 1
     }
   }
 
@@ -83,9 +83,12 @@ resource "google_iam_workload_identity_pool_provider" "github_actions" {
   workload_identity_pool_provider_id = "github-actions"
   display_name                       = "github-actions"
   description                        = "GitHub Actions"
-  attribute_condition                = "assertion.repository_owner == \"${local.github_repo_owner}\""
+  attribute_condition                = "assertion.repository_owner == 'konojunya'"
   attribute_mapping = {
-    "google.subject" = "assertion.repository"
+    "google.subject"       = "assertion.sub"
+    "attribute.actor"      = "assertion.actor"
+    "attribute.aud"        = "assertion.aud"
+    "attribute.repository" = "assertion.repository"
   }
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
