@@ -30,7 +30,7 @@ resource "google_artifact_registry_repository_iam_member" "github_actions" {
 resource "google_service_account_iam_member" "github_actions" {
   service_account_id = google_service_account.github_actions.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/*"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/konojunya/0xjj.dev"
 }
 
 ## Artifact Registry
