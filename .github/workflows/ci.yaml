@@ -36,14 +36,11 @@ jobs:
       - name: Docker use gcloud CLI as credential helper
         run: gcloud auth configure-docker asia-north1-docker.pkg.dev
 
-      - name: Echo Project ID
-        run: echo ${{ secrets.GCP_PROJECT_ID }}
-
       - name: Echo Auth list
         run: gcloud auth list
 
       - name: Echo Roles
-        run: gcloud iam roles list --project ${{ secrets.GCP_PROJECT_ID }}
+        run: gcloud iam roles list --project portfolio-0xjj
 
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v2
