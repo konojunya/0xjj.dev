@@ -23,7 +23,7 @@ resource "google_artifact_registry_repository_iam_member" "github_actions" {
   project    = var.project_id
   location   = var.default_region
   repository = google_artifact_registry_repository.portfolio.name
-  role       = "roles/artifactregistry.createOnPushWriter"
+  role       = "roles/artifactregistry.admin"
   member     = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
