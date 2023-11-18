@@ -25,7 +25,6 @@ jobs:
         uses: google-github-actions/auth@v1
         id: auth
         with:
-          create_credentials_file: true
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
@@ -37,7 +36,6 @@ jobs:
       - name: Docker use gcloud CLI as credential helper
         run: |-
           gcloud auth configure-docker asia-north1-docker.pkg.dev
-          gcloud auth login --brief --cred-file="${{steps.auth.outputs.credentials_file_path}}"
 
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v2
