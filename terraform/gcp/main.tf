@@ -23,14 +23,14 @@ resource "google_artifact_registry_repository_iam_member" "github_actions" {
   project    = var.project_id
   location   = var.default_region
   repository = google_artifact_registry_repository.portfolio.name
-  role       = "roles/artifactregistry.admin"
+  role       = "roles/artifactregistry.writer"
   member     = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
-resource "google_service_account_iam_binding" "github_actions" {
-  service_account_id = google_service_account.github_actions.id
+resource "google_service_account_iam_member" "github_actions" {
+  service_account_id = google_service_account.github_actions.name
   role               = "roles/iam.workloadIdentityUser"
-  members            = ["principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/${local.github_repo_owner}/${local.github_repo_name}"]
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/${local.github_repo_owner}/${local.github_repo_name}"
 }
 
 ## Artifact Registry
