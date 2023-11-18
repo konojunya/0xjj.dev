@@ -27,8 +27,7 @@ jobs:
       #   with:
       #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
       #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      - id: "auth"
-        name: "Authenticate to Google Cloud"
+      - name: Authenticate to Google Cloud with JSON Key
         uses: "google-github-actions/auth@v1"
         with:
           credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
