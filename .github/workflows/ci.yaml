@@ -34,8 +34,7 @@ jobs:
           install_components: "beta"
 
       - name: Docker use gcloud CLI as credential helper
-        run: |-
-          gcloud auth configure-docker asia-north1-docker.pkg.dev
+        run: gcloud auth configure-docker asia-north1-docker.pkg.dev
 
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v2
