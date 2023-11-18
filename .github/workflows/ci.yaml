@@ -47,7 +47,7 @@ jobs:
           install: true
 
       - name: Build and Push
-        run: docker build -t ${{secrets.GCP_REGISTRY}}:$GITHUB_SHA --push .
+        run: docker build -t ${{secrets.GCP_REGISTRY}} --push .
 
   # setup:
   #   name: Setup
