@@ -27,10 +27,10 @@ resource "google_artifact_registry_repository_iam_member" "github_actions" {
   member     = "serviceAccount:${google_service_account.github_actions.email}"
 }
 
-resource "google_service_account_iam_member" "github_actions" {
+resource "google_service_account_iam_binding" "github_actions" {
   service_account_id = google_service_account.github_actions.id
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/subject/${local.github_repo_owner}/${local.github_repo_name}"
+  members            = ["principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/${local.github_repo_owner}/${local.github_repo_name}"]
 }
 
 ## Artifact Registry
@@ -85,7 +85,9 @@ resource "google_iam_workload_identity_pool_provider" "github_actions" {
   description                        = "GitHub Actions"
   attribute_condition                = "assertion.repository_owner == \"${local.github_repo_owner}\""
   attribute_mapping = {
-    "google.subject" = "assertion.repository"
+    "google.subject"       = "assertion.sub"
+    "attribute.actor"      = "assertion.actor"
+    "attribute.repository" = "assertion.repository"
   }
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"

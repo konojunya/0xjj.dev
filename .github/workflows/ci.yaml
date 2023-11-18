@@ -22,7 +22,7 @@ jobs:
 
       # https://cloud.google.com/blog/ja/products/identity-security/enabling-keyless-authentication-from-github-actions
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v0.4.0
+        uses: google-github-actions/auth@v1
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
