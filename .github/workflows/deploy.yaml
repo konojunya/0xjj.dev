@@ -53,5 +53,5 @@ jobs:
           --project=${{secrets.GCP_PROJECT_ID}} \
           --image=${{secrets.GCP_REGISTRY}}:$GITHUB_SHA \
           --service-account=${{secrets.GCP_SERVICE_ACCOUNT}} \
-          --region=asia-northeast1
+          --region=asia-northeast1 \
           --allow-unauthenticated
