@@ -16,6 +16,12 @@ resource "google_service_account" "github_actions" {
   description  = "Service Account for GitHub Actions"
 }
 
+resource "google_service_account_iam_binding" "github_actions" {
+  service_account_id = google_service_account.github_actions.name
+  members            = ["serviceAccount:${google_service_account.github_actions.email}"]
+  role               = "roles/iam.serviceAccountUser"
+}
+
 resource "google_cloud_run_v2_service_iam_member" "github_actions" {
   name     = google_cloud_run_v2_service.portfolio.name
   location = var.default_region
