@@ -3,6 +3,11 @@ provider "google" {
   region  = var.default_region
 }
 
+provider "google-beta" {
+  project = var.project_id
+  region  = var.default_region
+}
+
 ## IAM
 ### GitHub Actions Service Account(eg. Cloud Run deploy from GitHub Actions)
 resource "google_service_account" "github_actions" {
@@ -35,10 +40,19 @@ resource "google_service_account_iam_member" "github_actions" {
 
 ## Artifact Registry
 resource "google_artifact_registry_repository" "portfolio" {
-  location      = var.default_region
-  repository_id = "portfolio"
-  description   = "Portfolio"
-  format        = "DOCKER"
+  provider               = "google-beta"
+  location               = var.default_region
+  repository_id          = "portfolio"
+  description            = "Portfolio"
+  format                 = "DOCKER"
+  cleanup_policy_dry_run = false
+  cleanup_policies {
+    id     = "keep_minimum-versions"
+    action = "KEEP"
+    most_recent_versions {
+      keep_count = 5
+    }
+  }
 }
 
 ## Cloud Run
