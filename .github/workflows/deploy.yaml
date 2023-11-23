@@ -2,6 +2,8 @@ name: Deploy
 
 env:
   TZ: Asia/Tokyo
+  GCP_WEB_IMAGE: ${{ secrets.GCP_REGISTRY }}/web:${{ github.sha }}
+  GCP_NGINX_IMAGE: ${{ secrets.GCP_REGISTRY }}/nginx:${{ github.sha }}
 
 on:
   push:
@@ -46,14 +48,14 @@ jobs:
 
       - name: Build and Push
         run: |-
-          docker build -t ${{secrets.GCP_REGISTRY}}/web:$GITHUB_SHA -f ./containers/web/Dockerfile --push .
-          docker build -t ${{secrets.GCP_REGISTRY}}/nginx:$GITHUB_SHA -f ./containers/nginx/Dockerfile --push .
+          docker build -t ${{env.GCP_WEB_IMAGE}} -f ./containers/web/Dockerfile --push .
+          docker build -t ${{env.GCP_NGINX_IMAGE}} -f ./containers/nginx/Dockerfile --push .
 
       - name: Deploy
         run: |-
           gcloud run deploy portfolio \
           --project=${{secrets.GCP_PROJECT_ID}} \
-          --image=${{secrets.GCP_REGISTRY}}:$GITHUB_SHA \
+          --image=${{env.GCP_WEB_IMAGE}} \
           --service-account=${{secrets.GCP_SERVICE_ACCOUNT}} \
           --region=asia-northeast1 \
           --allow-unauthenticated
