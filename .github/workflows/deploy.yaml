@@ -45,7 +45,9 @@ jobs:
           install: true
 
       - name: Build and Push
-        run: docker build -t ${{secrets.GCP_REGISTRY}}:$GITHUB_SHA -f ./containers/web/Dockerfile --push .
+        run: |-
+          docker build -t ${{secrets.GCP_REGISTRY}}:$GITHUB_SHA -f ./containers/web/Dockerfile --push .
+          docker build -t ${{secrets.GCP_REGISTRY}}:$GITHUB_SHA -f ./containers/nginx/Dockerfile --push .
 
       - name: Deploy
         run: |-
