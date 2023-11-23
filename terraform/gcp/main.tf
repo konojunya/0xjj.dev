@@ -119,12 +119,12 @@ resource "google_cloud_run_v2_service" "portfolio" {
 #   }
 # }
 
-# resource "google_cloud_run_v2_service_iam_member" "noauth" {
-#   location = google_cloud_run_v2_service.portfolio.location
-#   name     = google_cloud_run_v2_service.portfolio.name
-#   role     = "roles/run.invoker"
-#   member   = "allUsers"
-# }
+resource "google_cloud_run_v2_service_iam_member" "noauth" {
+  location = google_cloud_run_v2_service.portfolio.location
+  name     = google_cloud_run_v2_service.portfolio.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
 
 ## Workload Identity
 resource "google_iam_workload_identity_pool" "github_actions_pool" {

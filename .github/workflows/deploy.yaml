@@ -3,7 +3,7 @@ name: Deploy
 env:
   TZ: Asia/Tokyo
   GCP_WEB_IMAGE: ${{ secrets.GCP_REGISTRY }}/web:${{ github.sha }}
-  GCP_NGINX_IMAGE: ${{ secrets.GCP_REGISTRY }}/nginx:${{ github.sha }}
+  # GCP_NGINX_IMAGE: ${{ secrets.GCP_REGISTRY }}/nginx:${{ github.sha }}
 
 on:
   push:
@@ -48,8 +48,9 @@ jobs:
 
       - name: Build and Push
         run: |-
-          docker build -t ${{env.GCP_WEB_IMAGE}} -f ./containers/web/Dockerfile --push .
-          docker build -t ${{env.GCP_NGINX_IMAGE}} -f ./containers/nginx/Dockerfile --push .
+          docker build -t ${{env.GCP_WEB_IMAGE}} -f ./infura/cloudrun/web/Dockerfile --push .
+        # Feature support: cloud run multiple container
+        # docker build -t ${{env.GCP_NGINX_IMAGE}} -f ./infura/cloudrun/nginx/Dockerfile --push .
 
       - name: Deploy
         run: |-
