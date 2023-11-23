@@ -63,27 +63,12 @@ resource "google_artifact_registry_repository" "portfolio" {
 
 ## Cloud Run
 resource "google_cloud_run_v2_service" "portfolio" {
-  provider = google-beta
   name     = "portfolio"
   location = var.default_region
-  ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     containers {
-      name = "app"
-      ports {
-        container_port = 3000
-      }
-      image      = "asia-northeast1-docker.pkg.dev/${var.project_id}/portfolio/web"
-      depends_on = ["nginx"]
-    }
-
-    containers {
-      name = "nginx"
-      ports {
-        container_port = 8080
-      }
-      image = "asia-northeast1-docker.pkg.dev/${var.project_id}/portfolio/nginx"
+      image = "asia-northeast1-docker.pkg.dev/${var.project_id}/portfolio/web"
     }
 
     scaling {
@@ -97,6 +82,42 @@ resource "google_cloud_run_v2_service" "portfolio" {
     percent = 100
   }
 }
+## NOTE: multi container
+# resource "google_cloud_run_v2_service" "portfolio" {
+#   provider = google-beta
+#   name     = "portfolio"
+#   location = var.default_region
+#   ingress  = "INGRESS_TRAFFIC_ALL"
+
+#   template {
+#     containers {
+#       name = "app"
+#       ports {
+#         container_port = 3000
+#       }
+#       image      = "asia-northeast1-docker.pkg.dev/${var.project_id}/portfolio/web"
+#       depends_on = ["nginx"]
+#     }
+
+#     containers {
+#       name = "nginx"
+#       ports {
+#         container_port = 8080
+#       }
+#       image = "asia-northeast1-docker.pkg.dev/${var.project_id}/portfolio/nginx"
+#     }
+
+#     scaling {
+#       min_instance_count = 0
+#       max_instance_count = 1
+#     }
+#   }
+
+#   traffic {
+#     type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+#     percent = 100
+#   }
+# }
 
 # resource "google_cloud_run_v2_service_iam_member" "noauth" {
 #   location = google_cloud_run_v2_service.portfolio.location
