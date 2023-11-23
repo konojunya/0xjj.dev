@@ -52,11 +52,6 @@ jobs:
           gcloud run deploy portfolio \
           --project=${{secrets.GCP_PROJECT_ID}} \
           --image=${{secrets.GCP_REGISTRY}}:$GITHUB_SHA \
+          --service-account=${{secrets.GCP_SERVICE_ACCOUNT}} \
           --region=asia-northeast1
-
-      # - name: Deploy
-      #   uses: google-github-actions/deploy-cloudrun@v1
-      #   with:
-      #     service: portfolio
-      #     image: ${{ secrets.GCP_REGISTRY }}:$GITHUB_SHA
-      #     region: asia-northeast1
+          --allow-unauthenticated

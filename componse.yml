@@ -1,0 +1,19 @@
+services:
+  web:
+    image: web
+    build:
+      context: .
+      dockerfile: ./containers/web/Dockerfile
+    ports:
+      - 3000:3000
+    depens_on:
+      - nginx
+  nginx:
+    name: nginx
+    build:
+      context: .
+      dockerfile: ./containers/nginx/Dockerfile
+    volumes:
+      - ./containers/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 8080:8080
