@@ -35,6 +35,7 @@ jobs:
         with:
           service: portfolio
           image: ${{ secrets.GCP_REGISTRY }}:$GITHUB_SHA
+          region: asia-northeast1
 
       # - name: Setup Cloud SDK
       #   uses: google-github-actions/setup-gcloud@v1
