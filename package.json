@@ -1,6 +1,6 @@
 {
   "name": "0xjj.dev",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "All of me",
   "private": true,
   "keywords": [
@@ -17,7 +17,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "run-p lint:*",
-    "lint:markup": "markuplint ./apps/**/*.tsx",
+    "lint:markup": "markuplint ./**/*.tsx",
     "lint:eslint": "eslint './**/*.{tsx,ts}'"
   },
   "dependencies": {

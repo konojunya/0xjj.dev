@@ -1,5 +1,8 @@
+name: pnpm setup
+description: pnpm setup
+
 runs:
-  using: "Composite"
+  using: "composite"
   steps:
     - uses: actions/setup-node@v3
       with:

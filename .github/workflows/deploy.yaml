@@ -3,7 +3,6 @@ name: Deploy
 env:
   TZ: Asia/Tokyo
   GCP_WEB_IMAGE: ${{ secrets.GCP_REGISTRY }}/web:${{ github.sha }}
-  # GCP_NGINX_IMAGE: ${{ secrets.GCP_REGISTRY }}/nginx:${{ github.sha }}
 
 on:
   push:
