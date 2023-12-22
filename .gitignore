@@ -129,11 +129,4 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# css modules
-*.scss.d.ts
-*.scss.d.ts.map
 
-# terraform
-.terraform
-terraform.tfstate
-terraform.tfstate.backup

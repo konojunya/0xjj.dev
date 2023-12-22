@@ -1,5 +1,5 @@
 {
-  "extends": "gts/tsconfig-google.json",
+  // "extends": "gts/tsconfig-google.json",
   "compilerOptions": {
     "strict": true,
     "target": "es2020",
@@ -13,14 +13,10 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
     "lib": ["es2019", "dom"],
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "rootDir": ".",
     "outDir": "dist",
     "baseUrl": ".",
@@ -28,6 +24,6 @@
       "@*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "**/*.js"]
 }
