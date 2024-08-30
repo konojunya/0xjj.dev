@@ -3,31 +3,33 @@
   "compilerOptions": {
     "strict": true,
     "target": "es2020",
-    "module": "esnext",
+    "module": "ESNext",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": false,
     "declaration": false,
     "declarationMap": false,
     "noEmit": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "lib": ["es2019", "dom"],
+    "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": ["vite/client","node", "three"],
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
     "rootDir": ".",
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@*": ["./*"]
-    }
+      "@/*": ["./src/*"]
+    },
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "**/*.js"]
 }

@@ -1,34 +1,106 @@
 {
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2020": true
+  },
   "extends": [
     "./node_modules/gts",
-    "plugin:prettier/recommended",
     "plugin:react/recommended",
+    "plugin:unicorn/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@next/next/recommended"
+    "plugin:react-hooks/recommended",
+    "plugin:tailwindcss/recommended",
+    "plugin:storybook/recommended"
   ],
   "plugins": [
     "@typescript-eslint",
     "react",
     "react-hooks",
     "jsx-a11y",
-    "import"
+    "import",
+    "unused-imports",
+    "react-refresh"
   ],
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "public",
+    ".prettierrc.js",
+    "postcss.config.js",
+    "app/components/ui"
+  ],
+  "parser": "@typescript-eslint/parser",
   "rules": {
-    // this app using Next.js
-    "react/react-in-jsx-scope": "off",
+    "quotes": ["error", "double"],
     "react/prop-types": "off",
+    "react/display-name": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-member-accessibility": "warn",
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
     "react-hooks/rules-of-hooks": "error",
-    // https://eslint.org/docs/latest/rules/eqeqeq#allow-null
-    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "react-hooks/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
+    "eqeqeq": [2, "allow-null"],
     "no-console": [
       "error",
       {
         "allow": ["warn", "error"]
       }
-    ]
+    ],
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index",
+          "object",
+          "type"
+        ],
+        "pathGroups": [
+          {
+            "pattern": "{react,react-dom/**,react-router-dom}",
+            "group": "builtin",
+            "position": "before"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["builtin"],
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
+    ],
+    "unicorn/filename-case": [
+      "error",
+      {
+        "cases": {
+          "camelCase": true,
+          "pascalCase": true
+        }
+      }
+    ],
+    "unicorn/prevent-abbreviations": "off",
+    "unicorn/no-abusive-eslint-disable": "off",
+    "unicorn/no-null": "off",
+    "unicorn/no-array-reduce": "off",
+    "unicorn/text-encoding-identifier-case": "off",
+    "unicorn/prefer-export-from": "off",
+    "node/no-unsupported-features/node-builtins": "off"
   },
+  "overrides": [
+    {
+      "files": ["*.stories.tsx"],
+      "rules": {
+        "node/no-unpublished-import": "off"
+      }
+    }
+  ],
   "settings": {
     "react": {
       "version": "detect"

@@ -1,16 +1,17 @@
 name: CI
 
+on: pull_request
+
 env:
   TZ: Asia/Tokyo
-
-on: pull_request
+  NODE_VERSION: 21.7.3
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  setup:
+  ci:
     name: Setup
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -20,19 +21,8 @@ jobs:
       - name: pnpm setup composite
         uses: ./.github/actions/pnpm-setup
 
-      - name: Install Deps
+      - name: install deps
         run: pnpm install --frozen-lockfile
-
-  build-and-lint:
-    name: Build and Lint
-    runs-on: ubuntu-latest
-    needs:
-      - setup
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: pnpm setup composite
-        uses: ./.github/actions/pnpm-setup
 
       - name: build
         run: pnpm build
