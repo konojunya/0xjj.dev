@@ -4,7 +4,7 @@ export const Contact: React.FC = () => {
   return (
     <Card number="K" suit="clubs">
       <h2 className="text-xl leading-loose tracking-wide">Contact.</h2>
-      <div className="mt-4 flex flex-col gap-4 leading-loose tracking-wide">
+      <div className="mt-4 flex flex-col gap-4 leading-loose tracking-wide lg:text-lg">
         <p>
           Contacting me on{" "}
           <a

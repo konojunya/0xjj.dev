@@ -42,7 +42,7 @@ export const Works: React.FC = () => {
     <Card number="J" suit="hearts">
       <h2 className="text-xl leading-loose tracking-wide">Works.</h2>
       <div className="mt-4 flex flex-col gap-8">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 text-sm lg:text-lg">
           {jobs.map((job) => (
             <dl className="flex gap-4" key={job.company}>
               <dt>{job.title}</dt>
@@ -61,7 +61,7 @@ export const Works: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 text-sm lg:text-lg">
           {exJobs.map((job) => (
             <dl className="flex gap-4" key={job.company}>
               <dt>ex-{job.title}</dt>
@@ -80,7 +80,7 @@ export const Works: React.FC = () => {
           ))}
         </div>
 
-        <span>etc...</span>
+        <span className="text-sm lg:text-lg">etc...</span>
       </div>
     </Card>
   );
