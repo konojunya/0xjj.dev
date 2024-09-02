@@ -11,6 +11,7 @@ const jobs = [
     company: "Poker Picks",
     url: "https://poker-picks.com",
   },
+  { title: "Dev", company: "Argonauts inc.", url: "https://argonauts.design/" },
   { title: "Backend Dev", company: "UTAGE3.0", url: "https://utage3.com" },
   { title: "Web Dev", company: "Progate", url: "https://prog-8.com/" },
   {
