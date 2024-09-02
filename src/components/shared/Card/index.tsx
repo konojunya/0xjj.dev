@@ -45,8 +45,8 @@ export const Card = memo(
       suit === "hearts" || suit === "diamonds" ? "red" : "black";
 
     return (
-      <section className="relative h-screen p-8">
-        <div className="h-full rounded-2xl bg-slate-50 px-10 py-20 text-black">
+      <section className="relative h-screen w-full p-8 lg:h-fit">
+        <div className="h-full rounded-2xl bg-slate-50 px-10 py-20 text-black lg:h-[800px] lg:overflow-scroll">
           <div
             className="absolute left-12 top-12 flex flex-col items-center"
             style={{ color: suitColor }}
