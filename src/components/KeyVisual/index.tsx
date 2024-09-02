@@ -1,21 +1,29 @@
-/* eslint-disable react/no-unknown-property */
 import { useEffect, useRef } from "react";
 import fontData from "@compai/font-fugaz-one/data/typefaces/normal-400.json";
-import { getProject, types } from "@theatre/core";
+import { getProject, types, val } from "@theatre/core";
 import studio from "@theatre/studio";
 import * as THREE from "three";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
+import { throttle } from "throttle-debounce";
 import state from "./state.json";
 
 const project = getProject("Project JJ", { state });
 const sheet = project.sheet("KeyVisual");
 
-// Play the animation on repeat
-// eslint-disable-next-line unicorn/prefer-top-level-await
-project.ready.then(() =>
-  sheet.sequence.play({ iterationCount: Number.POSITIVE_INFINITY }),
+// アニメーションをスクロールで制御
+window.addEventListener(
+  "scroll",
+  throttle(100, () => {
+    const scroll = window.scrollY;
+    const documentHeight =
+      document.documentElement.scrollHeight - window.innerHeight;
+    const scrollProgress = scroll / documentHeight;
+
+    sheet.sequence.position =
+      scrollProgress * val(sheet.sequence.pointer.length);
+  }),
 );
 
 /**
@@ -46,10 +54,10 @@ const scene = new THREE.Scene();
 
   const font = new FontLoader().parse(fontData as any);
 
-  const geometry = new TextGeometry("Hello, I'm JJ", {
+  const geometry = new TextGeometry("Hello,\nI'm JJ", {
     font: font,
-    size: 6,
-    depth: 5,
+    size: 5,
+    depth: 3,
     curveSegments: 12,
     bevelEnabled: true,
     bevelThickness: 1,
@@ -79,6 +87,7 @@ const scene = new THREE.Scene();
       y: types.number(0, { range: [-2, 2] }),
       z: types.number(0, { range: [-2, 2] }),
     }),
+    color: types.rgba({ r: 255, g: 255, b: 255, a: 1 }),
   });
 
   mainTextObject.onValuesChange((values) => {
@@ -88,6 +97,11 @@ const scene = new THREE.Scene();
       rotate.x * Math.PI,
       rotate.y * Math.PI,
       rotate.z * Math.PI,
+    );
+    textMesh.material.color.setRGB(
+      values.color.r,
+      values.color.g,
+      values.color.b,
     );
   });
 })();
@@ -109,7 +123,7 @@ const scene = new THREE.Scene();
 
   directionalLight.shadow.mapSize.width = 2048;
   directionalLight.shadow.mapSize.height = 2048;
-  directionalLight.shadow.camera.far = 50;
+  directionalLight.shadow.camera.far = 100;
   directionalLight.shadow.camera.near = 1;
   directionalLight.shadow.camera.top = 20;
   directionalLight.shadow.camera.right = 20;
