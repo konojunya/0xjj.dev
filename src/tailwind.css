@@ -34,6 +34,12 @@
 @layer base {
   * {
     @apply border-border;
+
+    /* font-family */
+    font-family: "Fugaz One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+
   }
   body {
     @apply bg-background text-foreground;

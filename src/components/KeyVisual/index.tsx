@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import fontData from "@compai/font-fugaz-one/data/typefaces/normal-400.json";
 import { getProject, types, val } from "@theatre/core";
 import studio from "@theatre/studio";
+import { motion, useAnimation } from "framer-motion";
 import * as THREE from "three";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
@@ -12,7 +13,9 @@ import state from "./state.json";
 const project = getProject("Project JJ", { state });
 const sheet = project.sheet("KeyVisual");
 
-// アニメーションをスクロールで制御
+/**
+ * handle scroll events
+ */
 window.addEventListener(
   "scroll",
   throttle(100, () => {
@@ -172,13 +175,31 @@ if (import.meta.env.DEV) {
   studio.initialize();
 }
 
+const blurVariants = {
+  hidden: { filter: "blur(80px)" },
+  visible: {
+    filter: "blur(0px)",
+    transition: { duration: 0.8, ease: "easeInOut" },
+  },
+};
+
 export const KeyVisual: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);
+  const control = useAnimation();
 
   useEffect(() => {
     ref.current?.append(renderer.domElement);
     tick();
-  }, []);
+    control.start("visible");
+  }, [control]);
 
-  return <div className="m-0 h-screen" ref={ref} />;
+  return (
+    <motion.div
+      initial="hidden"
+      animate={control}
+      variants={blurVariants}
+      className="m-0 h-screen"
+      ref={ref}
+    />
+  );
 };
