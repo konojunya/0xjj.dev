@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@compai/font-fugaz-one':
+        specifier: ^0.0.3
+        version: 0.0.3
       '@radix-ui/react-slot':
         specifier: ^1.1.0
         version: 1.1.0(@types/react@18.3.4)(react@18.3.1)
@@ -297,6 +300,9 @@ packages:
 
   '@cloudflare/workers-types@4.20240529.0':
     resolution: {integrity: sha512-W5obfjAwCNdYk3feUHtDfUxtTU6WIq83k6gmrLLJv+HkgCkOTwwrDNs+3w1Qln0tMj+FQx/fbwxw3ZuHIoyzGg==}
+
+  '@compai/font-fugaz-one@0.0.3':
+    resolution: {integrity: sha512-UNYpdo4eTQ69KBfbOEZy5cs8w4nwr+MNAsOX5YWWSLGwYsfuByiZ3U7raLzxpxlh95oTUj5dHMovucfAY4E9gw==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -4004,6 +4010,8 @@ snapshots:
   '@cloudflare/workers-shared@0.4.0': {}
 
   '@cloudflare/workers-types@4.20240529.0': {}
+
+  '@compai/font-fugaz-one@0.0.3': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
