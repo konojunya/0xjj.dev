@@ -1,7 +1,9 @@
 /* eslint-disable react/no-unescaped-entities */
 import { useEffect, useState } from "react";
+import { clsx } from "clsx";
 import { Works } from "src/components/Works";
 import { throttle } from "throttle-debounce";
+import styles from "./App.module.css";
 import { About } from "@/components/About";
 import { Contact } from "@/components/Contact";
 import { KeyVisual } from "@/components/KeyVisual";
@@ -35,8 +37,11 @@ export const App: React.FC = () => {
       </div>
 
       <div
-        className="relative left-0 top-0 z-10 mx-auto w-screen max-w-screen-2xl"
-        style={{ backdropFilter: `blur(${blurPixel}px)` }}
+        className={clsx(
+          "relative left-0 top-0 z-10 mx-auto w-screen max-w-screen-2xl",
+          styles.blur,
+        )}
+        style={{ "--blur": `${blurPixel}px` } as React.CSSProperties}
       >
         {/* key visual 用の箱 */}
         <div className="h-screen" />

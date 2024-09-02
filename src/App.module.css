@@ -1,0 +1,3 @@
+.blur {
+  backdrop-filter: blur(var(--blur, 10px));
+}

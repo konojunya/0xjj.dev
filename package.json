@@ -14,7 +14,7 @@
     "node": "21.7.3"
   },
   "scripts": {
-    "clean": "rimraf build",
+    "clean": "rimraf dist",
     "build": "run-s clean build:vite",
     "build:vite": "vite build",
     "start": "serve dist --single",

@@ -14,10 +14,6 @@ export const About: React.FC = () => {
           winter. Even though it's cold, I can wear my favorite clothes, and
           there's lots of good food. My favorite character is Elsa from
           "Frozen."
-          <br />
-          This isn't a quote from Walt Disney, but there is a famous saying: "If
-          you can dream it, you can do it." This is my favorite, and I think
-          it's similar to the Law of Attraction. I live by this saying.
         </p>
       </div>
     </Card>
