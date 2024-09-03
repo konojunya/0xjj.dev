@@ -39,9 +39,8 @@ const exJobs = [
 
 export const Works: React.FC = () => {
   return (
-    <Card number="J" suit="hearts">
-      <h2 className="text-xl leading-loose tracking-wide">Works.</h2>
-      <div className="mt-4 flex flex-col gap-8">
+    <Card number="J" suit="hearts" title="Works.">
+      <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2 text-sm lg:text-lg">
           {jobs.map((job) => (
             <dl className="flex gap-4" key={job.company}>

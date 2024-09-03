@@ -36,12 +36,13 @@ const suitToIcon = (suit: Suit) => {
 };
 
 interface Props {
+  title: string;
   number: CardNumber;
   suit: Suit;
 }
 
 export const Card = memo(
-  ({ number, suit, children }: React.PropsWithChildren<Props>) => {
+  ({ title, number, suit, children }: React.PropsWithChildren<Props>) => {
     const suitColor =
       suit === "hearts" || suit === "diamonds" ? "red" : "black";
 
@@ -145,7 +146,8 @@ export const Card = memo(
           </div>
 
           <div className="relative" style={{ zIndex: handling ? 0 : 20 }}>
-            {children}
+            <h2 className="text-xl leading-loose tracking-wide">{title}</h2>
+            <div className="mt-4">{children}</div>
           </div>
         </div>
       </motion.section>
