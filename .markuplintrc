@@ -8,7 +8,4 @@
   "specs": {
     ".tsx$": "@markuplint/react-spec"
   },
-  "excludeFiles": [
-    "./packages/0xjj.dev/**/layout.tsx"
-  ]
 }
