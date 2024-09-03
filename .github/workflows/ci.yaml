@@ -13,9 +13,8 @@ concurrency:
 
 jobs:
   ci:
-    name: Setup
+    name: Build and Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
