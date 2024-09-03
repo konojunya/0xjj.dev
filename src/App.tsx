@@ -2,11 +2,12 @@
 import { Works } from "src/components/Works";
 import { About } from "@/components/About";
 import { Contact } from "@/components/Contact";
+import { Footer } from "@/components/Footer";
 import { KeyVisual } from "@/components/KeyVisual";
 
 export const App: React.FC = () => {
   return (
-    <main className="relative left-0 top-0">
+    <main className="relative left-0 top-0 h-screen">
       <div className="fixed left-0 top-0 z-0">
         <KeyVisual />
         <h1 className="sr-only">Hello, I'm JJ</h1>
@@ -22,6 +23,8 @@ export const App: React.FC = () => {
           <Contact />
         </div>
       </div>
+
+      <Footer />
     </main>
   );
 };
