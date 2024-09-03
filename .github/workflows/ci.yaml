@@ -19,17 +19,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Nodejs setup
-        uses: actions/setup-node@v4
+      - name: enable corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
-      - name: pnpm setup
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: |
-            - args: [--from-lockfile]
+      - name: install deps
+        run: pnpm install --frozen-lockfile
 
       - name: build
         run: pnpm build
