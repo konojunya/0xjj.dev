@@ -5,7 +5,7 @@ import { Card } from "@/components/shared/Card";
 export const About: React.FC = () => {
   return (
     <Card number="A" suit="spades" title="about me.">
-      <div className="flex flex-col gap-4 leading-loose tracking-wide lg:text-lg">
+      <div className="flex flex-col gap-4 text-sm leading-loose tracking-wide lg:text-lg">
         <p>I'm a software developer and also work as a technical advisor.</p>
         <p>My hobbies include traveling, poker, mahjong, and tattoos.</p>
         <p>
