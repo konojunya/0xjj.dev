@@ -1,3 +1,5 @@
+import Top from "@/components/pages/top";
+
 export default async function page() {
-  return <h1>Hello World</h1>;
+  return <Top />;
 }

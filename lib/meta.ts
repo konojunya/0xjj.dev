@@ -40,7 +40,7 @@ export function generateMetadata(params?: {
 }
 
 function generateTitle(title?: string) {
-  const baseTitle = "0xjj.dev";
+  const baseTitle = "JJ";
 
   if (!title) {
     return baseTitle;
