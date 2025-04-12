@@ -41,8 +41,6 @@ async function getProjects() {
 export const Projects: React.FC = async () => {
   const projects = await getProjects();
 
-  console.log(projects.contents);
-
   return (
     <section className="mt-10">
       <h2 className="text-2xl font-bold">Projects</h2>
