@@ -1,8 +1,3 @@
-```txt
-npm install
-npm run dev
-```
+# 0xjj.dev
 
-```txt
-npm run deploy
-```
+All of me
