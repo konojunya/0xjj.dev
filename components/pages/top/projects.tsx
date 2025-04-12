@@ -32,6 +32,7 @@ async function getProjects() {
     headers: {
       "X-MICROCMS-API-KEY": process.env.MICROCMS_API_KEY,
     },
+    next: { tags: ["jobs"] },
   });
 
   return (await res.json()) as { contents: Project[] };
