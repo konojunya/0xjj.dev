@@ -23,8 +23,8 @@ export const About: React.FC = () => {
         setDisplayText(currentText);
         index++;
 
-        // next char delay (10-50ms)
-        const randomDelay = Math.floor(Math.random() * 41) + 10;
+        // next char delay (10-20ms)
+        const randomDelay = Math.floor(Math.random() * 21) + 10;
         setTimeout(typeNextChar, randomDelay);
       }
     };
