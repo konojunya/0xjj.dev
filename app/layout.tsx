@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { generateMetadata } from "@/lib/meta";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
-import { Layout } from "@/components/shared/Layout";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,7 +26,7 @@ export default function RootLayout({
           disableTransitionOnChange
           storageKey="0xjj-dev-theme"
         >
-          <Layout>{children}</Layout>
+          {children}
         </ThemeProvider>
       </body>
     </html>

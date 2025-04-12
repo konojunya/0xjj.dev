@@ -2,7 +2,7 @@ import DecryptedText from "@/components/shared/bits/DecryptedText";
 
 export const About: React.FC = () => {
   return (
-    <section>
+    <section className="min-h-90 lg:min-h-60">
       <h2 className="sr-only">About Me</h2>
       <div className="flex flex-col gap-4">
         <DecryptedText

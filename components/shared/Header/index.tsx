@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import DecryptedText from "../bits/DecryptedText";
+import Link from "next/link";
 
 export const Header: React.FC = () => {
   const { setTheme } = useTheme();
@@ -18,14 +19,16 @@ export const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-10 backdrop-blur-sm py-4 lg:py-8">
       <div className="container flex justify-between items-center">
-        <h1 className="font-bold text-3xl">
-          <DecryptedText
-            text="Hello, I'm JJ"
-            animateOn="view"
-            revealDirection="center"
-            maxIterations={10}
-          />
-        </h1>
+        <Link href="/">
+          <h1 className="font-bold text-3xl">
+            <DecryptedText
+              text="Hello, I'm JJ"
+              animateOn="view"
+              revealDirection="center"
+              maxIterations={10}
+            />
+          </h1>
+        </Link>
         <Button variant="outline" size="icon" onClick={handleTheme}>
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

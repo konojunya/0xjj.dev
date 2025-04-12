@@ -1,5 +1,3 @@
-import DecryptedText from "@/components/shared/bits/DecryptedText";
-
 export const SNS: React.FC = () => {
   return (
     <section className="mt-10">
