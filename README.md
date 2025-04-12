@@ -1,2 +1,8 @@
-# 0xjj.dev
-All of me
+```txt
+npm install
+npm run dev
+```
+
+```txt
+npm run deploy
+```
