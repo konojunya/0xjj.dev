@@ -7,11 +7,13 @@ const MAX_QUESTIONS = 20;
 export async function POST(req: Request) {
   const cookieStore = await cookies();
   const count = Number.parseInt(cookieStore.get("ask_count")?.value || "0", 10);
+  console.log("current count", count);
   if (count >= MAX_QUESTIONS) {
     return new Response("You've reached the question limit.", { status: 429 });
   }
 
   const { messages } = await req.json();
+  console.log("messages", JSON.stringify(messages, null, 2));
   const userMessage =
     messages.find((m: { role: string }) => m.role === "user")?.content || "";
   if (userMessage.length > 100) {
