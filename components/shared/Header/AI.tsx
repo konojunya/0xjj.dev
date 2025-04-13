@@ -12,12 +12,31 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import Orb from "@/components/shared/bits/Orb";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
+import { useChat } from "@ai-sdk/react";
+import { useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import z from "zod"
+import { toast } from "sonner";
+
+const schema = z.object({
+  question: z.string().min(1).max(100),
+})
 
 export const AI: React.FC = () => {
-  const form = useForm();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  const moveToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
+    onFinish: moveToBottom,
+    onError: (error) => {
+      setError(error);
+    },
+  });
 
   return (
     <Drawer direction="bottom">
@@ -38,30 +57,102 @@ export const AI: React.FC = () => {
             Tech? Life in Tokyo? Favorite snack while coding? Ask away.
           </DrawerDescription>
         </DrawerHeader>
-        <Form {...form}>
-          <form className="p-4">
-            <FormField
-              control={form.control}
-              name="prompt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea {...field} placeholder="Ask JJ anything..." />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
-        <DrawerFooter>
-          <div className="flex justify-end gap-2">
-            <Button type="submit" disabled>
-              Submit
-            </Button>
-            <DrawerClose>
-              <Button variant="outline">Cancel</Button>
-            </DrawerClose>
+        <div className="flex-1 overflow-y-auto p-2 bg-muted py-4">
+          <div className="container">
+            {messages.length === 0 && (
+              <p className="text-sm text-muted-foreground px-2">
+                What's on your mind?
+                <br />
+                What's your name?
+                <br />
+                What's your favorite movie?
+                <br />
+                etc.
+              </p>
+            )}
+            <div className="flex flex-col gap-4">
+              {messages.map((m, i) => (
+                <div
+                  key={`${m.role}-${i}`}
+                  className={cn(
+                    "whitespace-pre-wrap p-2 rounded-md max-w-[80%] w-fit",
+                    m.role === "user"
+                      ? "bg-foreground text-background self-end"
+                      : "bg-background self-start",
+                  )}
+                >
+                  <strong>{m.role === "user" ? "You" : "JJ"}:</strong>{" "}
+                  {m.content}
+                </div>
+              ))}
+            </div>
+
+            {status === "submitted" && (
+              <div className="flex items-center space-x-1 text-sm text-muted-foreground px-2">
+                <strong>JJ:</strong>
+                <span className="animate-bounce">.</span>
+                <span className="animate-bounce delay-150">.</span>
+                <span className="animate-bounce delay-300">.</span>
+              </div>
+            )}
+
+            {/* limit exceeded */}
+            {error?.message.includes("limit") && (
+              <p className="text-sm text-red-500 px-2 my-4">
+                You've asked quite a few questions!{" "}
+                <a
+                  href="https://x.com/0xjj_official"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Let’s talk directly instead.
+                </a>
+              </p>
+            )}
+
+            {/* question too long */}
+            {error?.message.includes("too long") && (
+              <p className="text-sm text-red-500 px-2 my-4">
+                Question too long. Try again.
+              </p>
+            )}
           </div>
+
+          <div ref={messagesEndRef} />
+        </div>
+        <DrawerFooter>
+          <form
+            className="flex flex-col gap-4 container"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const result = schema.safeParse({ question: input });
+              if (!result.success) {
+                toast.error("Invalid question");
+                return
+              }
+
+              handleSubmit(e);
+              moveToBottom();
+            }}
+          >
+            <Textarea
+              placeholder="Type your question here..."
+              value={input}
+              onChange={handleInputChange}
+              rows={3}
+              className="resize-none"
+            />
+
+            <div className="flex justify-end gap-2">
+              <Button type="submit" disabled={status === "streaming"}>
+                {status === "streaming" ? "JJ is typing..." : "Submit"}
+              </Button>
+              <DrawerClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DrawerClose>
+            </div>
+          </form>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
