@@ -61,13 +61,7 @@ export const AI: React.FC = () => {
           <div className="container">
             {messages.length === 0 && (
               <p className="text-sm text-muted-foreground px-2">
-                What's on your mind?
-                <br />
                 What's your name?
-                <br />
-                What's your favorite movie?
-                <br />
-                etc.
               </p>
             )}
             <div className="flex flex-col gap-4">
