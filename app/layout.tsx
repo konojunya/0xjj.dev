@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import "./globals.css";
 import { generateMetadata } from "@/lib/meta";
@@ -34,6 +35,7 @@ export default function RootLayout({
         </ThemeProvider>
 
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
