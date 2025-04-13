@@ -16,12 +16,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "@ai-sdk/react";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import z from "zod"
+import z from "zod";
 import { toast } from "sonner";
 
 const schema = z.object({
   question: z.string().min(1).max(100),
-})
+});
 
 export const AI: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -129,7 +129,7 @@ export const AI: React.FC = () => {
               const result = schema.safeParse({ question: input });
               if (!result.success) {
                 toast.error("Invalid question");
-                return
+                return;
               }
 
               handleSubmit(e);

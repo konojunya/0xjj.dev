@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 
 import "./globals.css";
 import { generateMetadata } from "@/lib/meta";
@@ -29,8 +30,10 @@ export default function RootLayout({
         >
           {children}
 
-          <Toaster/>
+          <Toaster />
         </ThemeProvider>
+
+        <Analytics />
       </body>
     </html>
   );
