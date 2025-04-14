@@ -50,7 +50,7 @@ export const AI: React.FC = () => {
           />
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent className="h-4/5 lg:h-3/5">
         <DrawerHeader>
           <DrawerTitle>Any questions for JJ?</DrawerTitle>
           <DrawerDescription>
@@ -60,9 +60,28 @@ export const AI: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-2 bg-muted py-4">
           <div className="container">
             {messages.length === 0 && (
-              <p className="text-sm text-muted-foreground px-2">
-                What's your name?
-              </p>
+              <div className="flex flex-col gap-4">
+                {[
+                  { role: "user", content: "What's your name?" },
+                  { role: "assistant", content: "Hello, I'm JJ.\nI can help you with anything you need." },
+                  { role: "user", content: "どんな気分ですか？" },
+                  { role: "assistant", content: "あなたに出会えてとても嬉しいです！" },
+                ].map((m, i) => (
+                  <div
+                    key={`placeholder-${m.role}-${i}`}
+                      className={cn(
+                        "whitespace-pre-wrap p-2 rounded-md max-w-[80%] w-fit",
+                        m.role === "user"
+                          ? "bg-foreground/60 text-background self-end"
+                          : "bg-foreground/60 text-background self-start",
+                      )}
+                    >
+                      <strong>{m.role === "user" ? "You" : "JJ"}:</strong>{" "}
+                      {m.content}
+                    </div>
+                  ),
+                )}
+              </div>
             )}
             <div className="flex flex-col gap-4">
               {messages.map((m, i) => (
