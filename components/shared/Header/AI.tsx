@@ -158,12 +158,12 @@ export const AI: React.FC = () => {
             />
 
             <div className="flex justify-end gap-2">
-              <Button type="submit" disabled={status === "streaming"}>
-                {status === "streaming" ? "JJ is typing..." : "Submit"}
-              </Button>
               <DrawerClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DrawerClose>
+              <Button type="submit" disabled={status === "streaming"}>
+                {status === "streaming" ? "JJ is typing..." : "Submit"}
+              </Button>
             </div>
           </form>
         </DrawerFooter>
