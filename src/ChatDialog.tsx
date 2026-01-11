@@ -10,7 +10,7 @@ import {
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { MessageResponse } from "@/components/ai-elements/message";
 import { useChat } from "@ai-sdk/react";
-import { CopyIcon } from "lucide-react";
+import { CopyIcon, MessageCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -36,12 +36,13 @@ import {
   type PromptInputMessage,
 } from "./components/ai-elements/prompt-input";
 import { useState } from "react";
+import { Button } from "./components/ui/button";
 
 export const ChatDialog = () => {
   const [input, setInput] = useState("");
   const { messages, sendMessage, status } = useChat();
 
-  const onSubmit = async (message: PromptInputMessage) => {
+  const handleSubmit = async (message: PromptInputMessage) => {
     await sendMessage({
       role: "user",
       parts: [{ type: "text" as const, text: message.text }],
@@ -52,7 +53,11 @@ export const ChatDialog = () => {
 
   return (
     <Dialog>
-      <DialogTrigger>trigger</DialogTrigger>
+      <DialogTrigger asChild>
+        <Button className="rounded-full size-12">
+          <MessageCircle />
+        </Button>
+      </DialogTrigger>
       <DialogContent className="max-h-none h-full w-full max-w-none rounded-none">
         <DialogHeader>
           <DialogTitle>JJ AI</DialogTitle>
@@ -143,19 +148,21 @@ export const ChatDialog = () => {
                 <ConversationScrollButton />
               </Conversation>
               <PromptInput
-                onSubmit={onSubmit}
+                onSubmit={handleSubmit}
                 className="mt-4"
                 globalDrop
                 multiple
               >
                 <PromptInputBody>
                   <PromptInputTextarea
+                    placeholder="血液型は何？MBTIは何？など、JJ に関する質問を入力してください"
                     onChange={(e) => setInput(e.target.value)}
                     value={input}
                   />
                 </PromptInputBody>
                 <PromptInputFooter>
                   <PromptInputSubmit
+                    type="submit"
                     disabled={!input && !status}
                     status={status}
                   />
