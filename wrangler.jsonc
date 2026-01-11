@@ -1,8 +1,7 @@
 {
-  "name": "<WORKER_NAME>",
+  "name": "0xjj-dev",
   "main": "worker/index.ts",
-  "compatibility_date": "<COMPATIBILITY_DATE>",
-  "assets": { "not_found_handling": "single-page-application" },
+  "compatibility_date": "2026-01-11",
   "observability": {
     "enabled": true
   }
