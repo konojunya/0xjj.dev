@@ -1,7 +1,7 @@
 {
   "name": "0xjj-dev",
   "main": "worker/index.ts",
-  "compatibility_date": "2026-01-11",
+  "compatibility_date": "2026-01-07",
   "observability": {
     "enabled": true
   }
