@@ -1,7 +1,13 @@
 {
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "0xjj-dev",
   "main": "worker/index.ts",
   "compatibility_date": "2026-01-07",
+  "ai": { "binding": "AI" },
+  "durable_objects": {
+    "bindings": [{ "name": "RATE_LIMITER", "class_name": "IpRateLimiter" }]
+  },
+  "migrations": [{ "tag": "v1", "new_classes": ["IpRateLimiter"] }],
   "observability": {
     "enabled": true
   }

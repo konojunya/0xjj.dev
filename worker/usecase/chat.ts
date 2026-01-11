@@ -1,33 +1,47 @@
 import type { Context } from "hono";
-import { sseData, sseHeaders } from "../util/streaming";
+import { getClientIp } from "../util/ip";
+import { checkRateLimit } from "./rateLimit";
 
-export function chat(c: Context<{ Bindings: Env }>) {
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      const enc = new TextEncoder();
+const SYSTEM_PROMPT = [
+  "You are a helpful assistant for a personal portfolio site.",
+  "Return the answer in Markdown.",
+  "Keep it concise and clear.",
+].join("\n");
 
-      const chunks = [
-        `# Hello from Hono on Workers 👋`,
-        ``,
-        `これは **Markdown** を **SSE streaming** で返す最小実装です。`,
-        ``,
-        `- 次はここを LLM のストリームに差し替えます`,
-        `- 次に DO で IP rate limit を入れます`,
-        ``,
-        `> time: ${new Date().toISOString()}`,
-      ];
+export async function chat(c: Context<{ Bindings: Env }>) {
+  const ip = getClientIp(c);
+  const rl = await checkRateLimit(c.env, ip);
+  if (!rl.ok) {
+    return c.json(
+      {
+        error: "rate_limit_exceeded",
+        message: "Too many requests. Please try again later.",
+        retryAfterSeconds: rl.retryAfter,
+      },
+      429,
+      { "Retry-After": rl.retryAfter.toString() },
+    );
+  }
 
-      for (const chunk of chunks) {
-        controller.enqueue(enc.encode(sseData(chunk)));
-        await new Promise((r) => setTimeout(r, 200)); // SSE streaming
-      }
+  const body = await c.req.json().catch(() => ({}));
+  const message = typeof body?.message === "string" ? body.message : "";
 
-      controller.enqueue(enc.encode(`event: done\ndata: {}\n\n`));
-      controller.close();
-    },
+  const prompt = [
+    SYSTEM_PROMPT,
+    `User: ${message || "(empty)"}`,
+    "Assistant:",
+  ].join("\n");
+
+  const stream = await c.env.AI.run("@cf/meta/llama-3.1-8b-instruct-fp8", {
+    prompt,
+    stream: true,
   });
 
   return c.newResponse(stream, {
-    headers: sseHeaders(),
+    headers: {
+      "content-type": "text/event-stream; charset=utf-8",
+      "cache-control": "no-cache, no-transform",
+      connection: "keep-alive",
+    },
   });
 }
