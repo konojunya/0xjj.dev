@@ -7,7 +7,7 @@
   "durable_objects": {
     "bindings": [{ "name": "RATE_LIMITER", "class_name": "IpRateLimiter" }]
   },
-  "migrations": [{ "tag": "v1", "new_classes": ["IpRateLimiter"] }],
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["IpRateLimiter"] }],
   "observability": {
     "enabled": true
   }

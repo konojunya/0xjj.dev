@@ -16,10 +16,12 @@ export class IpRateLimiter extends DurableObject {
       return new Response("Method Not Allowed", { status: 405 });
     }
 
-    const { windowSec, limit } = await request.json<{ windowSec: number; limit: number }>().catch(() => ({
-      windowSec: 60,
-      limit: 10,
-    }));
+    const { windowSec, limit } = await request
+      .json<{ windowSec: number; limit: number }>()
+      .catch(() => ({
+        windowSec: 60,
+        limit: 10,
+      }));
 
     const wSec = Number(windowSec) > 0 ? Number(windowSec) : 60;
     const max = Number(limit) > 0 ? Number(limit) : 10;

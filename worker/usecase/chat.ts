@@ -1,12 +1,8 @@
 import type { Context } from "hono";
 import { getClientIp } from "../util/ip";
 import { checkRateLimit } from "./rateLimit";
-
-const SYSTEM_PROMPT = [
-  "You are a helpful assistant for a personal portfolio site.",
-  "Return the answer in Markdown.",
-  "Keep it concise and clear.",
-].join("\n");
+import { createWorkersAI } from "workers-ai-provider";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
 
 export async function chat(c: Context<{ Bindings: Env }>) {
   const ip = getClientIp(c);
@@ -23,25 +19,22 @@ export async function chat(c: Context<{ Bindings: Env }>) {
     );
   }
 
-  const body = await c.req.json().catch(() => ({}));
-  const message = typeof body?.message === "string" ? body.message : "";
+  const { messages } = (await c.req.json()) as { messages: UIMessage[] };
+  const workersAI = createWorkersAI({ binding: c.env.AI });
 
-  const prompt = [
-    SYSTEM_PROMPT,
-    `User: ${message || "(empty)"}`,
-    "Assistant:",
-  ].join("\n");
-
-  const stream = await c.env.AI.run("@cf/meta/llama-3.1-8b-instruct-fp8", {
-    prompt,
-    stream: true,
+  const result = streamText({
+    model: workersAI("@cf/meta/llama-3.2-1b-instruct"),
+    messages: await convertToModelMessages(messages),
+    system: [
+      "あなたは JJ のサイトに関する質問に回答するアシスタントです",
+      "回答は Markdown で行ってください。",
+      "簡潔かつ明確に回答してください。",
+    ].join("\n"),
   });
 
-  return c.newResponse(stream, {
-    headers: {
-      "content-type": "text/event-stream; charset=utf-8",
-      "cache-control": "no-cache, no-transform",
-      connection: "keep-alive",
-    },
+  const res = result.toUIMessageStreamResponse({
+    headers: { "content-encoding": "identity" },
   });
+
+  return res;
 }

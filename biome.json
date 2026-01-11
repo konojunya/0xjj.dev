@@ -11,6 +11,9 @@
       "**",
       "!**/bun.lock",
       "!**/node_modules",
+      "!**/dist",
+      "!**/src/components/ui",
+      "!**/src/components/ai-elements",
       "!worker/worker-configuration.d.ts"
     ]
   },
@@ -41,6 +44,11 @@
   "javascript": {
     "formatter": {
       "quoteStyle": "double"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   }
 }

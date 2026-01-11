@@ -1,5 +1,5 @@
 export const RL_WINDOW_SEC = 60;
-export const RL_MAX_PER_WINDOW = 2;
+export const RL_MAX_PER_WINDOW = 10;
 
 export async function checkRateLimit(env: Env, ip: string) {
   const id = env.RATE_LIMITER.idFromName(ip);
