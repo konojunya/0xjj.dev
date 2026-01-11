@@ -3,7 +3,7 @@ resource "cloudflare_r2_bucket" "tfstate" {
   name       = "0xjj-dev-tfstate"
 }
 
-resource "cloudflare_r2_bucket" "blog" {
+resource "cloudflare_r2_bucket" "assets" {
   account_id = var.account_id
-  name       = "0xjj-dev-blog"
+  name       = "0xjj-dev-assets"
 }

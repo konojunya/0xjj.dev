@@ -1,0 +1,41 @@
+name: Sync blog to R2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "blog/**"
+      - ".github/workflows/sync-blog-to-r2.yaml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync-blog-to-r2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install AWS CLI
+        run: |
+          python -m pip install --upgrade pip
+          pip install awscli
+
+      - name: Sync blog/*.md to R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.ASSETS_R2_BUCKET }}
+        run: |
+          set -euxo pipefail
+
+          aws s3 sync ./blog "s3://$R2_BUCKET/blog" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --exclude "*" \
+            --include "*.md" \
+            --delete
