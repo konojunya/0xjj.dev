@@ -9,6 +9,7 @@ import { csrf } from "hono/csrf";
 // do
 import { IpRateLimiter } from "./do/ipRateLimiter";
 import { upsertBlogIndex } from "./usecase/upsertBlogIndex";
+import { reindexAllBlogs } from "./usecase/reindexAllBlogs";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -20,7 +21,8 @@ app.use(secureHeaders());
 
 app.use("/api/*", cors());
 app.post("/api/chat", chat);
-app.post("/api/admin/index/:slug", upsertBlogIndex);
+app.post("/internal/index/blog/:slug", upsertBlogIndex);
+app.post("/internal/index/blog", reindexAllBlogs);
 app.all("*", (c) => c.notFound());
 
 export default app;

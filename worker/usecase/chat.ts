@@ -41,6 +41,7 @@ export async function chat(c: Context<{ Bindings: Env }>) {
       "回答は Markdown で行ってください。",
       "与えられた Context に基づいて答えてください。分からない場合は分からないと言ってください。",
       "言語は常に「日本語」で答えるようにしてください。",
+      "回答は簡潔にし、長くても500文字以内にしてください。",
       "",
       "### Context",
       context || "(no context provided)",
