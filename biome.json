@@ -1,33 +1,35 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
-    "enabled": false,
+    "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": false
+    "useIgnoreFile": true
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [
-      ".next",
-      "node_modules",
-      "components/shared/bits",
-      "components/ui"
-    ]
+    "includes": ["**", "!**/bun.lock", "!**/node_modules"]
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2
   },
-  "organizeImports": {
-    "enabled": false
-  },
+  "assist": { "actions": { "source": { "organizeImports": "off" } } },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true,
+      "suspicious": {
+        "noUnknownAtRules": "off"
+      },
       "style": {
         "noUnusedTemplateLiteral": "off"
+      },
+      "performance": {
+        "noImgElement": "off"
+      },
+      "complexity": {
+        "noUselessFragments": "off"
       }
     }
   },
