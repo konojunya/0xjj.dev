@@ -3,6 +3,7 @@ import { getClientIp } from "../util/ip";
 import { checkRateLimit } from "./rateLimit";
 import { createWorkersAI } from "workers-ai-provider";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { buildContextFromMatches, searchRelevantChunks } from "./rag";
 
 export async function chat(c: Context<{ Bindings: Env }>) {
   const ip = getClientIp(c);
@@ -22,13 +23,27 @@ export async function chat(c: Context<{ Bindings: Env }>) {
   const { messages } = (await c.req.json()) as { messages: UIMessage[] };
   const workersAI = createWorkersAI({ binding: c.env.AI });
 
+  const userText =
+    messages
+      .slice()
+      .reverse()
+      .find((m) => m.role === "user")
+      ?.parts.join("") || "";
+  console.log({ userText });
+  const matches = await searchRelevantChunks(c.env, userText);
+  const context = await buildContextFromMatches(c.env, matches);
+
   const result = streamText({
-    model: workersAI("@cf/meta/llama-3.2-1b-instruct"),
+    model: workersAI("@cf/meta/llama-3.1-8b-instruct-fp8"),
     messages: await convertToModelMessages(messages),
     system: [
       "あなたは JJ のサイトに関する質問に回答するアシスタントです",
       "回答は Markdown で行ってください。",
-      "簡潔かつ明確に回答してください。",
+      "与えられた Context に基づいて答えてください。分からない場合は分からないと言ってください。",
+      "言語は常に「日本語」で答えるようにしてください。",
+      "",
+      "### Context",
+      context || "(no context provided)",
     ].join("\n"),
   });
 

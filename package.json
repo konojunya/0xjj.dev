@@ -11,7 +11,8 @@
     "preview": "bun run build && vite preview",
     "deploy": "bun run build && wrangler deploy",
     "cf-typegen": "wrangler types worker/worker-configuration.d.ts",
-    "ui:add": "bunx --bun shadcn@latest add"
+    "ui:add": "bunx --bun shadcn@latest add",
+    "vectorize": "wrangler vectorize create jj-blog-index --dimensions=768 --metric=cosine"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.7",

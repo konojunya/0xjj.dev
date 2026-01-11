@@ -3,11 +3,38 @@
   "name": "0xjj-dev",
   "main": "worker/index.ts",
   "compatibility_date": "2026-01-07",
-  "ai": { "binding": "AI" },
-  "durable_objects": {
-    "bindings": [{ "name": "RATE_LIMITER", "class_name": "IpRateLimiter" }]
+  "ai": {
+    "binding": "AI",
+    "remote": true
   },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["IpRateLimiter"] }],
+  "r2_buckets": [
+    {
+      "binding": "ASSETS",
+      "bucket_name": "0xjj-dev-assets",
+      "remote": true
+    }
+  ],
+  "vectorize": [
+    {
+      "binding": "BLOG_INDEX",
+      "index_name": "jj-blog-index",
+      "remote": true
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "RATE_LIMITER",
+        "class_name": "IpRateLimiter"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["IpRateLimiter"]
+    }
+  ],
   "observability": {
     "enabled": true
   }
