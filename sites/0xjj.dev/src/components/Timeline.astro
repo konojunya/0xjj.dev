@@ -4,11 +4,13 @@ import TimelineEntry from './TimelineEntry.astro';
 import Signature from './Signature';
 
 const blogs = await getCollection('blog');
-const works = await getCollection('timeline');
+const works = await getCollection('work');
+const projects = await getCollection('project');
 
 type Entry =
   | { type: 'blog'; date: Date; id: string; title: string }
-  | { type: 'work'; date: Date; title: string; role: string; url?: string };
+  | { type: 'work'; date: Date; title: string; role: string; url?: string }
+  | { type: 'project'; date: Date; title: string; url: string };
 
 const blogEntries: Entry[] = blogs.map(b => ({
   type: 'blog',
@@ -25,7 +27,14 @@ const workEntries: Entry[] = works.map(w => ({
   url: w.data.url,
 }));
 
-const allEntries = [...blogEntries, ...workEntries].sort(
+const projectEntries: Entry[] = projects.map(p => ({
+  type: 'project',
+  date: p.data.date,
+  title: p.data.title,
+  url: p.data.url,
+}));
+
+const allEntries = [...blogEntries, ...workEntries, ...projectEntries].sort(
   (a, b) => b.date.getTime() - a.date.getTime()
 );
 

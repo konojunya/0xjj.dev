@@ -10,10 +10,9 @@ const blog = defineCollection({
   }),
 });
 
-const timeline = defineCollection({
-  loader: file('./src/content/timeline.yaml'),
+const work = defineCollection({
+  loader: file('./src/content/work.yaml'),
   schema: z.object({
-    type: z.literal('work'),
     date: z.coerce.date(),
     title: z.string(),
     role: z.string(),
@@ -21,4 +20,13 @@ const timeline = defineCollection({
   }),
 });
 
-export const collections = { blog, timeline };
+const project = defineCollection({
+  loader: file('./src/content/project.yaml'),
+  schema: z.object({
+    date: z.coerce.date(),
+    title: z.string(),
+    url: z.string(),
+  }),
+});
+
+export const collections = { blog, work, project };

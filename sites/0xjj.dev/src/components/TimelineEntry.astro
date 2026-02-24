@@ -1,7 +1,7 @@
 ---
 interface Props {
   entry: {
-    type: 'blog' | 'work';
+    type: 'blog' | 'work' | 'project';
     date: Date;
     id?: string;
     title: string;
@@ -23,6 +23,8 @@ const dateStr = `${month} ${day}`;
   <p class="text">
     {entry.type === 'blog' ? (
       <>Published a post on <a href={`/blog/${entry.id}`}>{entry.title}</a></>
+    ) : entry.type === 'project' ? (
+      <>Built <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a></>
     ) : entry.url ? (
       <>Joined <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a> as <em>{entry.role}</em></>
     ) : (

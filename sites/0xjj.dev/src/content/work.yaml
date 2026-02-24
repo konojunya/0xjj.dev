@@ -1,0 +1,22 @@
+- id: microverse
+  date: "2022-07-01"
+  title: "microverse"
+  role: "CTO"
+
+- id: fujimi
+  date: "2020-12-01"
+  title: "fujimi / tricot inc."
+  role: "Tech Lead"
+  url: "https://fujimi.me/"
+  
+- id: winticket
+  date: "2019-04-01"
+  title: "WINTICKET / CyberAgent inc."
+  role: "Software Engineer"
+  url: "https://www.winticket.jp/"
+
+- id: lovegraph
+  date: "2019-03-01"
+  title: "LOVEGRAPH"
+  role: "Software Engineer"
+  url: "https://lovegraph.me/"
