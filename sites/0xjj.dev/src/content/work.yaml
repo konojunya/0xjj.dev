@@ -1,52 +1,112 @@
+- id: mercoin
+  date: 2025-02-17
+  title: メルコイン
+  role: Backend Engineer
+  url: https://about.mercoin.com/
+
 - id: xrossstars
-  date: "2025-03-01"
-  title: "Xross Stars"
-  role: "Software Engineer"
+  date: 2025-03-01
+  title: Xross Stars
+  role: Software Engineer
   url: "https://xross-stars.com/"
 
 - id: renatus
-  date: "2024-02-01"
-  title: "Renatus Robotics"
-  role: "Software Engineer"
+  date: 2024-02-01
+  title: Renatus Robotics
+  role: Software Engineer
   url: https://www.renatus-robotics.com/jp/
 
 - id: xrossroad
-  date: "2025-06-01"
-  title: "Xross Road"
+  date: 2025-06-01
+  title: Xross Road
   role: "Software Engineer"
   url: https://xross-road.com/
 
+- id: tenkoten
+  date: 2025-10-05
+  title: 天狐てん
+  role: Software Engineer
+  url: https://tenkoten.com/
+
 - id: utage
   date: "2024-03-01"
-  title: "UTAGE 3.0"
-  role: "Backend Engineer"
+  title: UTAGE 3.0
+  role: Backend Engineer
   url: https://service.utage3.com/
 
 - id: argonauts
-  date: "2022-05-25"
-  title: "Argonauts inc."
-  role: "Co-Founder / CTO"
+  date: 2022-05-25
+  title: Argonauts inc.
+  role: Co-Founder / CTO
   url: https://argonauts.design/
 
+- id: sorajima
+  date: 2024-06-25
+  title: ソラジマTOON
+  role: Web Advisor
+  url: https://sorajimatoon.com/
+
+- id: progate
+  date: 2024-07-03
+  title: Progate inc.
+  role: Web Advisor
+  url: https://prog-8.com/
+
+- id: timee
+  date: 2023-01-01
+  title: タイミー
+  role: Web Advisor
+  url: https://timee.co.jp/
+
 - id: microverse
-  date: "2022-07-01"
-  title: "microverse"
+  date: 2022-07-01
+  title: microverse
   role: "CTO"
 
 - id: fujimi
-  date: "2020-12-01"
-  title: "fujimi / tricot inc."
-  role: "Tech Lead"
+  date: 2020-12-01
+  title: fujimi / tricot inc.
+  role: Tech Lead
   url: "https://fujimi.me/"
   
 - id: winticket
-  date: "2019-04-01"
-  title: "WINTICKET / CyberAgent inc."
-  role: "Frontend Engineer"
+  date: 2019-04-01
+  title: WINTICKET / CyberAgent inc.
+  role: Frontend Engineer
   url: "https://www.winticket.jp/"
 
 - id: lovegraph
-  date: "2019-03-01"
-  title: "LOVEGRAPH"
-  role: "Frontend Engineer"
+  date: 2019-03-01
+  title: LOVEGRAPH
+  role: Frontend Engineer
   url: "https://lovegraph.me/"
+
+- id: progate_intern
+  date: 2017-10-01
+  title: Progate
+  role: Intern
+
+- id: voyage
+  date: 2017-08-01
+  title: Treasure / VOYAGE GROUP
+  role: Intern
+
+- id: lebe
+  date: 2016-06-01
+  title: Lebe inc.
+  role: Intern
+
+- id: cyberagent_intern
+  date: 2017-07-01
+  title: Ameba / CyberAgent inc.
+  role: Intern
+
+- id: techkids
+  date: 2015-07-01
+  title: CA Tech Kids
+  role: Mentor
+
+- id: farconnection
+  date: 2015-07-01
+  title: Far Connection
+  role: Intern

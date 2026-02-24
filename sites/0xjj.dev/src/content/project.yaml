@@ -4,3 +4,129 @@
   role: "Co-Founder / Software Engineer"
   url: https://poker-picks.com/
   render: "Founded {{TITLE}}"
+
+- id: celguard
+  date: 2025-11-06
+  title: celguard
+  role: OSS
+  url: https://github.com/marketplace/actions/celguard
+
+- id: sql-to-drizzle-schema
+  date: 2025-05-30
+  title: sql-to-drizzle-schema
+  role: OSS
+  url: https://github.com/konojunya/sql-to-drizzle-schema/
+
+- id: difit
+  date: 2025-07-09
+  title: yoshiko-pg/difit
+  role: OSS
+  url: https://github.com/yoshiko-pg/difit
+  render: "Contributed to {{TITLE}}"
+
+- id: raycast-ghq
+  date: 2024-02-22
+  title: raycast/ghq extension
+  role: OSS
+  url: https://github.com/raycast/extensions
+  render: "Contributed to {{TITLE}}"
+
+- id: astro
+  date: 2022-12-15
+  title: withastro/Astro
+  role: OSS
+  url: https://github.com/withastro/astro
+  render: "Contributed to {{TITLE}}"
+
+- id: thirdweb-js
+  date: 2023-07-27
+  title: thirdweb-dev/js
+  role: OSS
+  url: https://github.com/thirdweb-dev/js
+  render: "Contributed to {{TITLE}}"
+
+- id: mdn
+  date: 2023-07-31
+  title: mdn/translated-content
+  role: OSS
+  url: https://github.com/mdn/translated-content
+  render: "Contributed to {{TITLE}}"
+
+- id: split-eth
+  date: 2022-11-19
+  title: split eth
+  role: OSS
+  url: https://github.com/konojunya/split-eth
+
+- id: octocrab
+  date: 2022-02-20
+  title: XAMPPRocky/octocrab
+  role: OSS
+  url: https://github.com/XAMPPRocky/octocrab
+  render: "Contributed to {{TITLE}}"
+
+- id: fedcm
+  date: 2022-01-11
+  title: w3c-fedid/FedCM
+  role: OSS
+  url: https://github.com/w3c-fedid/FedCM
+  render: "Contributed to {{TITLE}}"
+
+- id: mdn-wasm-example
+  date: 2019-12-05
+  title: mdn/webassembly-examples
+  role: OSS
+  url: https://github.com/mdn/webassembly-examples
+  render: "Contributed to {{TITLE}}"
+
+- id: stripe-react-stripe-js
+  date: 2021-06-04
+  title: stripe/react-stripe-js
+  role: OSS
+  url: https://github.com/stripe/react-stripe-js
+  render: "Contributed to {{TITLE}}"
+
+- id: browsee-template
+  date: 2019-05-08
+  title: browsee-template
+  role: OSS
+  url: https://github.com/konojunya/browsee-template
+
+- id: scaffdog
+  date: 2019-05-29
+  title: scaffdog/scaffdog
+  role: OSS
+  url: https://github.com/scaffdog/scaffdog
+  render: "Contributed to {{TITLE}}"
+
+- id: dirql
+  date: 2019-02-12
+  title: dirql
+  role: OSS
+  url: https://github.com/konojunya/dirql
+
+- id: go-github
+  date: 2019-08-20
+  title: google/go-github
+  role: OSS
+  url: https://github.com/google/go-github
+  render: "Contributed to {{TITLE}}"
+
+- id: sadako
+  date: 2018-02-28
+  title: sadako
+  role: OSS
+  url: https://github.com/konojunya/sadako
+
+- id: webdev
+  date: 2020-07-09
+  title: GoogleChrome/web.dev
+  role: OSS
+  url: https://github.com/GoogleChrome/web.dev
+  render: "Contributed to {{TITLE}}"
+
+- id: ghana-vim
+  date: 2021-02-09
+  title: ghana.vim
+  role: OSS
+  url: https://github.com/konojunya/ghana.vim
