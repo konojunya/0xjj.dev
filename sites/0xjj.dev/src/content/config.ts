@@ -1,5 +1,5 @@
 import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { glob, file } from 'astro/loaders';
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
@@ -11,7 +11,7 @@ const blog = defineCollection({
 });
 
 const timeline = defineCollection({
-  loader: glob({ pattern: '**/*.yaml', base: './src/content/timeline' }),
+  loader: file('./src/content/timeline.yaml'),
   schema: z.object({
     type: z.literal('work'),
     date: z.coerce.date(),
