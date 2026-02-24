@@ -1,0 +1,162 @@
+- id: pokerpicks
+  date: "2023-12-13"
+  title: "POKER PICKS"
+  type: project
+  url: https://poker-picks.com/
+  render: "Founded {{TITLE}}"
+
+- id: celguard
+  date: 2025-11-06
+  title: celguard
+  type: OSS
+  url: https://github.com/marketplace/actions/celguard
+
+- id: sql-to-drizzle-schema
+  date: 2025-05-30
+  title: sql-to-drizzle-schema
+  type: OSS
+  url: https://github.com/konojunya/sql-to-drizzle-schema/
+
+- id: difit
+  date: 2025-07-09
+  title: yoshiko-pg/difit
+  type: OSS
+  url: https://github.com/yoshiko-pg/difit
+  render: "Contributed to {{TITLE}}"
+
+- id: raycast-ghq
+  date: 2024-02-22
+  title: raycast/ghq extension
+  type: OSS
+  url: https://github.com/raycast/extensions
+  render: "Contributed to {{TITLE}}"
+
+- id: astro
+  date: 2022-12-15
+  title: withastro/Astro
+  type: OSS
+  url: https://github.com/withastro/astro
+  render: "Contributed to {{TITLE}}"
+
+- id: thirdweb-js
+  date: 2023-07-27
+  title: thirdweb-dev/js
+  type: OSS
+  url: https://github.com/thirdweb-dev/js
+  render: "Contributed to {{TITLE}}"
+
+- id: mdn
+  date: 2023-07-31
+  title: mdn/translated-content
+  type: OSS
+  url: https://github.com/mdn/translated-content
+  render: "Contributed to {{TITLE}}"
+
+- id: split-eth
+  date: 2022-11-19
+  title: split eth
+  type: OSS
+  url: https://github.com/konojunya/split-eth
+
+- id: octocrab
+  date: 2022-02-20
+  title: XAMPPRocky/octocrab
+  type: OSS
+  url: https://github.com/XAMPPRocky/octocrab
+  render: "Contributed to {{TITLE}}"
+
+- id: fedcm
+  date: 2022-01-11
+  title: w3c-fedid/FedCM
+  type: OSS
+  url: https://github.com/w3c-fedid/FedCM
+  render: "Contributed to {{TITLE}}"
+
+- id: mdn-wasm-example
+  date: 2019-12-05
+  title: mdn/webassembly-examples
+  type: OSS
+  url: https://github.com/mdn/webassembly-examples
+  render: "Contributed to {{TITLE}}"
+
+- id: stripe-react-stripe-js
+  date: 2021-06-04
+  title: stripe/react-stripe-js
+  type: OSS
+  url: https://github.com/stripe/react-stripe-js
+  render: "Contributed to {{TITLE}}"
+
+- id: browsee-template
+  date: 2019-05-08
+  title: browsee-template
+  type: OSS
+  url: https://github.com/konojunya/browsee-template
+
+- id: scaffdog
+  date: 2019-05-29
+  title: scaffdog/scaffdog
+  type: OSS
+  url: https://github.com/scaffdog/scaffdog
+  render: "Contributed to {{TITLE}}"
+
+- id: dirql
+  date: 2019-02-12
+  title: dirql
+  type: OSS
+  url: https://github.com/konojunya/dirql
+
+- id: go-github
+  date: 2019-08-20
+  title: google/go-github
+  type: OSS
+  url: https://github.com/google/go-github
+  render: "Contributed to {{TITLE}}"
+
+- id: sadako
+  date: 2018-02-28
+  title: sadako
+  type: OSS
+  url: https://github.com/konojunya/sadako
+
+- id: webdev
+  date: 2020-07-09
+  title: GoogleChrome/web.dev
+  type: OSS
+  url: https://github.com/GoogleChrome/web.dev
+  render: "Contributed to {{TITLE}}"
+
+- id: ghana-vim
+  date: 2021-02-09
+  title: ghana.vim
+  type: OSS
+  url: https://github.com/konojunya/ghana.vim
+
+- id: what-is-nft
+  date: 2022-11-18
+  title: What is NFT?
+  type: speaker
+  url: https://speakerdeck.com/konojunya/what-is-nft
+
+- id: fujimi-fastly
+  title: FUJIMI の Fastly 活用事例集
+  date: 2022-03-29
+  type: speaker
+  url: https://speakerdeck.com/konojunya/fastly-case-studies-at-fujimi
+
+- id: progressive-release-with-fastly
+  title: Progressive Release by using Fastly
+  date: 2021-08-23
+  type: speaker
+  url: https://speakerdeck.com/konojunya/progressive-release-by-using-fastly-8a9fc1f5-8730-44f3-8981-986e47498c6d
+
+- id: winticket-pwa
+  title: WinTicket における PWA
+  date: 2019-10-16
+  type: speaker
+  url: https://speakerdeck.com/konojunya/winticketniokerupwa-at-pwa-night-vol-dot-9
+
+- id: web-development-with-webpack
+  title: 大規模な Web の開発手法
+  date: 2018-05-29
+  type: speaker
+  url: https://speakerdeck.com/konojunya/da-gui-mo-nawebfalsekai-fa-shou-fa

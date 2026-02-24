@@ -1,0 +1,91 @@
+- id: HTML/CSS
+  rate: 5
+  category: Language
+
+- id: JavaScript / TypeScript
+  rate: 5
+  category: Language
+
+- id: Solidity
+  rate: 3
+  category: Language
+
+- id: Rust
+  rate: 2
+  category: Language
+
+- id: Python
+  rate: 2
+  category: Language
+
+- id: Vim Script
+  rate: 3
+  category: Language
+
+- id: CUE
+  rate: 3
+  category: Language
+
+- id: React
+  rate: 5
+  category: Frontend
+
+- id: Next.js
+  rate: 5
+  category: Frontend
+
+- id: Astro
+  rate: 3
+  category: Frontend
+
+- id: Tailwind CSS
+  rate: 5
+  category: Frontend
+
+- id: OpenAPI
+  rate: 5
+  category: Backend
+
+- id: gRPC
+  rate: 3
+  category: Backend
+
+- id: Hono
+  rate: 4
+  category: Backend
+
+- id: Express
+  rate: 4
+  category: Backend
+
+- id: Node.js
+  rate: 4
+  category: Backend
+
+- id: Go
+  rate: 4
+  category: Language
+
+- id: Docker
+  rate: 4
+  category: Infra
+
+- id: Terraform
+  rate: 4
+  category: Infra
+
+- id: Kubernetes
+  rate: 3
+  category: Infra
+
+- id: Google Cloud
+  rate: 4
+  category: Infra
+
+- id: AWS
+  rate: 4
+  category: Infra
+
+- id: Cloudflare
+  rate: 4
+  category: Infra

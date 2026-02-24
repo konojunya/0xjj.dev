@@ -1,0 +1,271 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { readingTime } from '../../lib/reading-time';
+
+const posts = await getCollection('blog');
+const sorted = posts
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map(post => ({
+    id: post.id,
+    title: post.data.title,
+    date: post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+    minutes: readingTime(post.body ?? ''),
+  }));
+---
+
+<Layout title="Blog">
+  <div class="container">
+    <a href="/" class="back">← Back</a>
+
+    <header>
+      <h1>Blog</h1>
+      <a href="/rss.xml" class="rss" aria-label="RSS feed">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/>
+        </svg>
+        RSS
+      </a>
+    </header>
+
+    <div class="search-wrap">
+      <input
+        id="search"
+        type="search"
+        placeholder="Search posts..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <ul class="post-list" id="post-list">
+      {sorted.map(post => (
+        <li class="post-item" data-title={post.title.toLowerCase()}>
+          <a href={`/blog/${post.id}`} class="post-link" data-animate>
+            <div class="post-thumb" transition:name={`blog-thumb-${post.id}`}>
+              <img src={`/og/bg/${post.id}.png`} alt="" />
+              <div class="post-body">
+                <span class="post-title" transition:name={`blog-title-${post.id}`}>{post.title}</span>
+                <span class="post-meta">
+                  <time>{post.date}</time>
+                  <span class="sep">·</span>
+                  <span>{post.minutes} min read</span>
+                </span>
+              </div>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <p class="no-results" id="no-results" hidden>No posts found.</p>
+  </div>
+</Layout>
+
+<script>
+  function init() {
+    const input = document.getElementById('search') as HTMLInputElement;
+    const items = document.querySelectorAll<HTMLElement>('.post-item');
+    const noResults = document.getElementById('no-results')!;
+
+    input.addEventListener('input', () => {
+      const q = input.value.toLowerCase().trim();
+      let visible = 0;
+      for (const item of items) {
+        const match = !q || item.dataset.title!.includes(q);
+        item.hidden = !match;
+        if (match) visible++;
+      }
+      noResults.hidden = visible > 0;
+    });
+
+    const cards = document.querySelectorAll<HTMLElement>('[data-animate]');
+    const observer = new IntersectionObserver(
+      (observed) => {
+        for (const e of observed) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible');
+            observer.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.08 }
+    );
+    for (const el of cards) {
+      const { top, bottom } = el.getBoundingClientRect();
+      if (top < window.innerHeight && bottom > 0) {
+        el.classList.add('is-visible');
+      } else {
+        observer.observe(el);
+      }
+    }
+  }
+
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style>
+  .container {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem;
+  }
+
+  .back {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 3rem;
+    letter-spacing: 0.02em;
+    transition: color 0.15s ease;
+  }
+  .back:hover { color: var(--color-fg); }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .rss {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.15s ease;
+  }
+  .rss:hover { color: var(--color-fg); }
+
+  .search-wrap {
+    margin-bottom: 2rem;
+  }
+
+  #search {
+    width: 100%;
+    background: color-mix(in srgb, var(--color-fg) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-fg) 12%, transparent);
+    border-radius: 6px;
+    padding: 0.6rem 0.875rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-fg);
+    outline: none;
+    transition: border-color 0.15s ease;
+    box-sizing: border-box;
+  }
+  #search::placeholder { color: var(--color-muted); }
+  #search:focus { border-color: color-mix(in srgb, var(--color-fg) 30%, transparent); }
+
+  .post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 52rem) {
+    .post-list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .post-item {
+    display: contents;
+  }
+
+  .post-link {
+    display: block;
+    text-decoration: none;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-fg) 8%, transparent);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.18s ease;
+  }
+  .post-link.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .post-link.is-visible:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px color-mix(in srgb, var(--color-fg) 8%, transparent);
+  }
+
+  .post-thumb {
+    position: relative;
+    aspect-ratio: 2 / 1;
+    overflow: hidden;
+  }
+  .post-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .post-link:hover .post-thumb img {
+    transform: scale(1.04);
+  }
+
+  .post-thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 30%, rgba(255,255,255,0.72) 100%);
+    pointer-events: none;
+  }
+
+  .post-body {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem 1rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .post-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1e0e4e;
+    line-height: 1.4;
+  }
+
+  .post-meta {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: rgba(30, 14, 78, 0.6);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .sep { opacity: 0.5; }
+
+  .no-results {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-muted);
+    margin-top: 2rem;
+  }
+</style>

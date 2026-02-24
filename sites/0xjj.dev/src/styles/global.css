@@ -19,6 +19,35 @@
 :root {
   --font-display: 'DM Serif Display', serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* post badge — light mode */
+  --color-accent-text: #6e3fa3;
+  --color-accent-border: #c4a0e8;
+  --color-accent-bg: #f3ecfb;
+
+  /* work badge — light mode */
+  --color-work-text: #92600a;
+  --color-work-border: #e8c07a;
+  --color-work-bg: #fdf6e3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* post badge — dark mode */
+    --color-accent-text: #d4a8ff;
+    --color-accent-border: #7a45b0;
+    --color-accent-bg: #2a1a3e;
+
+    /* work badge — dark mode */
+    --color-work-text: #fcd34d;
+    --color-work-border: #92600a;
+    --color-work-bg: #1f1500;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem;
 }
 
 html,

@@ -1,0 +1,181 @@
+---
+import { getCollection } from 'astro:content';
+import TimelineEntry from './TimelineEntry.astro';
+import Signature from './Signature';
+
+const blogs = await getCollection('blog');
+const works = await getCollection('work');
+const projects = await getCollection('project');
+
+type Entry =
+  | { type: 'blog'; date: Date; id: string; title: string }
+  | { type: 'work'; date: Date; title: string; role: string; url?: string; current?: boolean }
+  | { type: 'project'; date: Date; title: string; url: string; projectType?: string; render?: string };
+
+const blogEntries: Entry[] = blogs.map(b => ({
+  type: 'blog',
+  date: b.data.date,
+  id: b.id,
+  title: b.data.title,
+}));
+
+const workEntries: Entry[] = works.map(w => ({
+  type: 'work',
+  date: w.data.date,
+  title: w.data.title,
+  role: w.data.role,
+  url: w.data.url,
+  current: w.data.current,
+}));
+
+const projectEntries: Entry[] = projects.map(p => ({
+  type: 'project',
+  date: p.data.date,
+  title: p.data.title,
+  url: p.data.url,
+  projectType: p.data.type,
+  render: p.data.render,
+}));
+
+const allEntries = [...blogEntries, ...workEntries, ...projectEntries].sort(
+  (a, b) => b.date.getTime() - a.date.getTime()
+);
+
+const byYear: Record<number, Entry[]> = {};
+for (const entry of allEntries) {
+  const y = entry.date.getFullYear();
+  if (!byYear[y]) byYear[y] = [];
+  byYear[y].push(entry);
+}
+
+const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
+---
+
+<div class="container">
+  <hr class="divider" />
+  <header class="timeline-header">
+    <span class="timeline-title">changelog</span>
+    <a href="/blog" class="blog-link">blog →</a>
+  </header>
+  <main>
+    {years.map(year => (
+      <section class="year-group">
+        <p class="year-label">{year}</p>
+        <div class="entries">
+          {byYear[year].map(entry => (
+            <TimelineEntry entry={entry} />
+          ))}
+        </div>
+      </section>
+    ))}
+  </main>
+  <footer>
+    <Signature client:only="react" />
+  </footer>
+</div>
+
+<script>
+  function init() {
+    const entries = document.querySelectorAll<HTMLElement>('[data-animate]');
+    const observer = new IntersectionObserver(
+      (observed) => {
+        for (const e of observed) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible');
+            observer.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.15 }
+    );
+    for (const el of entries) {
+      const { top, bottom } = el.getBoundingClientRect();
+      if (top < window.innerHeight && bottom > 0) {
+        el.classList.add('is-visible');
+      } else {
+        observer.observe(el);
+      }
+    }
+  }
+
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style>
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+    margin: 0 0 1.75rem;
+  }
+
+  .timeline-header {
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .blog-link {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .blog-link:hover {
+    color: var(--color-fg);
+  }
+
+  .timeline-title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    color: var(--color-muted);
+    border: 1px solid color-mix(in srgb, var(--color-fg) 15%, transparent);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+  }
+
+  .year-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .year-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+    margin: 0 0 0.875rem;
+    text-transform: uppercase;
+  }
+
+  .entries {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-fg) 8%, transparent);
+  }
+</style>

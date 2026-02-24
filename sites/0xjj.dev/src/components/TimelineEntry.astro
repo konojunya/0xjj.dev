@@ -1,0 +1,154 @@
+---
+interface Props {
+  entry: {
+    type: 'blog' | 'work' | 'project';
+    date: Date;
+    id?: string;
+    title: string;
+    role?: string;
+    url?: string;
+    current?: boolean;
+    projectType?: string;
+    render?: string;
+  };
+}
+
+const { entry } = Astro.props;
+
+const d = new Date(entry.date);
+const month = d.toLocaleString('en-US', { month: 'short' });
+const day = String(d.getDate()).padStart(2, '0');
+const dateStr = `${month} ${day}`;
+
+const badge =
+  entry.type === 'blog' ? 'post'
+  : entry.type === 'work' ? 'work'
+  : entry.projectType === 'speaker' ? 'talk'
+  : entry.projectType === 'OSS' ? 'oss'
+  : 'project';
+---
+
+<div class="entry" data-animate>
+  <time class="date" datetime={entry.date.toISOString()}>{dateStr}</time>
+  <span class={`badge badge--${badge}`}>{badge}</span>
+  <p class="text">
+    {entry.current && <span class="now-dot" aria-label="currently active" />}
+    {entry.type === 'blog' ? (
+      <a href={`/blog/${entry.id}`}>{entry.title}</a>
+    ) : entry.type === 'project' ? (
+      entry.render ? (
+        <>
+          {entry.render.split('{{TITLE}}')[0]}
+          <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
+          {entry.render.split('{{TITLE}}')[1]}
+        </>
+      ) : (
+        <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
+      )
+    ) : entry.url ? (
+      <><a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a> as <em>{entry.role}</em></>
+    ) : (
+      <><strong>{entry.title}</strong> as <em>{entry.role}</em></>
+    )}
+  </p>
+</div>
+
+<style>
+  .entry {
+    display: grid;
+    grid-template-columns: 50px 62px 1fr;
+    align-items: baseline;
+    gap: 0 0.75rem;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .entry.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .date {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid;
+    white-space: nowrap;
+    line-height: 1.6;
+    justify-self: start;
+  }
+
+  .badge--post    { color: var(--color-accent-text); border-color: var(--color-accent-border); background: var(--color-accent-bg); }
+  .badge--work    { color: var(--color-work-text); border-color: var(--color-work-border); background: var(--color-work-bg); }
+  .badge--oss     { color: var(--color-muted); border-color: color-mix(in srgb, var(--color-fg) 15%, transparent); }
+  .badge--project { color: var(--color-muted); border-color: color-mix(in srgb, var(--color-fg) 15%, transparent); }
+  .badge--talk    { color: var(--color-muted); border-color: color-mix(in srgb, var(--color-fg) 15%, transparent); }
+
+  .text {
+    font-size: 0.875rem;
+    color: var(--color-fg);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .text a {
+    color: var(--color-fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--color-fg) 25%, transparent);
+    transition: text-decoration-color 0.15s ease;
+  }
+
+  .text a:hover {
+    text-decoration-color: var(--color-fg);
+  }
+
+  .text em {
+    font-style: italic;
+    color: var(--color-muted);
+  }
+
+  .text strong {
+    font-weight: 500;
+  }
+
+  .now-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    margin-right: 0.4em;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    flex-shrink: 0;
+  }
+
+  .now-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: #4ade80;
+    opacity: 0.35;
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%   { transform: scale(1); opacity: 0.35; }
+    70%  { transform: scale(2.2); opacity: 0; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+</style>
