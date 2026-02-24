@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@theme {
+  --color-bg: #f7f4ef;
+  --color-fg: #111008;
+  --color-muted: #7a7570;
+  --color-accent: #6E45981A;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0e0d0c;
+    --color-fg: #f0ece5;
+    --color-muted: #7a7570;
+    --color-accent: #BC7AFF;
+  }
+}
+
+:root {
+  --font-display: 'DM Serif Display', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html,
+body {
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+}
