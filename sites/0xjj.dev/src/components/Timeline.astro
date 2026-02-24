@@ -1,0 +1,108 @@
+---
+import { getCollection } from 'astro:content';
+import TimelineEntry from './TimelineEntry.astro';
+import Signature from './Signature';
+
+const blogs = await getCollection('blog');
+const works = await getCollection('timeline');
+
+type Entry =
+  | { type: 'blog'; date: Date; id: string; title: string }
+  | { type: 'work'; date: Date; title: string; role: string; url?: string };
+
+const blogEntries: Entry[] = blogs.map(b => ({
+  type: 'blog',
+  date: b.data.date,
+  id: b.id,
+  title: b.data.title,
+}));
+
+const workEntries: Entry[] = works.map(w => ({
+  type: 'work',
+  date: w.data.date,
+  title: w.data.title,
+  role: w.data.role,
+  url: w.data.url,
+}));
+
+const allEntries = [...blogEntries, ...workEntries].sort(
+  (a, b) => b.date.getTime() - a.date.getTime()
+);
+
+const byYear: Record<number, Entry[]> = {};
+for (const entry of allEntries) {
+  const y = entry.date.getFullYear();
+  if (!byYear[y]) byYear[y] = [];
+  byYear[y].push(entry);
+}
+
+const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
+---
+
+<div class="container">
+  <hr class="divider" />
+  <main>
+    {years.map(year => (
+      <section class="year-group">
+        <p class="year-label">{year}</p>
+        <div class="entries">
+          {byYear[year].map(entry => (
+            <TimelineEntry entry={entry} />
+          ))}
+        </div>
+      </section>
+    ))}
+  </main>
+  <footer>
+    <Signature client:only="react" />
+  </footer>
+</div>
+
+<style>
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+    margin: 0 0 2.5rem;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+  }
+
+  .year-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .year-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+    margin: 0 0 0.875rem;
+    text-transform: uppercase;
+  }
+
+  .entries {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-fg) 8%, transparent);
+  }
+</style>

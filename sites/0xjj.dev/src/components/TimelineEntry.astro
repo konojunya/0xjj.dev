@@ -1,0 +1,78 @@
+---
+interface Props {
+  entry: {
+    type: 'blog' | 'work';
+    date: Date;
+    id?: string;
+    title: string;
+    role?: string;
+    url?: string;
+  };
+}
+
+const { entry } = Astro.props;
+
+const d = new Date(entry.date);
+const month = d.toLocaleString('en-US', { month: 'short' });
+const day = String(d.getDate()).padStart(2, '0');
+const dateStr = `${month} ${day}`;
+---
+
+<div class="entry">
+  <time class="date" datetime={entry.date.toISOString()}>{dateStr}</time>
+  <p class="text">
+    {entry.type === 'blog' ? (
+      <>Published a post on <a href={`/blog/${entry.id}`}>{entry.title}</a></>
+    ) : entry.url ? (
+      <>Joined <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a> as <em>{entry.role}</em></>
+    ) : (
+      <>Joined <strong>{entry.title}</strong> as <em>{entry.role}</em></>
+    )}
+  </p>
+</div>
+
+<style>
+  .entry {
+    display: flex;
+    align-items: baseline;
+    gap: 1.75rem;
+  }
+
+  .date {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    width: 44px;
+    flex-shrink: 0;
+  }
+
+  .text {
+    font-size: 0.875rem;
+    color: var(--color-fg);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .text a {
+    color: var(--color-fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--color-fg) 25%, transparent);
+    transition: text-decoration-color 0.15s ease;
+  }
+
+  .text a:hover {
+    text-decoration-color: var(--color-fg);
+  }
+
+  .text em {
+    font-style: italic;
+    color: var(--color-muted);
+  }
+
+  .text strong {
+    font-weight: 500;
+  }
+</style>
