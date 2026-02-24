@@ -146,3 +146,19 @@ const orderedCategories = [
     to   { transform: scale(1); opacity: 1; }
   }
 </style>
+
+<script>
+  const items = document.querySelectorAll('.skill-item[data-animate]');
+  const observer = new IntersectionObserver(
+    (observed) => {
+      for (const e of observed) {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+          observer.unobserve(e.target);
+        }
+      }
+    },
+    { threshold: 0.15 }
+  );
+  for (const el of items) observer.observe(el);
+</script>

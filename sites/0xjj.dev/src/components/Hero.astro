@@ -52,24 +52,7 @@
     line-height: 1;
     letter-spacing: -0.03em;
     margin: 0;
-    background: linear-gradient(
-      90deg,
-      var(--color-fg) 0%,
-      var(--color-fg) 35%,
-      #bc7aff 50%,
-      var(--color-fg) 65%,
-      var(--color-fg) 100%
-    );
-    background-size: 250% auto;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 5s linear infinite;
-  }
-
-  @keyframes shimmer {
-    0%   { background-position: 200% center; }
-    100% { background-position: -200% center; }
+    color: var(--color-fg);
   }
 
   .socials {

@@ -17,7 +17,8 @@ export async function getStaticPaths() {
 }
 
 const { post, prev, next } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
 
 const dateStr = post.data.date.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -26,10 +27,29 @@ const dateStr = post.data.date.toLocaleDateString('en-US', {
 });
 
 const minutes = readingTime(post.body ?? '');
+
+function excerpt(body: string, maxLen = 150): string {
+  return body
+    .replace(/```[\s\S]*?```/g, '')   // fenced code blocks
+    .replace(/`[^`]*`/g, '')          // inline code
+    .replace(/!\[.*?\]\(.*?\)/g, '')  // images
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links → text
+    .replace(/^#{1,6}\s+/gm, '')      // headings
+    .replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, '$1') // bold/italic
+    .replace(/^\s*[-*>]\s+/gm, '')    // list markers / blockquotes
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLen)
+    .replace(/\s\S*$/, '…');          // trim at word boundary
+}
+
+const description = excerpt(post.body ?? '');
 ---
 
 <Layout title={post.data.title}>
+  <meta slot="head" name="description" content={description} />
   <meta slot="head" property="og:title" content={post.data.title} />
+  <meta slot="head" property="og:description" content={description} />
   <meta slot="head" property="og:type" content="article" />
   <meta slot="head" property="og:image" content={`/og/${post.id}.png`} />
   <meta slot="head" property="og:url" content={`https://0xjj.dev/blog/${post.id}`} />
@@ -38,14 +58,26 @@ const minutes = readingTime(post.body ?? '');
   <div class="container">
     <a href="/blog" class="back">← Blog</a>
     <article>
-      <header>
-        <h1>{post.data.title}</h1>
+      <header style={`--hero-bg: url('/og/bg/${post.id}.png')`} transition:name={`blog-thumb-${post.id}`}>
+        <h1 transition:name={`blog-title-${post.id}`}>{post.data.title}</h1>
         <div class="meta">
           <time class="date">{dateStr}</time>
           <span class="sep">·</span>
           <span class="reading-time">{minutes} min read</span>
         </div>
       </header>
+      {tocHeadings.length >= 2 && (
+        <nav class="toc" aria-label="Table of contents">
+          <span class="toc-label">contents</span>
+          <ol class="toc-list">
+            {tocHeadings.map(h => (
+              <li class={`toc-item toc-item--h${h.depth}`}>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
       <div class="prose">
         <Content />
       </div>
@@ -95,9 +127,38 @@ const minutes = readingTime(post.body ?? '');
   }
 
   article header {
-    margin-bottom: 2.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+    position: relative;
+    margin: 0 0 2.5rem;
+    padding: 1.75rem 1.75rem 1.5rem;
+    border-radius: 20px;
+    overflow: hidden;
+    /* pastel shader bg + milky translucent glaze */
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0.18) 55%, rgba(210,190,255,0.1) 100%),
+      var(--hero-bg, transparent) center top / cover no-repeat;
+    /* bubble rim */
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow:
+      0 2px 24px rgba(110,80,200,0.10),
+      inset 0 1.5px 0 rgba(255,255,255,0.7),
+      inset 0 -1px 0 rgba(190,170,230,0.18);
+  }
+
+  /* specular highlight — the bright glint of a soap bubble */
+  article header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60%;
+    height: 55%;
+    background: radial-gradient(
+      ellipse 65% 55% at 28% 22%,
+      rgba(255,255,255,0.58) 0%,
+      rgba(255,255,255,0.12) 45%,
+      transparent 70%
+    );
+    pointer-events: none;
   }
 
   h1 {
@@ -108,7 +169,8 @@ const minutes = readingTime(post.body ?? '');
     line-height: 1.15;
     letter-spacing: -0.02em;
     margin: 0 0 0.75rem;
-    color: var(--color-fg);
+    /* always dark — bubble background is always a light pastel */
+    color: #1e0e4e;
   }
 
   .meta {
@@ -117,13 +179,62 @@ const minutes = readingTime(post.body ?? '');
     gap: 0.4rem;
     font-family: var(--font-mono);
     font-size: 0.72rem;
-    color: var(--color-muted);
+    color: rgba(30, 14, 78, 0.55);
     letter-spacing: 0.04em;
   }
 
   .sep { opacity: 0.5; }
 
-  .date, .reading-time { color: var(--color-muted); }
+  .date, .reading-time { color: rgba(30, 14, 78, 0.55); }
+
+  .toc {
+    margin: 0 0 2.5rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--color-fg) 2.5%, transparent);
+  }
+
+  .toc-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 0.625rem;
+  }
+
+  .toc-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .toc-item a {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    line-height: 1.5;
+    transition: color 0.15s ease;
+  }
+
+  .toc-item a:hover {
+    color: var(--color-fg);
+  }
+
+  .toc-item--h3 {
+    padding-left: 1rem;
+  }
+
+  .toc-item--h3 a::before {
+    content: '↳ ';
+    opacity: 0.4;
+  }
 
   .prose {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

@@ -7,6 +7,7 @@ interface Props {
     title: string;
     role?: string;
     url?: string;
+    current?: boolean;
     projectType?: string;
     render?: string;
   };
@@ -31,6 +32,7 @@ const badge =
   <time class="date" datetime={entry.date.toISOString()}>{dateStr}</time>
   <span class={`badge badge--${badge}`}>{badge}</span>
   <p class="text">
+    {entry.current && <span class="now-dot" aria-label="currently active" />}
     {entry.type === 'blog' ? (
       <a href={`/blog/${entry.id}`}>{entry.title}</a>
     ) : entry.type === 'project' ? (
@@ -40,8 +42,6 @@ const badge =
           <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
           {entry.render.split('{{TITLE}}')[1]}
         </>
-      ) : entry.projectType === 'speaker' ? (
-        <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
       ) : (
         <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
       )
@@ -121,5 +121,34 @@ const badge =
 
   .text strong {
     font-weight: 500;
+  }
+
+  .now-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    margin-right: 0.4em;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    flex-shrink: 0;
+  }
+
+  .now-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: #4ade80;
+    opacity: 0.35;
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%   { transform: scale(1); opacity: 0.35; }
+    70%  { transform: scale(2.2); opacity: 0; }
+    100% { transform: scale(2.2); opacity: 0; }
   }
 </style>

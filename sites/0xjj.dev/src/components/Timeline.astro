@@ -9,7 +9,7 @@ const projects = await getCollection('project');
 
 type Entry =
   | { type: 'blog'; date: Date; id: string; title: string }
-  | { type: 'work'; date: Date; title: string; role: string; url?: string }
+  | { type: 'work'; date: Date; title: string; role: string; url?: string; current?: boolean }
   | { type: 'project'; date: Date; title: string; url: string; projectType?: string; render?: string };
 
 const blogEntries: Entry[] = blogs.map(b => ({
@@ -25,6 +25,7 @@ const workEntries: Entry[] = works.map(w => ({
   title: w.data.title,
   role: w.data.role,
   url: w.data.url,
+  current: w.data.current,
 }));
 
 const projectEntries: Entry[] = projects.map(p => ({
@@ -54,6 +55,7 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
   <hr class="divider" />
   <header class="timeline-header">
     <span class="timeline-title">changelog</span>
+    <a href="/blog" class="blog-link">blog →</a>
   </header>
   <main>
     {years.map(year => (
@@ -73,19 +75,30 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
 </div>
 
 <script>
-  const entries = document.querySelectorAll('[data-animate]');
-  const observer = new IntersectionObserver(
-    (observed) => {
-      for (const e of observed) {
-        if (e.isIntersecting) {
-          e.target.classList.add('is-visible');
-          observer.unobserve(e.target);
+  function init() {
+    const entries = document.querySelectorAll<HTMLElement>('[data-animate]');
+    const observer = new IntersectionObserver(
+      (observed) => {
+        for (const e of observed) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible');
+            observer.unobserve(e.target);
+          }
         }
+      },
+      { threshold: 0.15 }
+    );
+    for (const el of entries) {
+      const { top, bottom } = el.getBoundingClientRect();
+      if (top < window.innerHeight && bottom > 0) {
+        el.classList.add('is-visible');
+      } else {
+        observer.observe(el);
       }
-    },
-    { threshold: 0.15 }
-  );
-  for (const el of entries) observer.observe(el);
+    }
+  }
+
+  document.addEventListener('astro:page-load', init);
 </script>
 
 <style>
@@ -105,6 +118,21 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
 
   .timeline-header {
     margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .blog-link {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .blog-link:hover {
+    color: var(--color-fg);
   }
 
   .timeline-title {

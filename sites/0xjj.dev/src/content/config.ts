@@ -16,6 +16,7 @@ const work = defineCollection({
     title: z.string(),
     role: z.string(),
     url: z.string().optional(),
+    current: z.boolean().optional(),
   }),
 });
 

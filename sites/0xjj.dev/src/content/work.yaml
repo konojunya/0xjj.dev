@@ -3,12 +3,14 @@
   title: メルコイン
   role: Backend Engineer
   url: https://about.mercoin.com/
+  current: true
 
 - id: xrossstars
   date: 2025-03-01
   title: Xross Stars
   role: Software Engineer
   url: "https://xross-stars.com/"
+  current: true
 
 - id: renatus
   date: 2024-02-01
@@ -21,24 +23,28 @@
   title: Xross Road
   role: "Software Engineer"
   url: https://xross-road.com/
+  current: true
 
 - id: tenkoten
   date: 2025-10-05
-  title: 天狐てん
+  title: 天狐てん Official Site
   role: Software Engineer
   url: https://tenkoten.com/
+  current: true
 
 - id: utage
   date: "2024-03-01"
   title: UTAGE 3.0
   role: Backend Engineer
   url: https://service.utage3.com/
+  current: true
 
 - id: argonauts
   date: 2022-05-25
   title: Argonauts inc.
   role: Co-Founder / CTO
   url: https://argonauts.design/
+  current: true
 
 - id: sorajima
   date: 2024-06-25

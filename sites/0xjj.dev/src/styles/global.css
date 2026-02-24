@@ -45,6 +45,11 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem;
+}
+
 html,
 body {
   background-color: var(--color-bg);

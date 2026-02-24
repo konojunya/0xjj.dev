@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import satori from 'satori';
 import { Resvg, initWasm } from '@resvg/resvg-wasm';
+import satori from 'satori';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
+// Font buffers — satori converts text to SVG paths so resvg needs no font lookup
 const interRegular = readFileSync(
   resolve('node_modules/@fontsource/inter/files/inter-latin-400-normal.woff')
 );
@@ -18,15 +19,32 @@ const notoBold = readFileSync(
   resolve('node_modules/@fontsource/noto-sans-jp/files/noto-sans-jp-japanese-700-normal.woff')
 );
 
-let wasmInitialized = false;
+const fonts = [
+  { name: 'Inter',        data: interRegular, weight: 400 as const, style: 'normal' as const },
+  { name: 'Inter',        data: interBold,    weight: 700 as const, style: 'normal' as const },
+  { name: 'Noto Sans JP', data: notoRegular,  weight: 400 as const, style: 'normal' as const },
+  { name: 'Noto Sans JP', data: notoBold,     weight: 700 as const, style: 'normal' as const },
+];
+
+let wasmInitPromise: Promise<void> | null = null;
 async function ensureWasm() {
-  if (wasmInitialized) return;
-  const wasmBuffer = readFileSync(
-    resolve('node_modules/@resvg/resvg-wasm/index_bg.wasm')
-  );
-  await initWasm(wasmBuffer);
-  wasmInitialized = true;
+  if (!wasmInitPromise) {
+    wasmInitPromise = (async () => {
+      const wasmBuffer = readFileSync(
+        resolve('node_modules/@resvg/resvg-wasm/index_bg.wasm')
+      );
+      try {
+        await initWasm(wasmBuffer);
+      } catch (e: any) {
+        if (!e?.message?.includes('Already initialized')) throw e;
+      }
+    })();
+  }
+  return wasmInitPromise;
 }
+
+const W = 1200, H = 630;
+const INK = '#1e0e4e';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -37,80 +55,138 @@ export const GET: APIRoute = async ({ props }) => {
   await ensureWasm();
   const { post } = props as any;
   const title: string = post.data.title;
+  const dateStr = post.data.date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const len = title.length;
+  const fs = len > 45 ? 42 : len > 24 ? 52 : 64;
+
+  // Read pre-generated pastel background (produced by: bun run generate-ogp)
+  const bgPath = resolve(`public/og/bg/${post.id}.png`);
+  const bgDataUri = `data:image/png;base64,${readFileSync(bgPath).toString('base64')}`;
 
   const svg = await satori(
     {
       type: 'div',
       props: {
         style: {
-          width: '100%',
-          height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '72px',
-          backgroundColor: '#0e0d0c',
-          fontFamily: 'Inter, Noto Sans JP',
+          width: W,
+          height: H,
+          position: 'relative',
         },
         children: [
+          // Background layer
+          {
+            type: 'img',
+            props: {
+              src: bgDataUri,
+              style: {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: W,
+                height: H,
+              },
+            },
+          },
+          // Content: title + footer
           {
             type: 'div',
             props: {
-              style: { display: 'flex', flexDirection: 'column', gap: '28px' },
+              style: {
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                width: W,
+                height: H,
+                padding: '48px 72px 28px',
+                position: 'relative',
+              },
               children: [
-                {
-                  type: 'div',
-                  props: {
-                    style: { fontSize: '15px', color: '#7a7570', letterSpacing: '0.1em' },
-                    children: '0xjj.dev',
-                  },
-                },
+                // Title — fills the available space and centers vertically
                 {
                   type: 'div',
                   props: {
                     style: {
-                      fontSize: title.length > 40 ? '38px' : '52px',
-                      fontWeight: 700,
-                      color: '#f0ece5',
-                      lineHeight: 1.25,
-                      maxWidth: '900px',
+                      display: 'flex',
+                      flex: 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     },
-                    children: title,
+                    children: [{
+                      type: 'span',
+                      props: {
+                        style: {
+                          fontFamily: 'Inter, Noto Sans JP',
+                          fontSize: fs,
+                          fontWeight: 700,
+                          color: INK,
+                          textAlign: 'center',
+                          lineHeight: 1.25,
+                          letterSpacing: `${(-fs * 0.025).toFixed(1)}px`,
+                          maxWidth: W - 144,
+                        },
+                        children: title,
+                      },
+                    }],
+                  },
+                },
+                // Footer
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-end',
+                      borderTop: `1px solid rgba(30,14,78,0.15)`,
+                      paddingTop: 12,
+                    },
+                    children: [
+                      {
+                        type: 'span',
+                        props: {
+                          style: {
+                            fontFamily: 'Inter',
+                            fontSize: 13,
+                            fontWeight: 400,
+                            color: `rgba(30,14,78,0.45)`,
+                            letterSpacing: '0.5px',
+                          },
+                          children: '0xjj.dev',
+                        },
+                      },
+                      {
+                        type: 'span',
+                        props: {
+                          style: {
+                            fontFamily: 'Inter',
+                            fontSize: 13,
+                            fontWeight: 400,
+                            color: `rgba(30,14,78,0.55)`,
+                            letterSpacing: '0.5px',
+                          },
+                          children: dateStr,
+                        },
+                      },
+                    ],
                   },
                 },
               ],
             },
           },
-          {
-            type: 'div',
-            props: {
-              style: { fontSize: '14px', color: '#BC7AFF', letterSpacing: '0.06em' },
-              children: post.data.date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              }),
-            },
-          },
         ],
       },
     },
-    {
-      width: 1200,
-      height: 630,
-      fonts: [
-        { name: 'Inter', data: interRegular, weight: 400, style: 'normal' },
-        { name: 'Inter', data: interBold, weight: 700, style: 'normal' },
-        { name: 'Noto Sans JP', data: notoRegular, weight: 400, style: 'normal' },
-        { name: 'Noto Sans JP', data: notoBold, weight: 700, style: 'normal' },
-      ],
-    }
+    { width: W, height: H, fonts }
   );
 
-  const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
+  const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: W } });
   const png = resvg.render().asPng();
 
-  return new Response(png, {
-    headers: { 'Content-Type': 'image/png' },
-  });
+  return new Response(png, { headers: { 'Content-Type': 'image/png' } });
 };
