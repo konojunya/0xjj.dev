@@ -7,6 +7,7 @@ interface Props {
     title: string;
     role?: string;
     url?: string;
+    projectType?: string;
     render?: string;
   };
 }
@@ -17,13 +18,21 @@ const d = new Date(entry.date);
 const month = d.toLocaleString('en-US', { month: 'short' });
 const day = String(d.getDate()).padStart(2, '0');
 const dateStr = `${month} ${day}`;
+
+const badge =
+  entry.type === 'blog' ? 'post'
+  : entry.type === 'work' ? 'work'
+  : entry.projectType === 'speaker' ? 'talk'
+  : entry.projectType === 'OSS' ? 'oss'
+  : 'project';
 ---
 
 <div class="entry" data-animate>
   <time class="date" datetime={entry.date.toISOString()}>{dateStr}</time>
+  <span class={`badge badge--${badge}`}>{badge}</span>
   <p class="text">
     {entry.type === 'blog' ? (
-      <>Published a post on <a href={`/blog/${entry.id}`}>{entry.title}</a></>
+      <a href={`/blog/${entry.id}`}>{entry.title}</a>
     ) : entry.type === 'project' ? (
       entry.render ? (
         <>
@@ -31,22 +40,25 @@ const dateStr = `${month} ${day}`;
           <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
           {entry.render.split('{{TITLE}}')[1]}
         </>
+      ) : entry.projectType === 'speaker' ? (
+        <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
       ) : (
-        <>Released <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a></>
+        <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
       )
     ) : entry.url ? (
-      <>Joined <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a> as <em>{entry.role}</em></>
+      <><a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a> as <em>{entry.role}</em></>
     ) : (
-      <>Joined <strong>{entry.title}</strong> as <em>{entry.role}</em></>
+      <><strong>{entry.title}</strong> as <em>{entry.role}</em></>
     )}
   </p>
 </div>
 
 <style>
   .entry {
-    display: flex;
+    display: grid;
+    grid-template-columns: 50px 62px 1fr;
     align-items: baseline;
-    gap: 1.75rem;
+    gap: 0 0.75rem;
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.4s ease, transform 0.4s ease;
@@ -63,9 +75,25 @@ const dateStr = `${month} ${day}`;
     color: var(--color-muted);
     letter-spacing: 0.04em;
     white-space: nowrap;
-    width: 44px;
-    flex-shrink: 0;
   }
+
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid;
+    white-space: nowrap;
+    line-height: 1.6;
+    justify-self: start;
+  }
+
+  .badge--post    { color: var(--color-accent-text); border-color: var(--color-accent-border); background: var(--color-accent-bg); }
+  .badge--work    { color: var(--color-work-text); border-color: var(--color-work-border); background: var(--color-work-bg); }
+  .badge--oss     { color: var(--color-muted); border-color: color-mix(in srgb, var(--color-fg) 15%, transparent); }
+  .badge--project { color: var(--color-muted); border-color: color-mix(in srgb, var(--color-fg) 15%, transparent); }
+  .badge--talk    { color: var(--color-muted); border-color: color-mix(in srgb, var(--color-fg) 15%, transparent); }
 
   .text {
     font-size: 0.875rem;

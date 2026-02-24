@@ -25,6 +25,7 @@ const project = defineCollection({
     date: z.coerce.date(),
     title: z.string(),
     url: z.string(),
+    type: z.enum(['project', 'OSS', 'speaker']).optional(),
     render: z.string().optional(),
   }),
 });
