@@ -1,0 +1,148 @@
+---
+import { getCollection } from 'astro:content';
+
+const skills = await getCollection('skill');
+
+const categories = ['Language', 'Frontend', 'Backend', 'Infra'];
+
+const byCategory: Record<string, typeof skills> = {};
+for (const s of skills) {
+  const cat = s.data.category ?? 'Other';
+  if (!byCategory[cat]) byCategory[cat] = [];
+  byCategory[cat].push(s);
+}
+
+for (const cat of Object.keys(byCategory)) {
+  byCategory[cat].sort((a, b) => b.data.rate - a.data.rate);
+}
+
+const orderedCategories = [
+  ...categories.filter(c => byCategory[c]),
+  ...Object.keys(byCategory).filter(c => !categories.includes(c)),
+];
+---
+
+<div class="skills-container">
+  <hr class="divider" />
+  <header class="skills-header">
+    <span class="skills-title">skills</span>
+  </header>
+  <div class="categories">
+    {orderedCategories.map(cat => (
+      <div class="category">
+        <p class="category-name">{cat}</p>
+        <ul class="skill-list">
+          {byCategory[cat].map(s => (
+            <li class="skill-item" data-animate>
+              <span class="skill-name">{s.data.id}</span>
+              <span class="skill-rate" aria-label={`${s.data.rate} out of 5`}>
+                {Array.from({ length: s.data.rate }, (_, i) => (
+                  <span class="dot dot--filled" style={`--delay: ${i * 30}ms`} />
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .skills-container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+    margin: 0 0 1.75rem;
+  }
+
+  .skills-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .skills-title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    color: var(--color-muted);
+    border: 1px solid color-mix(in srgb, var(--color-fg) 15%, transparent);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+  }
+
+  .categories {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .category-name {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+  }
+
+  .skill-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .skill-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: var(--color-fg);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .skill-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .skill-name {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+
+  .skill-rate {
+    display: flex;
+    gap: 4px;
+  }
+
+  .dot--filled {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-fg);
+    display: inline-block;
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  .skill-item.is-visible .dot--filled {
+    animation: dot-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: calc(0.25s + var(--delay, 0ms));
+  }
+
+  @keyframes dot-pop {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+</style>

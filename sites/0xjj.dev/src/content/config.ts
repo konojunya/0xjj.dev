@@ -29,4 +29,13 @@ const project = defineCollection({
   }),
 });
 
-export const collections = { blog, work, project };
+const skill = defineCollection({
+  loader: file('./src/content/skills.yaml'),
+  schema: z.object({
+    id: z.string(),
+    rate: z.number().min(1).max(5),
+    category: z.string().optional(),
+  }),
+});
+
+export const collections = { blog, work, project, skill };

@@ -51,6 +51,9 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
 
 <div class="container">
   <hr class="divider" />
+  <header class="timeline-header">
+    <span class="timeline-title">changelog</span>
+  </header>
   <main>
     {years.map(year => (
       <section class="year-group">
@@ -68,6 +71,22 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
   </footer>
 </div>
 
+<script>
+  const entries = document.querySelectorAll('[data-animate]');
+  const observer = new IntersectionObserver(
+    (observed) => {
+      for (const e of observed) {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+          observer.unobserve(e.target);
+        }
+      }
+    },
+    { threshold: 0.15 }
+  );
+  for (const el of entries) observer.observe(el);
+</script>
+
 <style>
   .container {
     max-width: 680px;
@@ -80,7 +99,22 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
   .divider {
     border: none;
     border-top: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
-    margin: 0 0 2.5rem;
+    margin: 0 0 1.75rem;
+  }
+
+  .timeline-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .timeline-title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    color: var(--color-muted);
+    border: 1px solid color-mix(in srgb, var(--color-fg) 15%, transparent);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
   }
 
   main {
