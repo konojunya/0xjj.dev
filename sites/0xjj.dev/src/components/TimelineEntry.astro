@@ -7,6 +7,7 @@ interface Props {
     title: string;
     role?: string;
     url?: string;
+    render?: string;
   };
 }
 
@@ -24,7 +25,15 @@ const dateStr = `${month} ${day}`;
     {entry.type === 'blog' ? (
       <>Published a post on <a href={`/blog/${entry.id}`}>{entry.title}</a></>
     ) : entry.type === 'project' ? (
-      <>Built <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a></>
+      entry.render ? (
+        <>
+          {entry.render.split('{{TITLE}}')[0]}
+          <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
+          {entry.render.split('{{TITLE}}')[1]}
+        </>
+      ) : (
+        <>Released <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a></>
+      )
     ) : entry.url ? (
       <>Joined <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a> as <em>{entry.role}</em></>
     ) : (

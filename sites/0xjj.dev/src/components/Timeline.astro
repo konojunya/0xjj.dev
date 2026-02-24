@@ -10,7 +10,7 @@ const projects = await getCollection('project');
 type Entry =
   | { type: 'blog'; date: Date; id: string; title: string }
   | { type: 'work'; date: Date; title: string; role: string; url?: string }
-  | { type: 'project'; date: Date; title: string; url: string };
+  | { type: 'project'; date: Date; title: string; url: string; render?: string };
 
 const blogEntries: Entry[] = blogs.map(b => ({
   type: 'blog',
@@ -32,6 +32,7 @@ const projectEntries: Entry[] = projects.map(p => ({
   date: p.data.date,
   title: p.data.title,
   url: p.data.url,
+  render: p.data.render,
 }));
 
 const allEntries = [...blogEntries, ...workEntries, ...projectEntries].sort(

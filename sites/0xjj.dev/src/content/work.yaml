@@ -1,3 +1,33 @@
+- id: xrossstars
+  date: "2025-03-01"
+  title: "Xross Stars"
+  role: "Software Engineer"
+  url: "https://xross-stars.com/"
+
+- id: renatus
+  date: "2024-02-01"
+  title: "Renatus Robotics"
+  role: "Software Engineer"
+  url: https://www.renatus-robotics.com/jp/
+
+- id: xrossroad
+  date: "2025-06-01"
+  title: "Xross Road"
+  role: "Software Engineer"
+  url: https://xross-road.com/
+
+- id: utage
+  date: "2024-03-01"
+  title: "UTAGE 3.0"
+  role: "Backend Engineer"
+  url: https://service.utage3.com/
+
+- id: argonauts
+  date: "2022-05-25"
+  title: "Argonauts inc."
+  role: "Co-Founder / CTO"
+  url: https://argonauts.design/
+
 - id: microverse
   date: "2022-07-01"
   title: "microverse"
@@ -12,11 +42,11 @@
 - id: winticket
   date: "2019-04-01"
   title: "WINTICKET / CyberAgent inc."
-  role: "Software Engineer"
+  role: "Frontend Engineer"
   url: "https://www.winticket.jp/"
 
 - id: lovegraph
   date: "2019-03-01"
   title: "LOVEGRAPH"
-  role: "Software Engineer"
+  role: "Frontend Engineer"
   url: "https://lovegraph.me/"
