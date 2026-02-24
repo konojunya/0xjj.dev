@@ -11,6 +11,12 @@ const interRegular = readFileSync(
 const interBold = readFileSync(
   resolve('node_modules/@fontsource/inter/files/inter-latin-700-normal.woff')
 );
+const notoRegular = readFileSync(
+  resolve('node_modules/@fontsource/noto-sans-jp/files/noto-sans-jp-japanese-400-normal.woff')
+);
+const notoBold = readFileSync(
+  resolve('node_modules/@fontsource/noto-sans-jp/files/noto-sans-jp-japanese-700-normal.woff')
+);
 
 let wasmInitialized = false;
 async function ensureWasm() {
@@ -44,7 +50,7 @@ export const GET: APIRoute = async ({ props }) => {
           justifyContent: 'space-between',
           padding: '72px',
           backgroundColor: '#0e0d0c',
-          fontFamily: 'Inter',
+          fontFamily: 'Inter, Noto Sans JP',
         },
         children: [
           {
@@ -95,6 +101,8 @@ export const GET: APIRoute = async ({ props }) => {
       fonts: [
         { name: 'Inter', data: interRegular, weight: 400, style: 'normal' },
         { name: 'Inter', data: interBold, weight: 700, style: 'normal' },
+        { name: 'Noto Sans JP', data: notoRegular, weight: 400, style: 'normal' },
+        { name: 'Noto Sans JP', data: notoBold, weight: 700, style: 'normal' },
       ],
     }
   );
