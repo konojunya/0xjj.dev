@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import { readingTime } from '../../lib/reading-time';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -23,15 +24,27 @@ const dateStr = post.data.date.toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric',
 });
+
+const minutes = readingTime(post.body ?? '');
 ---
 
 <Layout title={post.data.title}>
+  <meta slot="head" property="og:title" content={post.data.title} />
+  <meta slot="head" property="og:type" content="article" />
+  <meta slot="head" property="og:image" content={`/og/${post.id}.png`} />
+  <meta slot="head" property="og:url" content={`https://0xjj.dev/blog/${post.id}`} />
+  <meta slot="head" name="twitter:card" content="summary_large_image" />
+  <meta slot="head" name="twitter:image" content={`/og/${post.id}.png`} />
   <div class="container">
-    <a href="/" class="back">← Back</a>
+    <a href="/blog" class="back">← Blog</a>
     <article>
       <header>
         <h1>{post.data.title}</h1>
-        <time class="date">{dateStr}</time>
+        <div class="meta">
+          <time class="date">{dateStr}</time>
+          <span class="sep">·</span>
+          <span class="reading-time">{minutes} min read</span>
+        </div>
       </header>
       <div class="prose">
         <Content />
@@ -98,12 +111,19 @@ const dateStr = post.data.date.toLocaleDateString('en-US', {
     color: var(--color-fg);
   }
 
-  .date {
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     font-family: var(--font-mono);
     font-size: 0.72rem;
     color: var(--color-muted);
     letter-spacing: 0.04em;
   }
+
+  .sep { opacity: 0.5; }
+
+  .date, .reading-time { color: var(--color-muted); }
 
   .prose {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

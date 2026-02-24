@@ -1,0 +1,191 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { readingTime } from '../../lib/reading-time';
+
+const posts = await getCollection('blog');
+const sorted = posts
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map(post => ({
+    id: post.id,
+    title: post.data.title,
+    date: post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+    minutes: readingTime(post.body ?? ''),
+  }));
+---
+
+<Layout title="Blog">
+  <div class="container">
+    <a href="/" class="back">← Back</a>
+
+    <header>
+      <h1>Blog</h1>
+      <a href="/rss.xml" class="rss" aria-label="RSS feed">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/>
+        </svg>
+        RSS
+      </a>
+    </header>
+
+    <div class="search-wrap">
+      <input
+        id="search"
+        type="search"
+        placeholder="Search posts..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <ul class="post-list" id="post-list">
+      {sorted.map(post => (
+        <li class="post-item" data-title={post.title.toLowerCase()}>
+          <a href={`/blog/${post.id}`} class="post-link">
+            <span class="post-title">{post.title}</span>
+            <span class="post-meta">
+              <time>{post.date}</time>
+              <span class="sep">·</span>
+              <span>{post.minutes} min read</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <p class="no-results" id="no-results" hidden>No posts found.</p>
+  </div>
+</Layout>
+
+<script>
+  const input = document.getElementById('search') as HTMLInputElement;
+  const items = document.querySelectorAll<HTMLElement>('.post-item');
+  const noResults = document.getElementById('no-results')!;
+
+  input.addEventListener('input', () => {
+    const q = input.value.toLowerCase().trim();
+    let visible = 0;
+    for (const item of items) {
+      const match = !q || item.dataset.title!.includes(q);
+      item.hidden = !match;
+      if (match) visible++;
+    }
+    noResults.hidden = visible > 0;
+  });
+</script>
+
+<style>
+  .container {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem;
+  }
+
+  .back {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 3rem;
+    letter-spacing: 0.02em;
+    transition: color 0.15s ease;
+  }
+  .back:hover { color: var(--color-fg); }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .rss {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.15s ease;
+  }
+  .rss:hover { color: var(--color-fg); }
+
+  .search-wrap {
+    margin-bottom: 2rem;
+  }
+
+  #search {
+    width: 100%;
+    background: color-mix(in srgb, var(--color-fg) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-fg) 12%, transparent);
+    border-radius: 6px;
+    padding: 0.6rem 0.875rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-fg);
+    outline: none;
+    transition: border-color 0.15s ease;
+    box-sizing: border-box;
+  }
+  #search::placeholder { color: var(--color-muted); }
+  #search:focus { border-color: color-mix(in srgb, var(--color-fg) 30%, transparent); }
+
+  .post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .post-item {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-fg) 8%, transparent);
+  }
+
+  .post-link {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 0.875rem 0;
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+  .post-link:hover { opacity: 0.7; }
+
+  .post-title {
+    font-size: 0.9rem;
+    color: var(--color-fg);
+    line-height: 1.5;
+  }
+
+  .post-meta {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .sep { opacity: 0.5; }
+
+  .no-results {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-muted);
+    margin-top: 2rem;
+  }
+</style>
