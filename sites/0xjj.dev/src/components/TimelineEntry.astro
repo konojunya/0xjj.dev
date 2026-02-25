@@ -28,7 +28,7 @@ const badge =
   : 'project';
 ---
 
-<div class="entry" data-animate>
+<div class="entry" data-animate data-type={badge}>
   <time class="date" datetime={entry.date.toISOString()}>{dateStr}</time>
   <span class={`badge badge--${badge}`}>{badge}</span>
   <p class="text">
@@ -42,6 +42,8 @@ const badge =
           <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
           {entry.render.split('{{TITLE}}')[1]}
         </>
+      ) : entry.projectType === 'OSS' ? (
+        <>Released <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a></>
       ) : (
         <a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.title}</a>
       )

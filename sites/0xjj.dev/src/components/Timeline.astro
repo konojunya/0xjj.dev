@@ -57,6 +57,14 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
     <span class="timeline-title">changelog</span>
     <a href="/blog" class="blog-link">blog →</a>
   </header>
+  <div class="filter-wrap">
+    <button class="filter-btn is-active" data-filter="all">all</button>
+    <button class="filter-btn" data-filter="post">post</button>
+    <button class="filter-btn" data-filter="work">work</button>
+    <button class="filter-btn" data-filter="oss">oss</button>
+    <button class="filter-btn" data-filter="project">project</button>
+    <button class="filter-btn" data-filter="talk">talk</button>
+  </div>
   <main>
     {years.map(year => (
       <section class="year-group">
@@ -96,6 +104,27 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
         observer.observe(el);
       }
     }
+
+    const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        const filter = btn.dataset.filter!;
+
+        for (const entry of entries) {
+          const match = filter === 'all' || entry.dataset.type === filter;
+          entry.hidden = !match;
+        }
+
+        // year group を空なら非表示
+        const yearGroups = document.querySelectorAll<HTMLElement>('.year-group');
+        for (const group of yearGroups) {
+          const visible = group.querySelectorAll<HTMLElement>('[data-animate]:not([hidden])').length;
+          group.hidden = visible === 0;
+        }
+      });
+    });
   }
 
   document.addEventListener('astro:page-load', init);
@@ -117,7 +146,7 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
   }
 
   .timeline-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -144,6 +173,37 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
     border: 1px solid color-mix(in srgb, var(--color-fg) 15%, transparent);
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
+  }
+
+  .filter-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .filter-btn {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-fg) 15%, transparent);
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .filter-btn:hover {
+    color: var(--color-fg);
+    border-color: color-mix(in srgb, var(--color-fg) 30%, transparent);
+  }
+
+  .filter-btn.is-active {
+    color: var(--color-fg);
+    border-color: var(--color-fg);
+    background: color-mix(in srgb, var(--color-fg) 8%, transparent);
   }
 
   main {
