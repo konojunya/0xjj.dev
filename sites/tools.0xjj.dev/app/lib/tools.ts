@@ -30,4 +30,10 @@ export const tools: Tool[] = [
     description: 'Convert any CSS color format — HEX, RGB, HSL, OKLAB, OKLCH, and more.',
     href: '/color',
   },
+  {
+    slug: 'json',
+    name: 'JSON Formatter',
+    description: 'Format and validate JSON with syntax error reporting.',
+    href: '/json',
+  },
 ];
