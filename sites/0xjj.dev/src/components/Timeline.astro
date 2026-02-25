@@ -58,12 +58,12 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
     <a href="/blog" class="blog-link">blog →</a>
   </header>
   <div class="filter-wrap">
-    <button class="filter-btn is-active" data-filter="all">all</button>
-    <button class="filter-btn" data-filter="post">post</button>
-    <button class="filter-btn" data-filter="work">work</button>
-    <button class="filter-btn" data-filter="oss">oss</button>
-    <button class="filter-btn" data-filter="project">project</button>
-    <button class="filter-btn" data-filter="talk">talk</button>
+    <button class="filter-btn is-active" id="all" data-filter="all">all</button>
+    <button class="filter-btn" id="post" data-filter="post">post</button>
+    <button class="filter-btn" id="work" data-filter="work">work</button>
+    <button class="filter-btn" id="oss" data-filter="oss">oss</button>
+    <button class="filter-btn" id="project" data-filter="project">project</button>
+    <button class="filter-btn" id="talk" data-filter="talk">talk</button>
   </div>
   <main>
     {years.map(year => (
@@ -83,6 +83,23 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
 </div>
 
 <script>
+  function applyFilter(filter: string) {
+    const entries = document.querySelectorAll<HTMLElement>('[data-animate]');
+    const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+    const yearGroups = document.querySelectorAll<HTMLElement>('.year-group');
+
+    filterBtns.forEach(b => b.classList.toggle('is-active', b.dataset.filter === filter));
+
+    for (const entry of entries) {
+      entry.hidden = filter !== 'all' && entry.dataset.type !== filter;
+    }
+
+    for (const group of yearGroups) {
+      const visible = group.querySelectorAll<HTMLElement>('[data-animate]:not([hidden])').length;
+      group.hidden = visible === 0;
+    }
+  }
+
   function init() {
     const entries = document.querySelectorAll<HTMLElement>('[data-animate]');
     const observer = new IntersectionObserver(
@@ -105,25 +122,26 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
       }
     }
 
-    const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
-    filterBtns.forEach(btn => {
+    // ページロード時にハッシュからフィルターを復元
+    const initialFilter = location.hash.slice(1) || 'all';
+    applyFilter(initialFilter);
+
+    const filterWrap = document.querySelector<HTMLElement>('.filter-wrap')!;
+
+    document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        filterBtns.forEach(b => b.classList.remove('is-active'));
-        btn.classList.add('is-active');
         const filter = btn.dataset.filter!;
-
-        for (const entry of entries) {
-          const match = filter === 'all' || entry.dataset.type === filter;
-          entry.hidden = !match;
-        }
-
-        // year group を空なら非表示
-        const yearGroups = document.querySelectorAll<HTMLElement>('.year-group');
-        for (const group of yearGroups) {
-          const visible = group.querySelectorAll<HTMLElement>('[data-animate]:not([hidden])').length;
-          group.hidden = visible === 0;
-        }
+        history.replaceState(null, '', `#${filter}`);
+        applyFilter(filter);
+        filterWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       });
+    });
+
+    // ブラウザの戻る/進むでハッシュが変わった場合
+    window.addEventListener('hashchange', () => {
+      const filter = location.hash.slice(1) || 'all';
+      applyFilter(filter);
+      filterWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   }
 
@@ -208,6 +226,7 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
 
   main {
     flex: 1;
+    min-height: 70vh;
     display: flex;
     flex-direction: column;
     gap: 2.25rem;
