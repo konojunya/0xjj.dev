@@ -24,4 +24,10 @@ export const tools: Tool[] = [
     description: 'Simplify ratios and calculate missing values from a known ratio.',
     href: '/ratio',
   },
+  {
+    slug: 'color',
+    name: 'Color Converter',
+    description: 'Convert hex color codes to RGB, HSL, HWB, LAB, LCH, OKLCH, and more CSS formats.',
+    href: '/color',
+  },
 ];

@@ -13,6 +13,21 @@
 | `ogpchecker` | OGP Checker | https://tools.0xjj.dev/ogpchecker |
 | `exif` | EXIF Viewer | https://tools.0xjj.dev/exif |
 | `ratio` | Ratio Calculator | https://tools.0xjj.dev/ratio |
+| `color` | Color Converter | https://tools.0xjj.dev/color |
+
+---
+
+### Color Converter
+
+> HEX カラーコードを CSS で表現できるすべての色形式に変換する。純粋なクライアントサイド計算（外部ライブラリ不要）。
+
+- CSS Legacy: HEX / HEX(alpha) / RGB / RGBA / HSL / HSLA
+- CSS Color Level 4: RGB / HSL / HWB / LAB / LCH / OKLAB / OKLCH / color(srgb) / color(display-p3)
+- デザインツール向け: HSV / CMYK
+- カラーピッカー + テキスト入力が同期、コピーボタン付き
+- #rgb・#rrggbb・#rgba・#rrggbbaa・大文字・# なしをすべて受け付ける
+
+**Route**: `app/color/`
 
 ---
 
