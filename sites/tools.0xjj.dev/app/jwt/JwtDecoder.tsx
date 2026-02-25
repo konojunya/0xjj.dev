@@ -187,16 +187,16 @@ export default function JwtDecoder() {
                   </span>
                 </p>
               )}
-              {parsed.payload.iat && (
+              {typeof parsed.payload.iat === 'number' && (
                 <p>
                   <span className="mr-2">iat:</span>
-                  <span>{formatDate(parsed.payload.iat as number)}</span>
+                  <span>{formatDate(parsed.payload.iat)}</span>
                 </p>
               )}
-              {parsed.payload.nbf && (
+              {typeof parsed.payload.nbf === 'number' && (
                 <p>
                   <span className="mr-2">nbf:</span>
-                  <span>{formatDate(parsed.payload.nbf as number)}</span>
+                  <span>{formatDate(parsed.payload.nbf)}</span>
                 </p>
               )}
             </div>
