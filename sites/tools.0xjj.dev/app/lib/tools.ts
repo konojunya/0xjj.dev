@@ -48,4 +48,16 @@ export const tools: Tool[] = [
     description: 'Decode and inspect JWT header, payload, and expiry.',
     href: '/jwt',
   },
+  {
+    slug: 'easing',
+    name: 'Easing Visualizer',
+    description: 'Visualize and preview cubic-bezier easing curves for CSS.',
+    href: '/easing',
+  },
+  {
+    slug: 'regex',
+    name: 'RegEx Tester',
+    description: 'Test regular expressions with live match highlighting.',
+    href: '/regex',
+  },
 ];
