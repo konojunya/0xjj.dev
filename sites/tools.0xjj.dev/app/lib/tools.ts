@@ -18,4 +18,10 @@ export const tools: Tool[] = [
     description: 'View embedded metadata (EXIF, XMP, IPTC) from images and PDF documents.',
     href: '/exif',
   },
+  {
+    slug: 'ratio',
+    name: 'Ratio Calculator',
+    description: 'Simplify ratios and calculate missing values from a known ratio.',
+    href: '/ratio',
+  },
 ];

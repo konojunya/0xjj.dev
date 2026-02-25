@@ -12,6 +12,19 @@
 |---|---|---|
 | `ogpchecker` | OGP Checker | https://tools.0xjj.dev/ogpchecker |
 | `exif` | EXIF Viewer | https://tools.0xjj.dev/exif |
+| `ratio` | Ratio Calculator | https://tools.0xjj.dev/ratio |
+
+---
+
+### Ratio Calculator
+
+> 比率の簡略化と、比率と片方の値からもう片方を計算する。純粋なクライアントサイド計算。
+
+- Simplify: a と b を入力 → GCD で割り算し最小整数比を表示（例: 1920:1080 → 16:9）
+- Calculate: 比率と a か b の一方を入力 → もう一方をリアルタイム計算
+- 小数の場合は切り上げ・切り下げも表示
+
+**Route**: `app/ratio/`
 
 ---
 
