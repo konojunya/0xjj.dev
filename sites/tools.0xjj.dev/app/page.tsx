@@ -13,9 +13,8 @@ export default function Home() {
         {tools.map((tool, i) => (
           <li
             key={tool.slug}
-            className="opacity-0"
             style={{
-              animation: 'fade-slide-up 0.35s ease forwards',
+              animation: 'fade-in 0.4s ease both',
               animationDelay: `${i * 0.08}s`,
             }}
           >
