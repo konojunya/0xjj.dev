@@ -28,13 +28,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen bg-neutral-50 text-neutral-900 antialiased">
-        <header className="sticky top-0 z-10 border-b border-neutral-200 bg-white/80 backdrop-blur-sm">
-          <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-4">
+        <div className="sticky top-4 z-10 px-4">
+          <header className="mx-auto flex h-11 max-w-5xl items-center justify-between rounded-2xl border border-neutral-200/80 bg-white/75 px-5 shadow-sm shadow-neutral-900/5 backdrop-blur-md">
             <a href="/" className="font-mono text-sm font-medium tracking-tight">
               tools.0xjj.dev
             </a>
-          </div>
-        </header>
+          </header>
+        </div>
         {children}
       </body>
     </html>
