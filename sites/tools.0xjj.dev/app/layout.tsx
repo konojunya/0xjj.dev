@@ -29,6 +29,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen bg-bg text-fg antialiased">
         {children}
+        <footer className="border-t border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] px-4 py-6">
+          <p className="text-center font-mono text-xs text-muted">
+            Created by{' '}
+            <a
+              href="https://0xjj.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-fg underline underline-offset-2 transition-opacity hover:opacity-60"
+            >
+              JJ
+            </a>
+          </p>
+        </footer>
       </body>
     </html>
   );
