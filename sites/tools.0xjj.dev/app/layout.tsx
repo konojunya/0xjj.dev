@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import ToolMap from './components/ToolMap';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://tools.0xjj.dev'),
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/" className="font-mono text-sm font-medium tracking-tight text-fg">
               tools.0xjj.dev
             </a>
+            <ToolMap />
           </header>
         </div>
         {children}
