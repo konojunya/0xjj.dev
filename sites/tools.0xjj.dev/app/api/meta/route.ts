@@ -1,4 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+
+const FETCH_INIT = {
+  headers: {
+    'User-Agent':
+      'Mozilla/5.0 (compatible; OGPChecker/1.0; +https://tools.0xjj.dev/ogpchecker)',
+    Accept: 'text/html,application/xhtml+xml',
+    'Accept-Language': 'en-US,en;q=0.9,ja;q=0.8',
+  },
+  redirect: 'follow' as const,
+};
+
+// Cloudflare Workers で同一オリジンへの fetch は 522 になるため、
+// WORKER_SELF_REFERENCE service binding を経由して内部呼び出しにする。
+async function fetchUrl(url: string): Promise<Response> {
+  try {
+    const { env } = getCloudflareContext();
+    const binding = (env as Record<string, { fetch: typeof fetch } | undefined>)
+      .WORKER_SELF_REFERENCE;
+    if (binding && new URL(url).hostname === 'tools.0xjj.dev') {
+      return binding.fetch(new Request(url, FETCH_INIT));
+    }
+  } catch {
+    // dev 環境など Cloudflare context が存在しない場合は通常の fetch にフォールバック
+  }
+  return fetch(url, FETCH_INIT);
+}
 
 export interface MetaEntry {
   key: string;
@@ -83,15 +110,7 @@ export async function GET(request: NextRequest) {
   const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 
   try {
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (compatible; OGPChecker/1.0; +https://tools.0xjj.dev/ogpchecker)',
-        Accept: 'text/html,application/xhtml+xml',
-        'Accept-Language': 'en-US,en;q=0.9,ja;q=0.8',
-      },
-      redirect: 'follow',
-    });
+    const res = await fetchUrl(url);
 
     if (!res.ok) {
       return NextResponse.json(
