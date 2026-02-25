@@ -86,8 +86,8 @@ export default function RatioCalculator() {
   let simpError: string | null = null;
 
   if (aSimp !== '' || bSimp !== '') {
-    if (simpA === null && aSimp !== '') simpError = 'a must be a positive number';
-    else if (simpB === null && bSimp !== '') simpError = 'b must be a positive number';
+    if (simpA === null && aSimp !== '') simpError = 'x must be a positive number';
+    else if (simpB === null && bSimp !== '') simpError = 'y must be a positive number';
     else if (simpA !== null && simpB !== null) simpResult = simplify(simpA, simpB);
   }
 
@@ -108,8 +108,8 @@ export default function RatioCalculator() {
     else if (rA !== null && rB !== null) {
       if (vA !== null) derivedB = (vA * rB) / rA;
       if (vB !== null) derivedA = (vB * rA) / rB;
-      if (vA === null && calcA !== '') calcError = 'a must be a positive number';
-      else if (vB === null && calcB !== '') calcError = 'b must be a positive number';
+      if (vA === null && calcA !== '') calcError = 'x must be a positive number';
+      else if (vB === null && calcB !== '') calcError = 'y must be a positive number';
     }
   }
 
@@ -133,9 +133,9 @@ export default function RatioCalculator() {
         <SectionHeading>Simplify</SectionHeading>
 
         <div className="flex flex-wrap items-center gap-3">
-          <NumInput value={aSimp} onChange={setASimp} placeholder="a" />
+          <NumInput value={aSimp} onChange={setASimp} placeholder="x" />
           <span className="font-mono text-lg text-muted">:</span>
-          <NumInput value={bSimp} onChange={setBSimp} placeholder="b" />
+          <NumInput value={bSimp} onChange={setBSimp} placeholder="y" />
 
           {simpResult && (
             <>
@@ -168,15 +168,15 @@ export default function RatioCalculator() {
           <NumInput value={ratioB} onChange={setRatioB} placeholder="9" />
         </div>
 
-        {/* a row */}
+        {/* x row */}
         <div className="mb-3 flex flex-wrap items-center gap-3">
-          <span className="w-16 font-mono text-xs text-muted">a</span>
+          <span className="w-16 font-mono text-xs text-muted">x</span>
           <NumInput value={calcA} onChange={setCalcA} placeholder="1920" />
           {derivedB !== null && (
             <>
               <span className="font-mono text-sm text-muted">→</span>
               <div className="flex flex-col">
-                <span className="font-mono text-xs text-muted">b =</span>
+                <span className="font-mono text-xs text-muted">y =</span>
                 <span className="font-mono text-2xl font-bold text-fg">{formatNum(derivedB)}</span>
                 {!Number.isInteger(derivedB) && (
                   <span className="font-mono text-xs text-muted">
@@ -188,15 +188,15 @@ export default function RatioCalculator() {
           )}
         </div>
 
-        {/* b row */}
+        {/* y row */}
         <div className="flex flex-wrap items-center gap-3">
-          <span className="w-16 font-mono text-xs text-muted">b</span>
+          <span className="w-16 font-mono text-xs text-muted">y</span>
           <NumInput value={calcB} onChange={setCalcB} placeholder="1080" />
           {derivedA !== null && (
             <>
               <span className="font-mono text-sm text-muted">→</span>
               <div className="flex flex-col">
-                <span className="font-mono text-xs text-muted">a =</span>
+                <span className="font-mono text-xs text-muted">x =</span>
                 <span className="font-mono text-2xl font-bold text-fg">{formatNum(derivedA)}</span>
                 {!Number.isInteger(derivedA) && (
                   <span className="font-mono text-xs text-muted">
@@ -214,7 +214,7 @@ export default function RatioCalculator() {
 
         {!calcError && rA === null && rB === null && (
           <p className="mt-3 font-mono text-xs text-muted">
-            Enter a ratio, then fill in a or b to calculate the other.
+            Enter a ratio, then fill in x or y to calculate the other.
           </p>
         )}
       </section>
