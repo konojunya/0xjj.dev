@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://tools.0xjj.dev'),
   title: {
     template: '%s | tools.0xjj.dev',
     default: 'tools.0xjj.dev',
