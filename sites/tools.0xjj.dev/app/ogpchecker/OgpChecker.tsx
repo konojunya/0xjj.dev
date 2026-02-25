@@ -235,6 +235,9 @@ export default function OgpChecker() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
       <div className="mb-8">
+        <a href="/" className="mb-6 inline-block font-mono text-xs text-muted transition-colors hover:text-fg">
+          ← back
+        </a>
         <h1 className="text-2xl font-semibold tracking-tight text-fg">OGP Checker</h1>
         <p className="mt-1 text-sm text-muted">
           Inspect Open Graph, Twitter Card, and all meta tags for any URL.

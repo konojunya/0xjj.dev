@@ -1,9 +1,10 @@
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { tools } from './lib/tools';
 
 export default function Home() {
   return (
-    <main className="relative z-10 mx-auto max-w-5xl px-4 py-14">
+    <main className="mx-auto max-w-5xl px-4 py-14">
       <div className="mb-12">
         <h1 className="text-3xl font-semibold tracking-tight text-fg">tools.0xjj.dev</h1>
         <p className="mt-2 text-sm text-muted">Useful tools for everyone.</p>
@@ -13,10 +14,8 @@ export default function Home() {
         {tools.map((tool, i) => (
           <li
             key={tool.slug}
-            style={{
-              animation: 'fade-in 0.4s ease both',
-              animationDelay: `${i * 0.08}s`,
-            }}
+            className="card-enter"
+            style={{ '--card-delay': `${i * 0.08}s` } as CSSProperties}
           >
             <Link
               href={tool.href}

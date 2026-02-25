@@ -34,3 +34,8 @@ body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+.card-enter {
+  animation: fade-in 0.45s ease var(--card-delay, 0s) forwards;
+  opacity: 0;
+}
