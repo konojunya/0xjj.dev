@@ -27,7 +27,7 @@ export const tools: Tool[] = [
   {
     slug: 'color',
     name: 'Color Converter',
-    description: 'Convert hex color codes to RGB, HSL, HWB, LAB, LCH, OKLCH, and more CSS formats.',
+    description: 'Convert any CSS color format — HEX, RGB, HSL, OKLAB, OKLCH, and more.',
     href: '/color',
   },
 ];

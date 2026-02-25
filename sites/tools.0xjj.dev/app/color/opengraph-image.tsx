@@ -5,5 +5,5 @@ export const size = OG_SIZE;
 export const contentType = 'image/png';
 
 export default function Image() {
-  return createOgImage('Color Converter', 'Convert hex colors to all CSS color formats.');
+  return createOgImage('Color Converter', 'Convert any CSS color format — HEX, RGB, HSL, OKLAB, OKLCH, and more.');
 }

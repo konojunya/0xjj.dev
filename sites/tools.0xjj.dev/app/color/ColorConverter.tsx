@@ -174,6 +174,97 @@ function xyzToDisplayP3(x: number, y: number, z: number): [number, number, numbe
   return [gammaEncode(rL), gammaEncode(gL), gammaEncode(bL)];
 }
 
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  const sn = s / 100, ln = l / 100;
+  const c = (1 - Math.abs(2 * ln - 1)) * sn;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = ln - c / 2;
+
+  let r = 0, g = 0, b = 0;
+  if (h < 60)       { r = c; g = x; }
+  else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; }
+  else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; }
+  else              { r = c; b = x; }
+
+  return [(r + m) * 255, (g + m) * 255, (b + m) * 255];
+}
+
+function hwbToRgb(h: number, w: number, bk: number): [number, number, number] {
+  const wn = w / 100, bkn = bk / 100;
+  if (wn + bkn >= 1) {
+    const gray = (wn / (wn + bkn)) * 255;
+    return [gray, gray, gray];
+  }
+  const [r, g, b] = hslToRgb(h, 100, 50);
+  const f = 1 - wn - bkn;
+  return [
+    (r / 255) * f * 255 + wn * 255,
+    (g / 255) * f * 255 + wn * 255,
+    (b / 255) * f * 255 + wn * 255,
+  ];
+}
+
+function labToXyz(L: number, a: number, b: number): [number, number, number] {
+  const Xn = 0.95047, Yn = 1.00000, Zn = 1.08883;
+  const fy = (L + 16) / 116;
+  const fx = a / 500 + fy;
+  const fz = fy - b / 200;
+
+  function invF(t: number) {
+    return t > 0.206897 ? t * t * t : (t - 16 / 116) / 7.787;
+  }
+
+  return [invF(fx) * Xn, invF(fy) * Yn, invF(fz) * Zn];
+}
+
+function xyzToRgb(x: number, y: number, z: number): [number, number, number] {
+  const rl =  3.2404542 * x - 1.5371385 * y - 0.4985314 * z;
+  const gl = -0.9692660 * x + 1.8760108 * y + 0.0415560 * z;
+  const bl =  0.0556434 * x - 0.2040259 * y + 1.0572252 * z;
+
+  const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+  return [
+    gammaEncode(clamp01(rl)) * 255,
+    gammaEncode(clamp01(gl)) * 255,
+    gammaEncode(clamp01(bl)) * 255,
+  ];
+}
+
+function oklabToRgb(L: number, a: number, b: number): [number, number, number] {
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+
+  const l = l_ * l_ * l_;
+  const m = m_ * m_ * m_;
+  const s = s_ * s_ * s_;
+
+  const rl =  4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+  const gl = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+  const bl = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
+
+  const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+  return [
+    gammaEncode(clamp01(rl)) * 255,
+    gammaEncode(clamp01(gl)) * 255,
+    gammaEncode(clamp01(bl)) * 255,
+  ];
+}
+
+function p3ToXyz(r: number, g: number, b: number): [number, number, number] {
+  const rl = linearize(r);
+  const gl = linearize(g);
+  const bl = linearize(b);
+
+  return [
+    0.4865709 * rl + 0.2656677 * gl + 0.1982173 * bl,
+    0.2289746 * rl + 0.6917385 * gl + 0.0792869 * bl,
+    0.0000000 * rl + 0.0451134 * gl + 1.0439444 * bl,
+  ];
+}
+
 // ─── format helpers ───────────────────────────────────────────────────────────
 
 function fmt(n: number, decimals = 2): string {
@@ -245,6 +336,259 @@ function computeColors({ r, g, b, a }: Rgba): ColorValues {
   };
 }
 
+// ─── parse helpers ────────────────────────────────────────────────────────────
+
+function parseNum(s: string): number | null {
+  s = s.trim();
+  if (s.endsWith('%')) {
+    const v = parseFloat(s);
+    if (isNaN(v)) return null;
+    return (v / 100) * 255;
+  }
+  const v = parseFloat(s);
+  return isNaN(v) ? null : v;
+}
+
+function parsePct(s: string): number | null {
+  s = s.trim();
+  const v = parseFloat(s);
+  return isNaN(v) ? null : v;
+}
+
+function parseAlphaVal(s: string): number {
+  s = s.trim();
+  let v: number;
+  if (s.endsWith('%')) {
+    v = parseFloat(s) / 100;
+  } else {
+    v = parseFloat(s);
+  }
+  if (isNaN(v)) return 1;
+  return Math.max(0, Math.min(1, v));
+}
+
+function parseAngle(s: string): number {
+  s = s.trim();
+  if (s.endsWith('grad')) return parseFloat(s) * (360 / 400);
+  if (s.endsWith('turn')) return parseFloat(s) * 360;
+  if (s.endsWith('rad'))  return parseFloat(s) * (180 / Math.PI);
+  if (s.endsWith('deg'))  return parseFloat(s);
+  return parseFloat(s);
+}
+
+function splitArgs(inner: string): string[] {
+  const normalized = inner.replace(/,/g, ' ');
+  const tokens = normalized.trim().split(/\s+/).filter(Boolean);
+  const slashIdx = tokens.findIndex((p) => p === '/');
+  if (slashIdx === -1) return tokens;
+  const channels = tokens.slice(0, slashIdx);
+  const alphaToken = tokens.slice(slashIdx + 1).join('');
+  return [...channels, '/' + alphaToken];
+}
+
+// ─── css parsers ──────────────────────────────────────────────────────────────
+
+function parseRgb(input: string): Rgba | null {
+  const m = input.trim().match(/^rgba?\s*\((.+)\)$/i);
+  if (!m) return null;
+  const parts = splitArgs(m[1]);
+  if (parts.length < 3) return null;
+
+  const r = parseNum(parts[0]);
+  const g = parseNum(parts[1]);
+  const b = parseNum(parts[2]);
+  if (r === null || g === null || b === null) return null;
+
+  let a = 1;
+  const alphaToken = parts.find((p) => p.startsWith('/'));
+  if (alphaToken) {
+    a = parseAlphaVal(alphaToken.slice(1));
+  } else if (parts.length >= 4) {
+    a = parseAlphaVal(parts[3]);
+  }
+
+  return {
+    r: Math.max(0, Math.min(255, r)),
+    g: Math.max(0, Math.min(255, g)),
+    b: Math.max(0, Math.min(255, b)),
+    a,
+  };
+}
+
+function parseHsl(input: string): Rgba | null {
+  const m = input.trim().match(/^hsla?\s*\((.+)\)$/i);
+  if (!m) return null;
+  const parts = splitArgs(m[1]);
+  if (parts.length < 3) return null;
+
+  const h = ((parseAngle(parts[0]) % 360) + 360) % 360;
+  const s = parsePct(parts[1]);
+  const l = parsePct(parts[2]);
+  if (s === null || l === null || isNaN(h)) return null;
+
+  let a = 1;
+  const alphaToken = parts.find((p) => p.startsWith('/'));
+  if (alphaToken) {
+    a = parseAlphaVal(alphaToken.slice(1));
+  } else if (parts.length >= 4) {
+    a = parseAlphaVal(parts[3]);
+  }
+
+  const [r, g, b] = hslToRgb(h, s, l);
+  return {
+    r: Math.max(0, Math.min(255, r)),
+    g: Math.max(0, Math.min(255, g)),
+    b: Math.max(0, Math.min(255, b)),
+    a,
+  };
+}
+
+function parseHwb(input: string): Rgba | null {
+  const m = input.trim().match(/^hwb\s*\((.+)\)$/i);
+  if (!m) return null;
+  const parts = splitArgs(m[1]);
+  if (parts.length < 3) return null;
+
+  const h = ((parseAngle(parts[0]) % 360) + 360) % 360;
+  const w = parsePct(parts[1]);
+  const bk = parsePct(parts[2]);
+  if (w === null || bk === null || isNaN(h)) return null;
+
+  let a = 1;
+  const alphaToken = parts.find((p) => p.startsWith('/'));
+  if (alphaToken) a = parseAlphaVal(alphaToken.slice(1));
+
+  const [r, g, b] = hwbToRgb(h, w, bk);
+  return {
+    r: Math.max(0, Math.min(255, r)),
+    g: Math.max(0, Math.min(255, g)),
+    b: Math.max(0, Math.min(255, b)),
+    a,
+  };
+}
+
+function parseLab(input: string): Rgba | null {
+  const m = input.trim().match(/^lab\s*\((.+)\)$/i);
+  if (!m) return null;
+  const parts = splitArgs(m[1]);
+  if (parts.length < 3) return null;
+
+  const L = parseFloat(parts[0]);
+  const a = parseFloat(parts[1]);
+  const b = parseFloat(parts[2]);
+  if (isNaN(L) || isNaN(a) || isNaN(b)) return null;
+
+  let alpha = 1;
+  const alphaToken = parts.find((p) => p.startsWith('/'));
+  if (alphaToken) alpha = parseAlphaVal(alphaToken.slice(1));
+
+  const [x, y, z] = labToXyz(L, a, b);
+  const [r, g, bv] = xyzToRgb(x, y, z);
+  return { r, g, b: bv, a: alpha };
+}
+
+function parseLch(input: string): Rgba | null {
+  const m = input.trim().match(/^lch\s*\((.+)\)$/i);
+  if (!m) return null;
+  const parts = splitArgs(m[1]);
+  if (parts.length < 3) return null;
+
+  const L = parseFloat(parts[0]);
+  const C = parseFloat(parts[1]);
+  const H = parseAngle(parts[2]);
+  if (isNaN(L) || isNaN(C) || isNaN(H)) return null;
+
+  let alpha = 1;
+  const alphaToken = parts.find((p) => p.startsWith('/'));
+  if (alphaToken) alpha = parseAlphaVal(alphaToken.slice(1));
+
+  const labA = C * Math.cos(H * (Math.PI / 180));
+  const labB = C * Math.sin(H * (Math.PI / 180));
+  const [x, y, z] = labToXyz(L, labA, labB);
+  const [r, g, b] = xyzToRgb(x, y, z);
+  return { r, g, b, a: alpha };
+}
+
+function parseOklab(input: string): Rgba | null {
+  const m = input.trim().match(/^oklab\s*\((.+)\)$/i);
+  if (!m) return null;
+  const parts = splitArgs(m[1]);
+  if (parts.length < 3) return null;
+
+  const L = parseFloat(parts[0]);
+  const a = parseFloat(parts[1]);
+  const b = parseFloat(parts[2]);
+  if (isNaN(L) || isNaN(a) || isNaN(b)) return null;
+
+  let alpha = 1;
+  const alphaToken = parts.find((p) => p.startsWith('/'));
+  if (alphaToken) alpha = parseAlphaVal(alphaToken.slice(1));
+
+  const [r, g, bv] = oklabToRgb(L, a, b);
+  return { r, g, b: bv, a: alpha };
+}
+
+function parseOklch(input: string): Rgba | null {
+  const m = input.trim().match(/^oklch\s*\((.+)\)$/i);
+  if (!m) return null;
+  const parts = splitArgs(m[1]);
+  if (parts.length < 3) return null;
+
+  const L = parseFloat(parts[0]);
+  const C = parseFloat(parts[1]);
+  const H = parseAngle(parts[2]);
+  if (isNaN(L) || isNaN(C) || isNaN(H)) return null;
+
+  let alpha = 1;
+  const alphaToken = parts.find((p) => p.startsWith('/'));
+  if (alphaToken) alpha = parseAlphaVal(alphaToken.slice(1));
+
+  const oklabA = C * Math.cos(H * (Math.PI / 180));
+  const oklabB = C * Math.sin(H * (Math.PI / 180));
+  const [r, g, b] = oklabToRgb(L, oklabA, oklabB);
+  return { r, g, b, a: alpha };
+}
+
+function parseColorFn(input: string): Rgba | null {
+  const m = input.trim().match(/^color\s*\(\s*([\w-]+)\s+(.+)\)$/i);
+  if (!m) return null;
+  const space = m[1].toLowerCase();
+  const parts = splitArgs(m[2]);
+  if (parts.length < 3) return null;
+
+  const c0 = parseFloat(parts[0]);
+  const c1 = parseFloat(parts[1]);
+  const c2 = parseFloat(parts[2]);
+  if (isNaN(c0) || isNaN(c1) || isNaN(c2)) return null;
+
+  let alpha = 1;
+  const alphaToken = parts.find((p) => p.startsWith('/'));
+  if (alphaToken) alpha = parseAlphaVal(alphaToken.slice(1));
+
+  if (space === 'srgb') {
+    return {
+      r: Math.max(0, Math.min(255, c0 * 255)),
+      g: Math.max(0, Math.min(255, c1 * 255)),
+      b: Math.max(0, Math.min(255, c2 * 255)),
+      a: alpha,
+    };
+  }
+
+  if (space === 'display-p3') {
+    const [x, y, z] = p3ToXyz(c0, c1, c2);
+    const [r, g, b] = xyzToRgb(x, y, z);
+    return { r, g, b, a: alpha };
+  }
+
+  return null;
+}
+
+function parseColor(input: string): Rgba | null {
+  return parseHex(input) ?? parseRgb(input) ?? parseHsl(input) ?? parseHwb(input)
+    ?? parseLab(input) ?? parseLch(input) ?? parseOklab(input) ?? parseOklch(input)
+    ?? parseColorFn(input) ?? null;
+}
+
 // ─── copy button ──────────────────────────────────────────────────────────────
 
 function CopyButton({ value }: { value: string }) {
@@ -302,10 +646,10 @@ function SectionDivider({ label }: { label: string }) {
 // ─── main component ───────────────────────────────────────────────────────────
 
 export default function ColorConverter() {
-  const [hexInput, setHexInput] = useState('#ff8000');
+  const [colorInput, setColorInput] = useState('#ff8000');
   const lastValidPickerRef = useRef('#ff8000');
 
-  const parsed = useMemo(() => parseHex(hexInput), [hexInput]);
+  const parsed = useMemo(() => parseColor(colorInput), [colorInput]);
 
   useEffect(() => {
     if (parsed) {
@@ -319,7 +663,7 @@ export default function ColorConverter() {
     ? `rgba(${Math.round(parsed.r)}, ${Math.round(parsed.g)}, ${Math.round(parsed.b)}, ${parsed.a})`
     : undefined;
 
-  const isInvalid = hexInput !== '' && !parsed;
+  const isInvalid = colorInput !== '' && !parsed;
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
@@ -332,7 +676,7 @@ export default function ColorConverter() {
           ← back
         </a>
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Color Converter</h1>
-        <p className="mt-1 text-sm text-muted">Convert hex colors to all CSS color formats.</p>
+        <p className="mt-1 text-sm text-muted">Convert any CSS color format — HEX, RGB, HSL, OKLAB, OKLCH, and more.</p>
       </div>
 
       {/* input row */}
@@ -340,17 +684,17 @@ export default function ColorConverter() {
         <input
           type="color"
           value={lastValidPickerRef.current}
-          onChange={(e) => setHexInput(e.target.value)}
+          onChange={(e) => setColorInput(e.target.value)}
           className="h-10 w-10 cursor-pointer rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-transparent p-0.5"
           title="Pick a color"
         />
         <input
           type="text"
-          value={hexInput}
-          onChange={(e) => setHexInput(e.target.value)}
+          value={colorInput}
+          onChange={(e) => setColorInput(e.target.value)}
           placeholder="#ff8000"
           spellCheck={false}
-          className={`w-44 rounded-lg border bg-transparent px-3 py-2 font-mono text-sm text-fg outline-none transition-colors placeholder:text-muted focus:border-[color-mix(in_srgb,var(--color-fg)_40%,transparent)] ${
+          className={`flex-1 rounded-lg border bg-transparent px-3 py-2 font-mono text-sm text-fg outline-none transition-colors placeholder:text-muted focus:border-[color-mix(in_srgb,var(--color-fg)_40%,transparent)] ${
             isInvalid
               ? 'border-red-500'
               : 'border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)]'
@@ -367,7 +711,7 @@ export default function ColorConverter() {
       {/* error */}
       {isInvalid && (
         <p className="mb-6 font-mono text-xs text-red-500">
-          Invalid hex color. Expected: #rgb, #rrggbb, #rgba, or #rrggbbaa.
+          Unrecognized color format.
         </p>
       )}
 
