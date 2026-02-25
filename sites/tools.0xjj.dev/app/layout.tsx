@@ -6,7 +6,13 @@ export const metadata: Metadata = {
     template: '%s | tools.0xjj.dev',
     default: 'tools.0xjj.dev',
   },
-  description: 'Developer tools by JJ',
+  description: 'Useful tools by JJ',
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
