@@ -12,4 +12,10 @@ export const tools: Tool[] = [
     description: 'Inspect Open Graph, Twitter Card, and all meta tags for any URL.',
     href: '/ogpchecker',
   },
+  {
+    slug: 'exif',
+    name: 'EXIF Viewer',
+    description: 'View embedded metadata (EXIF, XMP, IPTC) from images and PDF documents.',
+    href: '/exif',
+  },
 ];

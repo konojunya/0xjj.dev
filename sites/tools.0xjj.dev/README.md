@@ -11,6 +11,20 @@
 | slug | Tool | URL |
 |---|---|---|
 | `ogpchecker` | OGP Checker | https://tools.0xjj.dev/ogpchecker |
+| `exif` | EXIF Viewer | https://tools.0xjj.dev/exif |
+
+---
+
+### EXIF Viewer
+
+> 画像（JPEG/TIFF/PNG/HEIC/AVIF/WebP）と PDF のメタデータ（EXIF/XMP/IPTC）を抽出・表示する。ファイルはクライアントサイドのみで処理（サーバーへのアップロード不要）。
+
+- EXIF: Camera, Image, Exposure, Date/Time, GPS セクション
+- PDF: Page Count, Page Size, Title/Author/Subject/Keywords/Creator/Producer/Date
+- ドラッグ&ドロップ + クリックアップロード対応
+- ファイルはブラウザ内のみで処理（プライバシー配慮）
+
+**Route**: `app/exif/`
 
 ---
 
