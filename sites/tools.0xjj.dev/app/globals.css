@@ -33,7 +33,7 @@ body {
 @keyframes fade-slide-up {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

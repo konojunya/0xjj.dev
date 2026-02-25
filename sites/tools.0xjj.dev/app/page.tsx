@@ -15,7 +15,7 @@ export default function Home() {
             key={tool.slug}
             className="opacity-0"
             style={{
-              animation: 'fade-slide-up 0.5s ease forwards',
+              animation: 'fade-slide-up 0.35s ease forwards',
               animationDelay: `${i * 0.08}s`,
             }}
           >
