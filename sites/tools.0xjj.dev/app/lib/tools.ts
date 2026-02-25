@@ -36,4 +36,16 @@ export const tools: Tool[] = [
     description: 'Format and validate JSON with syntax error reporting.',
     href: '/json',
   },
+  {
+    slug: 'base64',
+    name: 'Base64 Encoder / Decoder',
+    description: 'Encode text to Base64 or decode Base64 back to text.',
+    href: '/base64',
+  },
+  {
+    slug: 'jwt',
+    name: 'JWT Decoder',
+    description: 'Decode and inspect JWT header, payload, and expiry.',
+    href: '/jwt',
+  },
 ];
