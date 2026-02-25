@@ -33,14 +33,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/" className="font-mono text-sm font-medium tracking-tight">
               tools.0xjj.dev
             </a>
-            <nav className="flex items-center gap-5">
-              <a
-                href="/ogpchecker"
-                className="font-mono text-xs text-neutral-500 transition-colors hover:text-neutral-900"
-              >
-                ogpchecker
-              </a>
-            </nav>
           </div>
         </header>
         {children}
