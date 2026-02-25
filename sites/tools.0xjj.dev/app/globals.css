@@ -3,9 +3,30 @@
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  --color-bg: #f7f4ef;
+  --color-fg: #111008;
+  --color-muted: #7a7570;
+  --color-accent: #6E45981A;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0e0d0c;
+    --color-fg: #f0ece5;
+    --color-muted: #7a7570;
+    --color-accent: #BC7AFF;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
 body {
+  background-color: var(--color-bg);
+  color: var(--color-fg);
   font-family: var(--font-sans);
 }
 

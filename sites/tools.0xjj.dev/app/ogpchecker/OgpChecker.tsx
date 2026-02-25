@@ -66,9 +66,7 @@ function categorize(entry: MetaEntry): string {
 // ─── image detection ──────────────────────────────────────────────────────────
 
 function shouldShowImage(key: string, content: string): boolean {
-  const keyHasImage = /image/i.test(key);
-  const looksLikeUrl = /^https?:\/\//i.test(content);
-  return keyHasImage && looksLikeUrl;
+  return /image/i.test(key) && /^https?:\/\//i.test(content);
 }
 
 // ─── sub components ───────────────────────────────────────────────────────────
@@ -81,50 +79,47 @@ function PreviewCard({ entries, title }: { entries: MetaEntry[]; title: string }
   const ogDesc = get('og:description') || get('description');
   const ogSiteName = get('og:site_name');
   const twitterCard = get('twitter:card');
-
   const isLarge = twitterCard === 'summary_large_image' || !!ogImage;
 
   return (
     <div className="mb-8">
-      <h2 className="mb-3 font-mono text-xs font-medium uppercase tracking-widest text-neutral-400">
+      <h2 className="mb-3 font-mono text-xs font-medium uppercase tracking-widest text-muted">
         Preview
       </h2>
-      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm max-w-lg">
+      <div
+        className="overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_3%,transparent)] shadow-sm max-w-lg"
+      >
         {ogImage && isLarge && (
-          <div className="aspect-[1.91/1] w-full overflow-hidden bg-neutral-100">
+          <div className="aspect-[1.91/1] w-full overflow-hidden bg-[color-mix(in_srgb,var(--color-fg)_8%,transparent)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={ogImage}
               alt="OGP image"
               className="h-full w-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           </div>
         )}
         <div className="p-4">
           {ogImage && !isLarge && (
-            <div className="float-right ml-4 h-16 w-16 overflow-hidden rounded-lg bg-neutral-100">
+            <div className="float-right ml-4 h-16 w-16 overflow-hidden rounded-lg bg-[color-mix(in_srgb,var(--color-fg)_8%,transparent)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={ogImage}
                 alt="OGP image"
                 className="h-full w-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
             </div>
           )}
           {ogSiteName && (
-            <p className="mb-1 font-mono text-xs text-neutral-400">{ogSiteName}</p>
+            <p className="mb-1 font-mono text-xs text-muted">{ogSiteName}</p>
           )}
-          <p className="font-semibold leading-snug text-neutral-900 line-clamp-2">
+          <p className="font-semibold leading-snug text-fg line-clamp-2">
             {ogTitle || '(no title)'}
           </p>
           {ogDesc && (
-            <p className="mt-1 text-sm text-neutral-500 line-clamp-2">{ogDesc}</p>
+            <p className="mt-1 text-sm text-muted line-clamp-2">{ogDesc}</p>
           )}
         </div>
       </div>
@@ -138,8 +133,7 @@ function MetaTable({ entries }: { entries: MetaEntry[] }) {
   const grouped = new Map<string, MetaEntry[]>();
   for (const g of GROUPS) grouped.set(g.id, []);
   for (const e of entries) {
-    const gid = categorize(e);
-    grouped.get(gid)!.push(e);
+    grouped.get(categorize(e))!.push(e);
   }
 
   return (
@@ -149,18 +143,18 @@ function MetaTable({ entries }: { entries: MetaEntry[] }) {
         if (items.length === 0) return null;
         return (
           <div key={id}>
-            <h2 className="mb-2 font-mono text-xs font-medium uppercase tracking-widest text-neutral-400">
+            <h2 className="mb-2 font-mono text-xs font-medium uppercase tracking-widest text-muted">
               {label}{' '}
-              <span className="text-neutral-300">({items.length})</span>
+              <span className="opacity-50">({items.length})</span>
             </h2>
-            <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_3%,transparent)] shadow-sm">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-neutral-100 bg-neutral-50">
-                    <th className="w-56 px-4 py-2.5 text-left font-mono text-xs font-medium text-neutral-400">
+                  <tr className="border-b border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]">
+                    <th className="w-56 px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">
                       property
                     </th>
-                    <th className="px-4 py-2.5 text-left font-mono text-xs font-medium text-neutral-400">
+                    <th className="px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">
                       content
                     </th>
                   </tr>
@@ -169,15 +163,15 @@ function MetaTable({ entries }: { entries: MetaEntry[] }) {
                   {items.map((entry, i) => (
                     <tr
                       key={i}
-                      className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50/50 transition-colors"
+                      className="border-b border-[color-mix(in_srgb,var(--color-fg)_6%,transparent)] last:border-0 hover:bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)] transition-colors"
                     >
                       <td className="w-56 px-4 py-3 align-top">
-                        <span className="font-mono text-xs text-neutral-600 break-all">
+                        <span className="font-mono text-xs text-muted break-all">
                           {entry.key}
                         </span>
                       </td>
                       <td className="px-4 py-3 align-top">
-                        <span className="text-xs text-neutral-800 break-all">
+                        <span className="text-xs text-fg break-all">
                           {entry.content}
                         </span>
                         {shouldShowImage(entry.key, entry.content) && (
@@ -186,11 +180,9 @@ function MetaTable({ entries }: { entries: MetaEntry[] }) {
                             <img
                               src={entry.content}
                               alt={entry.key}
-                              className="max-w-xs rounded-lg border border-neutral-200 object-contain"
+                              className="max-w-xs rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] object-contain"
                               loading="lazy"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                              }}
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
                           </div>
                         )}
@@ -242,15 +234,13 @@ export default function OgpChecker() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
-      {/* Page heading */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight">OGP Checker</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="text-2xl font-semibold tracking-tight text-fg">OGP Checker</h1>
+        <p className="mt-1 text-sm text-muted">
           Inspect Open Graph, Twitter Card, and all meta tags for any URL.
         </p>
       </div>
 
-      {/* URL input */}
       <form onSubmit={handleSubmit} className="mb-8">
         <div className="flex gap-2">
           <input
@@ -259,59 +249,51 @@ export default function OgpChecker() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="https://example.com"
             required
-            className="flex-1 rounded-lg border border-neutral-200 bg-white px-4 py-2.5 font-mono text-sm text-neutral-900 shadow-sm outline-none placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-900/8 transition-colors"
+            className="flex-1 rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)] px-4 py-2.5 font-mono text-sm text-fg shadow-sm outline-none placeholder:text-muted focus:border-[color-mix(in_srgb,var(--color-fg)_35%,transparent)] transition-colors"
+            style={{ fontSize: 16 }}
           />
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-neutral-900 px-5 py-2.5 font-mono text-sm font-medium text-white shadow-sm transition-colors hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg bg-fg px-5 py-2.5 font-mono text-sm font-medium text-bg shadow-sm transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isPending ? 'Checking…' : 'Check'}
           </button>
         </div>
       </form>
 
-      {/* Loading */}
       {isPending && (
-        <div className="flex items-center gap-3 text-sm text-neutral-500">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-600" />
+        <div className="flex items-center gap-3 text-sm text-muted">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[color-mix(in_srgb,var(--color-fg)_20%,transparent)] border-t-muted" />
           Fetching and parsing meta tags…
         </div>
       )}
 
-      {/* Error */}
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-500">
           {error}
         </div>
       )}
 
-      {/* Results */}
       {result && !isPending && (
         <div>
-          {/* URL info */}
           {result.finalUrl !== result.url && (
-            <p className="mb-6 font-mono text-xs text-neutral-400">
+            <p className="mb-6 font-mono text-xs text-muted">
               Redirected to{' '}
               <a
                 href={result.finalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-600 underline underline-offset-2 hover:text-neutral-900"
+                className="text-fg underline underline-offset-2 hover:opacity-70"
               >
                 {result.finalUrl}
               </a>
             </p>
           )}
-
-          {/* OGP Preview card */}
           <PreviewCard entries={result.entries} title={result.title} />
-
-          {/* Detailed table */}
           <MetaTable entries={result.entries} />
-
           {result.entries.length === 0 && (
-            <p className="text-sm text-neutral-500">No meta tags found.</p>
+            <p className="text-sm text-muted">No meta tags found.</p>
           )}
         </div>
       )}

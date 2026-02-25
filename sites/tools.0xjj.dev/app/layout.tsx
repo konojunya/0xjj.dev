@@ -27,10 +27,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-neutral-50 text-neutral-900 antialiased">
+      <body className="min-h-screen antialiased">
         <div className="sticky top-4 z-10 px-4">
-          <header className="mx-auto flex h-11 max-w-5xl items-center justify-between rounded-2xl border border-neutral-200/80 bg-white/75 px-5 shadow-sm shadow-neutral-900/5 backdrop-blur-md">
-            <a href="/" className="font-mono text-sm font-medium tracking-tight">
+          <header className="mx-auto flex h-11 max-w-5xl items-center justify-between rounded-2xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-bg)_80%,transparent)] px-5 shadow-sm backdrop-blur-md">
+            <a href="/" className="font-mono text-sm font-medium tracking-tight text-fg">
               tools.0xjj.dev
             </a>
           </header>
