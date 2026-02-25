@@ -1,6 +1,6 @@
 # tools.0xjj.dev
 
-開発者向けツール集。Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築。
+便利ツール集。Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築。
 
 **URL**: https://tools.0xjj.dev
 

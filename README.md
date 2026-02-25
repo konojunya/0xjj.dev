@@ -27,7 +27,7 @@ bun dev
 
 ### [sites/tools.0xjj.dev](./sites/tools.0xjj.dev)
 
-Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築された開発者向けツール集。
+Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築された便利ツール集。
 
 ```sh
 cd sites/tools.0xjj.dev
