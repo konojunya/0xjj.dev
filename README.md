@@ -7,7 +7,8 @@ JJ (Junya Kono) の個人サイト。
 ```
 /
 ├── sites/
-│   └── 0xjj.dev/        ← Astro サイト本体
+│   ├── 0xjj.dev/        ← Astro サイト本体
+│   └── tools.0xjj.dev/  ← 開発者向けツール集
 └── scripts/
     └── generate-ogp/    ← OGP 背景画像生成スクリプト (Go)
 ```
@@ -20,6 +21,16 @@ Astro 5 + Tailwind CSS v4 + Cloudflare Workers で構築された本番サイト
 
 ```sh
 cd sites/0xjj.dev
+bun install
+bun dev
+```
+
+### [sites/tools.0xjj.dev](./sites/tools.0xjj.dev)
+
+Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築された開発者向けツール集。
+
+```sh
+cd sites/tools.0xjj.dev
 bun install
 bun dev
 ```
