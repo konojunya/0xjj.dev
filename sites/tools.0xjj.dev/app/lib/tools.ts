@@ -60,4 +60,28 @@ export const tools: Tool[] = [
     description: 'Test regular expressions with live match highlighting.',
     href: '/regex',
   },
+  {
+    slug: 'uuid',
+    name: 'UUID Generator',
+    description: 'Generate v4 UUIDs instantly, in bulk.',
+    href: '/uuid',
+  },
+  {
+    slug: 'hash',
+    name: 'Hash Calculator',
+    description: 'Compute SHA-1, SHA-256, SHA-384, and SHA-512 hashes of any text.',
+    href: '/hash',
+  },
+  {
+    slug: 'base',
+    name: 'Number Base Converter',
+    description: 'Convert numbers between binary, octal, decimal, and hexadecimal.',
+    href: '/base',
+  },
+  {
+    slug: 'cron',
+    name: 'Cron Expression Parser',
+    description: 'Parse cron expressions and preview the next scheduled run times.',
+    href: '/cron',
+  },
 ];
