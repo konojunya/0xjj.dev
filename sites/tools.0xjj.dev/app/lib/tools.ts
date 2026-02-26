@@ -106,6 +106,13 @@ export const tools: Tool[] = [
     category: 'tool',
   },
   {
+    slug: '2048',
+    name: '2048',
+    description: 'Slide and merge tiles to reach 2048. A classic single-player puzzle game.',
+    href: '/2048',
+    category: 'game',
+  },
+  {
     slug: 'tictactoe',
     name: 'Tic-Tac-Toe',
     description: 'Real-time multiplayer Tic-Tac-Toe. Create a room, share the link, and play.',

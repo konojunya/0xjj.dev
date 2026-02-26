@@ -23,6 +23,7 @@
 | `hash` | Hash Calculator | https://tools.0xjj.dev/hash |
 | `base` | Number Base Converter | https://tools.0xjj.dev/base |
 | `cron` | Cron Expression Parser | https://tools.0xjj.dev/cron |
+| `2048` | 2048 | https://tools.0xjj.dev/2048 |
 | `tictactoe` | Tic-Tac-Toe | https://tools.0xjj.dev/tictactoe |
 | `wordwolf` | Word Wolf | https://tools.0xjj.dev/wordwolf |
 
@@ -195,6 +196,20 @@
 - プリセット: Every minute / Every hour / Daily / Weekly / Monthly
 
 **Route**: `app/cron/`
+
+---
+
+### 2048
+
+> Slide and merge tiles to reach 2048. A classic single-player puzzle game.
+
+- Arrow keys / swipe to move tiles
+- Same-value tiles merge on collision
+- Score tracking with local best score persistence
+- Win at 2048 with option to keep playing
+- Touch / swipe support for mobile
+
+**Route**: `app/2048/`
 
 ---
 
