@@ -5,5 +5,5 @@ export const size = OG_SIZE;
 export const contentType = 'image/png';
 
 export default function Image() {
-  return createOgImage('Word Wolf', 'ワードウルフ - 仲間の中に紛れた「ウルフ」を見つけ出せ!');
+  return createOgImage('Word Wolf', 'Find the wolf hiding among your friends! A real-time party game for 3-8 players.');
 }

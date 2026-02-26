@@ -93,7 +93,7 @@ export const tools: Tool[] = [
   {
     slug: 'wordwolf',
     name: 'Word Wolf',
-    description: 'ワードウルフ - 仲間の中に紛れた「ウルフ」を見つけ出せ!',
+    description: 'Find the wolf hiding among your friends! A real-time party game for 3-8 players.',
     href: '/wordwolf',
   },
 ];
