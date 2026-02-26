@@ -23,6 +23,7 @@
 | `hash` | Hash Calculator | https://tools.0xjj.dev/hash |
 | `base` | Number Base Converter | https://tools.0xjj.dev/base |
 | `cron` | Cron Expression Parser | https://tools.0xjj.dev/cron |
+| `tictactoe` | Tic-Tac-Toe | https://tools.0xjj.dev/tictactoe |
 
 ---
 
@@ -193,6 +194,20 @@
 - プリセット: Every minute / Every hour / Daily / Weekly / Monthly
 
 **Route**: `app/cron/`
+
+---
+
+### Tic-Tac-Toe
+
+> リアルタイム対戦の○×ゲーム。ルームを作成してリンクを共有し、対戦する。
+
+- Cloudflare Durable Objects + WebSocket (Hibernation API) によるリアルタイム通信
+- ルーム作成 → リンク共有 → 対戦 → リマッチのフロー
+- URL パラメータ (`?room=XXX`) での自動参加
+- ゲームサーバー: `tictactoe-api.0xjj.dev` (`workers/tictactoe/`)
+
+**Route**: `app/tictactoe/`
+**API**: `POST /rooms`, `GET /ws?room=XXXXXX` (WebSocket)
 
 ---
 

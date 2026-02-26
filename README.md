@@ -9,6 +9,8 @@ JJ (Junya Kono) の個人サイト。
 ├── sites/
 │   ├── 0xjj.dev/        ← Astro サイト本体
 │   └── tools.0xjj.dev/  ← 開発者向けツール集
+├── workers/
+│   └── tictactoe/       ← Durable Objects ゲームサーバー (tictactoe-api.0xjj.dev)
 └── scripts/
     └── generate-ogp/    ← OGP 背景画像生成スクリプト (Go)
 ```
@@ -33,6 +35,19 @@ Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築された便利ツー
 cd sites/tools.0xjj.dev
 bun install
 bun dev
+```
+
+## Workers
+
+### [workers/tictactoe](./workers/tictactoe)
+
+Tic-Tac-Toe のリアルタイム対戦用ゲームサーバー。Cloudflare Durable Objects + WebSocket (Hibernation API) で実装。
+
+```sh
+cd workers/tictactoe
+bun install
+npx wrangler dev     # ローカル開発
+npx wrangler deploy  # デプロイ
 ```
 
 ## Scripts

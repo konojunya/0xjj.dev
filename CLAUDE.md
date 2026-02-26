@@ -9,7 +9,10 @@ This is a monorepo:
 ```
 /
 ├── sites/
-│   └── 0xjj.dev/        ← Astro site (main)
+│   ├── 0xjj.dev/        ← Astro site (main)
+│   └── tools.0xjj.dev/  ← Next.js developer tools
+├── workers/
+│   └── tictactoe/       ← Durable Objects game server (tictactoe-api.0xjj.dev)
 └── scripts/
     └── generate-ogp/    ← Go script for OGP background image generation
 ```
