@@ -145,7 +145,7 @@ export default function JwtDecoder() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Paste your JWT token here..."
           rows={4}
-          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-sm text-fg outline-none transition-colors"
+          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none transition-colors"
           style={{
             borderColor: input && !parsed
               ? 'color-mix(in srgb, #ef4444 60%, transparent)'

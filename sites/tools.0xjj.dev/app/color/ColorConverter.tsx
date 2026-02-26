@@ -694,7 +694,7 @@ export default function ColorConverter() {
           onChange={(e) => setColorInput(e.target.value)}
           placeholder="#ff8000"
           spellCheck={false}
-          className={`flex-1 rounded-lg border bg-transparent px-3 py-2 font-mono text-sm text-fg outline-none transition-colors placeholder:text-muted focus:border-[color-mix(in_srgb,var(--color-fg)_40%,transparent)] ${
+          className={`flex-1 rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none transition-colors placeholder:text-muted focus:border-[color-mix(in_srgb,var(--color-fg)_40%,transparent)] ${
             isInvalid
               ? 'border-red-500'
               : 'border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)]'

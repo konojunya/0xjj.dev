@@ -126,7 +126,7 @@ export default function Base64Tool() {
               : 'Enter Base64 to decode...'
           }
           rows={6}
-          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-sm text-fg outline-none transition-colors"
+          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none transition-colors"
           style={{
             borderColor: error
               ? 'color-mix(in srgb, #ef4444 60%, transparent)'
@@ -153,7 +153,7 @@ export default function Base64Tool() {
           readOnly
           rows={6}
           placeholder="Output will appear here..."
-          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-sm text-fg outline-none"
+          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none"
           style={{
             borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)',
             background: 'color-mix(in srgb, var(--color-fg) 4%, transparent)',

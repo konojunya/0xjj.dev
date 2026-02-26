@@ -104,7 +104,7 @@ export default function JsonFormatter() {
           onChange={(e) => setInput(e.target.value)}
           placeholder='Paste JSON here...'
           rows={10}
-          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-sm text-fg outline-none transition-colors"
+          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none transition-colors"
           style={{
             borderColor: error
               ? 'color-mix(in srgb, #ef4444 60%, transparent)'

@@ -94,7 +94,7 @@ export default function BaseConverter() {
                 onChange={(e) => handleChange(base, e.target.value.trim())}
                 onFocus={() => { if (parsed !== null) { setActiveBase(base); setRaw(toBase(parsed, base)); } else { setActiveBase(base); } }}
                 placeholder={placeholder}
-                className="w-full rounded-lg border bg-transparent px-3 py-2.5 font-mono text-sm text-fg outline-none transition-colors"
+                className="w-full rounded-lg border bg-transparent px-3 py-2.5 font-mono text-base text-fg outline-none transition-colors"
                 style={inputStyle(base)}
                 spellCheck={false}
               />

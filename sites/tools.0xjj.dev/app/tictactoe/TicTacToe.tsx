@@ -253,7 +253,7 @@ export default function TicTacToe() {
               onChange={(e) => setJoinInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
               placeholder="Room ID or link"
-              className="flex-1 rounded-lg border bg-transparent px-3 py-2.5 font-mono text-sm text-fg outline-none transition-colors"
+              className="flex-1 rounded-lg border bg-transparent px-3 py-2.5 font-mono text-base text-fg outline-none transition-colors"
               style={{
                 borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)',
               }}

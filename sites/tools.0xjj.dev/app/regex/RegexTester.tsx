@@ -107,7 +107,7 @@ export default function RegexTester() {
               value={pattern}
               onChange={(e) => setPattern(e.target.value)}
               placeholder="pattern"
-              className="flex-1 bg-transparent px-1 font-mono text-sm text-fg outline-none"
+              className="flex-1 bg-transparent px-1 font-mono text-base text-fg outline-none"
               spellCheck={false}
             />
             <span className="font-mono text-sm text-muted select-none">/</span>
@@ -148,7 +148,7 @@ export default function RegexTester() {
           onChange={(e) => setTestStr(e.target.value)}
           placeholder="Enter test string..."
           rows={6}
-          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-sm text-fg outline-none"
+          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none"
           style={{ borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)', resize: 'vertical' }}
           spellCheck={false}
         />

@@ -54,7 +54,7 @@ export default function UuidGenerator() {
             max={20}
             value={count}
             onChange={(e) => setCount(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
-            className="w-16 rounded-lg border bg-transparent px-2 py-1.5 font-mono text-sm text-fg outline-none"
+            className="w-16 rounded-lg border bg-transparent px-2 py-1.5 font-mono text-base text-fg outline-none"
             style={{ borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)' }}
           />
         </div>

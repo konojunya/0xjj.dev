@@ -49,7 +49,7 @@ function NumInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       className={[
-        'w-28 rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-transparent px-3 py-2 font-mono text-sm text-fg outline-none placeholder:text-muted focus:border-[color-mix(in_srgb,var(--color-fg)_40%,transparent)] transition-colors',
+        'w-28 rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-transparent px-3 py-2 font-mono text-base text-fg outline-none placeholder:text-muted focus:border-[color-mix(in_srgb,var(--color-fg)_40%,transparent)] transition-colors',
         className ?? '',
       ].join(' ')}
     />
