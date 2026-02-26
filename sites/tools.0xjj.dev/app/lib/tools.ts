@@ -90,4 +90,10 @@ export const tools: Tool[] = [
     description: 'Real-time multiplayer Tic-Tac-Toe. Create a room, share the link, and play.',
     href: '/tictactoe',
   },
+  {
+    slug: 'wordwolf',
+    name: 'Word Wolf',
+    description: 'ワードウルフ - 仲間の中に紛れた「ウルフ」を見つけ出せ!',
+    href: '/wordwolf',
+  },
 ];

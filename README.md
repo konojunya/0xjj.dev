@@ -10,7 +10,8 @@ JJ (Junya Kono) の個人サイト。
 │   ├── 0xjj.dev/        ← Astro サイト本体
 │   └── tools.0xjj.dev/  ← 開発者向けツール集
 ├── workers/
-│   └── tictactoe/       ← Durable Objects ゲームサーバー (tictactoe-api.0xjj.dev)
+│   ├── tictactoe/       ← Durable Objects ゲームサーバー (tictactoe-api.0xjj.dev)
+│   └── wordwolf/        ← Durable Objects ゲームサーバー (wordwolf-api.0xjj.dev)
 └── scripts/
     └── generate-ogp/    ← OGP 背景画像生成スクリプト (Go)
 ```
@@ -45,6 +46,17 @@ Tic-Tac-Toe のリアルタイム対戦用ゲームサーバー。Cloudflare Dur
 
 ```sh
 cd workers/tictactoe
+bun install
+npx wrangler dev     # ローカル開発
+npx wrangler deploy  # デプロイ
+```
+
+### [workers/wordwolf](./workers/wordwolf)
+
+ワードウルフのリアルタイム対戦用ゲームサーバー。Cloudflare Durable Objects + WebSocket (Hibernation API) + Alarm API で実装。
+
+```sh
+cd workers/wordwolf
 bun install
 npx wrangler dev     # ローカル開発
 npx wrangler deploy  # デプロイ

@@ -24,6 +24,7 @@
 | `base` | Number Base Converter | https://tools.0xjj.dev/base |
 | `cron` | Cron Expression Parser | https://tools.0xjj.dev/cron |
 | `tictactoe` | Tic-Tac-Toe | https://tools.0xjj.dev/tictactoe |
+| `wordwolf` | Word Wolf | https://tools.0xjj.dev/wordwolf |
 
 ---
 
@@ -207,6 +208,20 @@
 - ゲームサーバー: `tictactoe-api.0xjj.dev` (`workers/tictactoe/`)
 
 **Route**: `app/tictactoe/`
+**API**: `POST /rooms`, `GET /ws?room=XXXXXX` (WebSocket)
+
+---
+
+### Word Wolf
+
+> ワードウルフ - 仲間の中に紛れた「ウルフ」を見つけ出せ! 3〜8人のリアルタイムパーティゲーム。
+
+- Cloudflare Durable Objects + WebSocket (Hibernation API) + Alarm API によるリアルタイム通信
+- ルーム作成 → 名前入力 → 参加 → 3分議論 → 投票 → 結果公開のフロー
+- ウルフが捕まった場合の逆転推測チャンス
+- ゲームサーバー: `wordwolf-api.0xjj.dev` (`workers/wordwolf/`)
+
+**Route**: `app/wordwolf/`
 **API**: `POST /rooms`, `GET /ws?room=XXXXXX` (WebSocket)
 
 ---
