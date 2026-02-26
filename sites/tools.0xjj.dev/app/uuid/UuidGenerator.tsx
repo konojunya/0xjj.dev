@@ -74,7 +74,7 @@ export default function UuidGenerator() {
         <button
           onClick={generate}
           className={btnBase}
-          style={{ borderColor: 'var(--color-accent)', background: 'var(--color-accent)', color: '#fff' }}
+          style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
         >
           Generate
         </button>
