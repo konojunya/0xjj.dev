@@ -27,7 +27,7 @@ type ServerMessage =
 // ── Constants ──
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_TICTACTOE_API ?? 'https://tictactoe-api.chihaya-watanabe.workers.dev';
+  process.env.NEXT_PUBLIC_TICTACTOE_API ?? 'https://tictactoe.worker.0xjj.dev';
 
 // ── Component ──
 
