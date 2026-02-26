@@ -14,25 +14,12 @@ export const categories: { value: Category; label: string }[] = [
 ];
 
 export const tools: Tool[] = [
+  // ── Tools (A→Z) ──
   {
-    slug: 'ogpchecker',
-    name: 'OGP Checker',
-    description: 'Inspect Open Graph, Twitter Card, and all meta tags for any URL.',
-    href: '/ogpchecker',
-    category: 'tool',
-  },
-  {
-    slug: 'exif',
-    name: 'EXIF Viewer',
-    description: 'View embedded metadata (EXIF, XMP, IPTC) from images and PDF documents.',
-    href: '/exif',
-    category: 'tool',
-  },
-  {
-    slug: 'ratio',
-    name: 'Ratio Calculator',
-    description: 'Simplify ratios and calculate missing values from a known ratio.',
-    href: '/ratio',
+    slug: 'base64',
+    name: 'Base64 Encoder / Decoder',
+    description: 'Encode text to Base64 or decode Base64 back to text.',
+    href: '/base64',
     category: 'tool',
   },
   {
@@ -43,17 +30,38 @@ export const tools: Tool[] = [
     category: 'tool',
   },
   {
+    slug: 'cron',
+    name: 'Cron Expression Parser',
+    description: 'Parse cron expressions and preview the next scheduled run times.',
+    href: '/cron',
+    category: 'tool',
+  },
+  {
+    slug: 'easing',
+    name: 'Easing Visualizer',
+    description: 'Visualize and preview cubic-bezier easing curves for CSS.',
+    href: '/easing',
+    category: 'tool',
+  },
+  {
+    slug: 'exif',
+    name: 'EXIF Viewer',
+    description: 'View embedded metadata (EXIF, XMP, IPTC) from images and PDF documents.',
+    href: '/exif',
+    category: 'tool',
+  },
+  {
+    slug: 'hash',
+    name: 'Hash Calculator',
+    description: 'Compute SHA-1, SHA-256, SHA-384, and SHA-512 hashes of any text.',
+    href: '/hash',
+    category: 'tool',
+  },
+  {
     slug: 'json',
     name: 'JSON Formatter',
     description: 'Format and validate JSON with syntax error reporting.',
     href: '/json',
-    category: 'tool',
-  },
-  {
-    slug: 'base64',
-    name: 'Base64 Encoder / Decoder',
-    description: 'Encode text to Base64 or decode Base64 back to text.',
-    href: '/base64',
     category: 'tool',
   },
   {
@@ -64,10 +72,24 @@ export const tools: Tool[] = [
     category: 'tool',
   },
   {
-    slug: 'easing',
-    name: 'Easing Visualizer',
-    description: 'Visualize and preview cubic-bezier easing curves for CSS.',
-    href: '/easing',
+    slug: 'base',
+    name: 'Number Base Converter',
+    description: 'Convert numbers between binary, octal, decimal, and hexadecimal.',
+    href: '/base',
+    category: 'tool',
+  },
+  {
+    slug: 'ogpchecker',
+    name: 'OGP Checker',
+    description: 'Inspect Open Graph, Twitter Card, and all meta tags for any URL.',
+    href: '/ogpchecker',
+    category: 'tool',
+  },
+  {
+    slug: 'ratio',
+    name: 'Ratio Calculator',
+    description: 'Simplify ratios and calculate missing values from a known ratio.',
+    href: '/ratio',
     category: 'tool',
   },
   {
@@ -84,27 +106,7 @@ export const tools: Tool[] = [
     href: '/uuid',
     category: 'tool',
   },
-  {
-    slug: 'hash',
-    name: 'Hash Calculator',
-    description: 'Compute SHA-1, SHA-256, SHA-384, and SHA-512 hashes of any text.',
-    href: '/hash',
-    category: 'tool',
-  },
-  {
-    slug: 'base',
-    name: 'Number Base Converter',
-    description: 'Convert numbers between binary, octal, decimal, and hexadecimal.',
-    href: '/base',
-    category: 'tool',
-  },
-  {
-    slug: 'cron',
-    name: 'Cron Expression Parser',
-    description: 'Parse cron expressions and preview the next scheduled run times.',
-    href: '/cron',
-    category: 'tool',
-  },
+  // ── Games (A→Z) ──
   {
     slug: '2048',
     name: '2048',
@@ -120,17 +122,17 @@ export const tools: Tool[] = [
     category: 'game',
   },
   {
-    slug: 'reversi',
-    name: 'Reversi',
-    description: 'Classic disc-flipping strategy game. Real-time multiplayer.',
-    href: '/reversi',
-    category: 'game',
-  },
-  {
     slug: 'dots-and-boxes',
     name: 'Dots & Boxes',
     description: 'Draw lines to complete boxes and outscore your opponent.',
     href: '/dots-and-boxes',
+    category: 'game',
+  },
+  {
+    slug: 'reversi',
+    name: 'Reversi',
+    description: 'Classic disc-flipping strategy game. Real-time multiplayer.',
+    href: '/reversi',
     category: 'game',
   },
   {

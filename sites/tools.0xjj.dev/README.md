@@ -10,25 +10,38 @@
 
 | slug | Tool | URL |
 |---|---|---|
-| `ogpchecker` | OGP Checker | https://tools.0xjj.dev/ogpchecker |
-| `exif` | EXIF Viewer | https://tools.0xjj.dev/exif |
-| `ratio` | Ratio Calculator | https://tools.0xjj.dev/ratio |
+| `base64` | Base64 Encoder / Decoder | https://tools.0xjj.dev/base64 |
 | `color` | Color Converter | https://tools.0xjj.dev/color |
+| `cron` | Cron Expression Parser | https://tools.0xjj.dev/cron |
+| `easing` | Easing Visualizer | https://tools.0xjj.dev/easing |
+| `exif` | EXIF Viewer | https://tools.0xjj.dev/exif |
+| `hash` | Hash Calculator | https://tools.0xjj.dev/hash |
 | `json` | JSON Formatter | https://tools.0xjj.dev/json |
 | `jwt` | JWT Decoder | https://tools.0xjj.dev/jwt |
-| `base64` | Base64 Encoder / Decoder | https://tools.0xjj.dev/base64 |
-| `easing` | Easing Visualizer | https://tools.0xjj.dev/easing |
+| `base` | Number Base Converter | https://tools.0xjj.dev/base |
+| `ogpchecker` | OGP Checker | https://tools.0xjj.dev/ogpchecker |
+| `ratio` | Ratio Calculator | https://tools.0xjj.dev/ratio |
 | `regex` | RegEx Tester | https://tools.0xjj.dev/regex |
 | `uuid` | UUID Generator | https://tools.0xjj.dev/uuid |
-| `hash` | Hash Calculator | https://tools.0xjj.dev/hash |
-| `base` | Number Base Converter | https://tools.0xjj.dev/base |
-| `cron` | Cron Expression Parser | https://tools.0xjj.dev/cron |
 | `2048` | 2048 | https://tools.0xjj.dev/2048 |
 | `connect-four` | Connect Four | https://tools.0xjj.dev/connect-four |
-| `reversi` | Reversi | https://tools.0xjj.dev/reversi |
 | `dots-and-boxes` | Dots & Boxes | https://tools.0xjj.dev/dots-and-boxes |
+| `reversi` | Reversi | https://tools.0xjj.dev/reversi |
 | `tictactoe` | Tic-Tac-Toe | https://tools.0xjj.dev/tictactoe |
 | `wordwolf` | Word Wolf | https://tools.0xjj.dev/wordwolf |
+
+---
+
+### Base64 Encoder / Decoder
+
+> テキストを Base64 にエンコード、または Base64 をテキストにデコードする。
+
+- Encode / Decode の2モード
+- UTF-8 対応（`encodeURIComponent` + `btoa`）
+- URL-safe (base64url) オプション（`+`→`-`、`/`→`_`、`=` 除去）
+- 不正入力のエラー表示
+
+**Route**: `app/base64/`
 
 ---
 
@@ -46,15 +59,30 @@
 
 ---
 
-### Ratio Calculator
+### Cron Expression Parser
 
-> 比率の簡略化と、比率と片方の値からもう片方を計算する。純粋なクライアントサイド計算。
+> cron 式を解析し、次回実行予定時刻を一覧表示する。
 
-- Simplify: a と b を入力 → GCD で割り算し最小整数比を表示（例: 1920:1080 → 16:9）
-- Calculate: 比率と a か b の一方を入力 → もう一方をリアルタイム計算
-- 小数の場合は切り上げ・切り下げも表示
+- 5フィールド形式（minute / hour / day-of-month / month / day-of-week）
+- `*` / 数値 / 範囲 (`1-5`) / リスト (`1,3,5`) / ステップ (`*/5`) をフルサポート
+- 人間が読めるかんたんな説明文を生成
+- 次回10件の実行時刻をプレビュー
+- プリセット: Every minute / Every hour / Daily / Weekly / Monthly
 
-**Route**: `app/ratio/`
+**Route**: `app/cron/`
+
+---
+
+### Easing Visualizer
+
+> cubic-bezier の4パラメータをリアルタイムで SVG 曲線プレビューし、CSS 値を生成する。
+
+- de Casteljau アルゴリズムで100点サンプリングして SVG path を描画
+- プリセット: `linear` / `ease` / `ease-in` / `ease-out` / `ease-in-out`
+- Play ボタンでボールのアニメーションプレビュー
+- `cubic-bezier(x1, y1, x2, y2)` のコピーボタン
+
+**Route**: `app/easing/`
 
 ---
 
@@ -71,19 +99,15 @@
 
 ---
 
-### OGP Checker
+### Hash Calculator
 
-> URL を入力すると、そのページのメタタグをサーバーサイドで取得・一覧表示する。
+> テキストのハッシュ値を即時計算する。Web Crypto API (`crypto.subtle`) を使用。
 
-- `og:*` / `article:*` などの Open Graph タグ
-- `twitter:*` Twitter / X Card タグ
-- `description` / `keywords` などの標準メタタグ
-- `<link rel="...">` の canonical・icon などのリンクタグ
-- `og:image` / `twitter:image` などの画像は実際にプレビュー表示
-- シェア時のプレビューカードも確認できる
+- アルゴリズム: SHA-1 / SHA-256 / SHA-384 / SHA-512
+- 入力と同時にすべてのアルゴリズムで並列計算
+- 各ハッシュ値にコピーボタン
 
-**Route**: `app/ogpchecker/`
-**API**: `GET /api/meta?url=<url>`
+**Route**: `app/hash/`
 
 ---
 
@@ -113,29 +137,43 @@
 
 ---
 
-### Base64 Encoder / Decoder
+### Number Base Converter
 
-> テキストを Base64 にエンコード、または Base64 をテキストにデコードする。
+> 2進数・8進数・10進数・16進数を相互変換する。`BigInt` を使用。
 
-- Encode / Decode の2モード
-- UTF-8 対応（`encodeURIComponent` + `btoa`）
-- URL-safe (base64url) オプション（`+`→`-`、`/`→`_`、`=` 除去）
+- 4つの入力フィールドのどれを編集しても即時変換
+- `BigInt` で大きな数値も精度を保って処理
 - 不正入力のエラー表示
 
-**Route**: `app/base64/`
+**Route**: `app/base/`
 
 ---
 
-### Easing Visualizer
+### OGP Checker
 
-> cubic-bezier の4パラメータをリアルタイムで SVG 曲線プレビューし、CSS 値を生成する。
+> URL を入力すると、そのページのメタタグをサーバーサイドで取得・一覧表示する。
 
-- de Casteljau アルゴリズムで100点サンプリングして SVG path を描画
-- プリセット: `linear` / `ease` / `ease-in` / `ease-out` / `ease-in-out`
-- Play ボタンでボールのアニメーションプレビュー
-- `cubic-bezier(x1, y1, x2, y2)` のコピーボタン
+- `og:*` / `article:*` などの Open Graph タグ
+- `twitter:*` Twitter / X Card タグ
+- `description` / `keywords` などの標準メタタグ
+- `<link rel="...">` の canonical・icon などのリンクタグ
+- `og:image` / `twitter:image` などの画像は実際にプレビュー表示
+- シェア時のプレビューカードも確認できる
 
-**Route**: `app/easing/`
+**Route**: `app/ogpchecker/`
+**API**: `GET /api/meta?url=<url>`
+
+---
+
+### Ratio Calculator
+
+> 比率の簡略化と、比率と片方の値からもう片方を計算する。純粋なクライアントサイド計算。
+
+- Simplify: a と b を入力 → GCD で割り算し最小整数比を表示（例: 1920:1080 → 16:9）
+- Calculate: 比率と a か b の一方を入力 → もう一方をリアルタイム計算
+- 小数の場合は切り上げ・切り下げも表示
+
+**Route**: `app/ratio/`
 
 ---
 
@@ -161,44 +199,6 @@
 - 個別コピー + まとめてコピー（改行区切り）
 
 **Route**: `app/uuid/`
-
----
-
-### Hash Calculator
-
-> テキストのハッシュ値を即時計算する。Web Crypto API (`crypto.subtle`) を使用。
-
-- アルゴリズム: SHA-1 / SHA-256 / SHA-384 / SHA-512
-- 入力と同時にすべてのアルゴリズムで並列計算
-- 各ハッシュ値にコピーボタン
-
-**Route**: `app/hash/`
-
----
-
-### Number Base Converter
-
-> 2進数・8進数・10進数・16進数を相互変換する。`BigInt` を使用。
-
-- 4つの入力フィールドのどれを編集しても即時変換
-- `BigInt` で大きな数値も精度を保って処理
-- 不正入力のエラー表示
-
-**Route**: `app/base/`
-
----
-
-### Cron Expression Parser
-
-> cron 式を解析し、次回実行予定時刻を一覧表示する。
-
-- 5フィールド形式（minute / hour / day-of-month / month / day-of-week）
-- `*` / 数値 / 範囲 (`1-5`) / リスト (`1,3,5`) / ステップ (`*/5`) をフルサポート
-- 人間が読めるかんたんな説明文を生成
-- 次回10件の実行時刻をプレビュー
-- プリセット: Every minute / Every hour / Daily / Weekly / Monthly
-
-**Route**: `app/cron/`
 
 ---
 
@@ -229,6 +229,19 @@
 
 ---
 
+### Dots & Boxes
+
+> Draw lines to complete boxes and outscore your opponent. Real-time 2-player.
+
+- 5x5 dot grid (4x4 boxes, 40 lines)
+- Completing a box scores a point and grants an extra turn
+- Game server: `games-api.0xjj.dev` (`workers/games/`)
+
+**Route**: `app/dots-and-boxes/`
+**API**: `POST /rooms?game=dots-and-boxes`, `GET /ws?game=dots-and-boxes&room=XXXXXX` (WebSocket)
+
+---
+
 ### Reversi
 
 > Classic disc-flipping strategy game. Real-time 2-player.
@@ -240,19 +253,6 @@
 
 **Route**: `app/reversi/`
 **API**: `POST /rooms?game=reversi`, `GET /ws?game=reversi&room=XXXXXX` (WebSocket)
-
----
-
-### Dots & Boxes
-
-> Draw lines to complete boxes and outscore your opponent. Real-time 2-player.
-
-- 5x5 dot grid (4x4 boxes, 40 lines)
-- Completing a box scores a point and grants an extra turn
-- Game server: `games-api.0xjj.dev` (`workers/games/`)
-
-**Route**: `app/dots-and-boxes/`
-**API**: `POST /rooms?game=dots-and-boxes`, `GET /ws?game=dots-and-boxes&room=XXXXXX` (WebSocket)
 
 ---
 
