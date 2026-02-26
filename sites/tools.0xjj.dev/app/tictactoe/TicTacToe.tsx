@@ -18,7 +18,7 @@ interface GameState {
 }
 
 type ServerMessage =
-  | { type: 'joined'; playerId: Mark; state: GameState }
+  | { type: 'joined'; playerId: Mark; sessionId: string; state: GameState }
   | { type: 'state'; state: GameState }
   | { type: 'error'; message: string }
   | { type: 'opponent_connected' }
@@ -28,6 +28,9 @@ type ServerMessage =
 
 const API_BASE =
   process.env.NEXT_PUBLIC_GAMES_API ?? 'https://games-api.0xjj.dev';
+const MAX_RECONNECT = 3;
+const RECONNECT_DELAY = 2000;
+const SESSION_KEY = 'tictactoe';
 
 // ── Component ──
 
@@ -42,11 +45,19 @@ export default function TicTacToe() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
+  const roomIdRef = useRef<string | null>(null);
+  const manualCloseRef = useRef(false);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttemptsRef = useRef(0);
 
   // ── WebSocket connection ──
 
-  const connectWs = useCallback((room: string) => {
-    const wsUrl = `${API_BASE.replace(/^http/, 'ws')}/ws?game=tictactoe&room=${room}`;
+  const connectWs = useCallback((room: string, existingSessionId?: string) => {
+    manualCloseRef.current = false;
+    let wsUrl = `${API_BASE.replace(/^http/, 'ws')}/ws?game=tictactoe&room=${room}`;
+    if (existingSessionId) {
+      wsUrl += `&playerId=${existingSessionId}`;
+    }
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -61,6 +72,10 @@ export default function TicTacToe() {
         case 'joined':
           setPlayerId(msg.playerId);
           setGameState(msg.state);
+          if (roomIdRef.current) {
+            sessionStorage.setItem(`${SESSION_KEY}-${roomIdRef.current}`, msg.sessionId);
+          }
+          reconnectAttemptsRef.current = 0;
           if (msg.state.status === 'waiting') {
             setScreen('waiting');
           } else {
@@ -85,10 +100,24 @@ export default function TicTacToe() {
 
     ws.onclose = () => {
       wsRef.current = null;
+      if (!manualCloseRef.current && roomIdRef.current) {
+        const storedSessionId = sessionStorage.getItem(`${SESSION_KEY}-${roomIdRef.current}`);
+        reconnectAttemptsRef.current += 1;
+        if (reconnectAttemptsRef.current <= MAX_RECONNECT) {
+          setError('Reconnecting...');
+          reconnectTimerRef.current = setTimeout(() => {
+            connectWs(roomIdRef.current!, storedSessionId ?? undefined);
+          }, RECONNECT_DELAY);
+        } else {
+          setError('Connection lost');
+        }
+      }
     };
 
     ws.onerror = () => {
-      setError('Connection error');
+      if (reconnectAttemptsRef.current === 0) {
+        setError('Connection error');
+      }
     };
   }, []);
 
@@ -99,6 +128,7 @@ export default function TicTacToe() {
     const room = params.get('room');
     if (room) {
       setRoomId(room);
+      roomIdRef.current = room;
       connectWs(room);
     }
   }, [connectWs]);
@@ -108,6 +138,12 @@ export default function TicTacToe() {
   useEffect(() => {
     return () => {
       wsRef.current?.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
     };
   }, []);
 
@@ -131,6 +167,7 @@ export default function TicTacToe() {
       const data = await res.json();
       const room = data.roomId as string;
       setRoomId(room);
+      roomIdRef.current = room;
       window.history.replaceState(null, '', `?room=${room}`);
       connectWs(room);
     } catch {
@@ -151,6 +188,7 @@ export default function TicTacToe() {
       // Not a URL, use as-is
     }
     setRoomId(room);
+    roomIdRef.current = room;
     window.history.replaceState(null, '', `?room=${room}`);
     connectWs(room);
   };
@@ -174,8 +212,18 @@ export default function TicTacToe() {
   };
 
   const backToLobby = () => {
+    manualCloseRef.current = true;
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
     wsRef.current?.close();
     wsRef.current = null;
+    if (roomId) {
+      sessionStorage.removeItem(`${SESSION_KEY}-${roomId}`);
+    }
+    reconnectAttemptsRef.current = 0;
+    roomIdRef.current = null;
     setScreen('lobby');
     setRoomId(null);
     setPlayerId(null);
