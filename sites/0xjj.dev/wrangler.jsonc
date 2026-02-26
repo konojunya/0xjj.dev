@@ -1,7 +1,6 @@
 {
   "name": "0xjj",
   "compatibility_date": "2026-02-24",
-  "workers_dev": false,
   "assets": {
     "directory": "./dist"
   }
