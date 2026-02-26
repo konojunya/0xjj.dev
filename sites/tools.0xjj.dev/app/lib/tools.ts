@@ -84,4 +84,10 @@ export const tools: Tool[] = [
     description: 'Parse cron expressions and preview the next scheduled run times.',
     href: '/cron',
   },
+  {
+    slug: 'tictactoe',
+    name: 'Tic-Tac-Toe',
+    description: 'Real-time multiplayer Tic-Tac-Toe. Create a room, share the link, and play.',
+    href: '/tictactoe',
+  },
 ];
