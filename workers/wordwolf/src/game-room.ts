@@ -19,6 +19,7 @@ import type { ClientMessage, GameState, ServerMessage } from "./types";
 
 export class WordWolfRoom extends DurableObject {
   private state: GameState;
+  private initialized: boolean = false;
 
   constructor(ctx: DurableObjectState, env: unknown) {
     super(ctx, env);
@@ -28,7 +29,21 @@ export class WordWolfRoom extends DurableObject {
     );
   }
 
+  private async ensureState(): Promise<void> {
+    if (this.initialized) return;
+    const stored = await this.ctx.storage.get<GameState>("state");
+    if (stored) {
+      this.state = stored;
+    }
+    this.initialized = true;
+  }
+
+  private async saveState(): Promise<void> {
+    await this.ctx.storage.put("state", this.state);
+  }
+
   async fetch(request: Request): Promise<Response> {
+    await this.ensureState();
     const url = new URL(request.url);
 
     if (url.pathname === "/ws") {
@@ -51,6 +66,7 @@ export class WordWolfRoom extends DurableObject {
 
   async webSocketMessage(ws: WebSocket, rawMessage: string | ArrayBuffer): Promise<void> {
     if (typeof rawMessage !== "string") return;
+    await this.ensureState();
 
     let msg: ClientMessage;
     try {
@@ -81,6 +97,7 @@ export class WordWolfRoom extends DurableObject {
           return;
         }
         this.state = newState;
+        await this.saveState();
 
         // Send joined to this player
         this.send(ws, {
@@ -113,6 +130,8 @@ export class WordWolfRoom extends DurableObject {
           await this.ctx.storage.setAlarm(this.state.discussionEndTime);
         }
 
+        await this.saveState();
+
         // Send each player their word
         for (const [pid, player] of Object.entries(this.state.players)) {
           const playerWs = this.getWebSocketByTag(pid);
@@ -137,6 +156,7 @@ export class WordWolfRoom extends DurableObject {
           return;
         }
         this.state = newState;
+        await this.saveState();
 
         // Broadcast anonymous vote counts
         this.broadcast({
@@ -146,7 +166,7 @@ export class WordWolfRoom extends DurableObject {
 
         // Check if all votes are in
         if (allVotesIn(this.state)) {
-          this.resolveVotes();
+          await this.resolveVotes();
         }
         break;
       }
@@ -162,6 +182,7 @@ export class WordWolfRoom extends DurableObject {
           return;
         }
         this.state = newState;
+        await this.saveState();
 
         this.broadcast({
           type: "guess_result",
@@ -181,6 +202,7 @@ export class WordWolfRoom extends DurableObject {
           return;
         }
         this.state = returnToLobby(this.state);
+        await this.saveState();
 
         this.broadcast({
           type: "returned_to_lobby",
@@ -196,13 +218,16 @@ export class WordWolfRoom extends DurableObject {
   }
 
   async alarm(): Promise<void> {
+    await this.ensureState();
     if (this.state.phase === "playing") {
       this.state = transitionToVoting(this.state);
+      await this.saveState();
       this.broadcast({ type: "phase_changed", phase: "voting" });
     }
   }
 
   async webSocketClose(ws: WebSocket): Promise<void> {
+    await this.ensureState();
     const tags = this.ctx.getTags(ws);
     const playerId = tags[0];
 
@@ -220,6 +245,7 @@ export class WordWolfRoom extends DurableObject {
       connectedCount(this.state) < 3
     ) {
       this.state = returnToLobby(this.state);
+      await this.saveState();
       this.broadcast({
         type: "returned_to_lobby",
         players: this.state.players,
@@ -230,23 +256,15 @@ export class WordWolfRoom extends DurableObject {
 
     // Notify remaining players
     if (Object.keys(this.state.players).length > 0 && this.state.hostId) {
-      if (this.state.phase === "lobby") {
-        this.broadcast({
-          type: "player_left",
-          players: this.state.players,
-          hostId: this.state.hostId,
-        });
-      } else {
-        this.broadcast({
-          type: "player_left",
-          players: this.state.players,
-          hostId: this.state.hostId,
-        });
+      this.broadcast({
+        type: "player_left",
+        players: this.state.players,
+        hostId: this.state.hostId,
+      });
 
-        // Check if all remaining votes are in (voting phase)
-        if (this.state.phase === "voting" && allVotesIn(this.state)) {
-          this.resolveVotes();
-        }
+      // Check if all remaining votes are in (voting phase)
+      if (this.state.phase === "voting" && allVotesIn(this.state)) {
+        await this.resolveVotes();
       }
     }
 
@@ -254,14 +272,17 @@ export class WordWolfRoom extends DurableObject {
     if (Object.values(this.state.players).every((p) => !p.connected)) {
       this.state = createInitialState();
     }
+
+    await this.saveState();
   }
 
   async webSocketError(ws: WebSocket): Promise<void> {
     await this.webSocketClose(ws);
   }
 
-  private resolveVotes(): void {
+  private async resolveVotes(): Promise<void> {
     this.state = tallyVotes(this.state);
+    await this.saveState();
 
     const canGuess = this.state.winner === "citizen" && !this.state.wolfGuessed;
 
