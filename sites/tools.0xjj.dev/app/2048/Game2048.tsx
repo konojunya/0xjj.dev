@@ -298,7 +298,7 @@ export default function Game2048() {
         ref={boardRef}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        className="relative aspect-square w-full select-none rounded-xl border p-2"
+        className="relative aspect-square w-full touch-none select-none rounded-xl border p-2"
         style={{
           borderColor: border,
           background: 'color-mix(in srgb, var(--color-fg) 3%, transparent)',
