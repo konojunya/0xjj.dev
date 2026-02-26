@@ -34,6 +34,9 @@ type ServerMessage =
 
 const API_BASE =
   process.env.NEXT_PUBLIC_GAMES_API ?? 'https://games-api.0xjj.dev';
+const MAX_RECONNECT = 3;
+const RECONNECT_DELAY = 2000;
+const SESSION_KEY = 'wordwolf';
 
 type Screen = 'lobby' | 'waiting' | 'playing' | 'voting' | 'result';
 
@@ -65,22 +68,32 @@ export default function WordWolf() {
   const [copied, setCopied] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const nameRef = useRef('');
+  const roomIdRef = useRef<string | null>(null);
+  const manualCloseRef = useRef(false);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttemptsRef = useRef(0);
 
   // ── WebSocket ──
 
-  const connectWs = useCallback((room: string) => {
-    const wsUrl = `${API_BASE.replace(/^http/, 'ws')}/ws?game=wordwolf&room=${room}`;
+  const connectWs = useCallback((room: string, existingSessionId?: string) => {
+    manualCloseRef.current = false;
+    let wsUrl = `${API_BASE.replace(/^http/, 'ws')}/ws?game=wordwolf&room=${room}`;
+    if (existingSessionId) wsUrl += `&playerId=${existingSessionId}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
       setError(null);
-      ws.send(JSON.stringify({ type: 'join', name: nameRef.current }));
+      // Only send join for new connections (not reconnections)
+      if (!existingSessionId) {
+        ws.send(JSON.stringify({ type: 'join', name: nameRef.current }));
+      }
     };
 
     ws.onmessage = (event) => {
       if (event.data === 'pong') return;
       const msg: ServerMessage = JSON.parse(event.data);
+      reconnectAttemptsRef.current = 0;
 
       switch (msg.type) {
         case 'joined':
@@ -88,6 +101,9 @@ export default function WordWolf() {
           setPlayers(msg.players);
           setHostId(msg.hostId);
           setScreen('waiting');
+          if (roomIdRef.current) {
+            sessionStorage.setItem(`${SESSION_KEY}-${roomIdRef.current}`, msg.playerId);
+          }
           break;
         case 'player_joined':
           setPlayers(msg.players);
@@ -151,9 +167,23 @@ export default function WordWolf() {
 
     ws.onclose = () => {
       wsRef.current = null;
+      if (!manualCloseRef.current && roomIdRef.current) {
+        const sid = sessionStorage.getItem(`${SESSION_KEY}-${roomIdRef.current}`);
+        if (sid && reconnectAttemptsRef.current < MAX_RECONNECT) {
+          reconnectAttemptsRef.current++;
+          setError('Reconnecting...');
+          reconnectTimerRef.current = setTimeout(() => {
+            connectWs(roomIdRef.current!, sid);
+          }, RECONNECT_DELAY);
+          return;
+        }
+        if (reconnectAttemptsRef.current >= MAX_RECONNECT) {
+          setError('Connection lost');
+        }
+      }
     };
     ws.onerror = () => {
-      setError('Connection error');
+      if (reconnectAttemptsRef.current === 0) setError('Connection error');
     };
   }, []);
 
@@ -169,7 +199,9 @@ export default function WordWolf() {
 
   useEffect(() => {
     return () => {
+      manualCloseRef.current = true;
       wsRef.current?.close();
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
     };
   }, []);
 
@@ -210,6 +242,7 @@ export default function WordWolf() {
       const data = await res.json();
       const room = data.roomId as string;
       setRoomId(room);
+      roomIdRef.current = room;
       window.history.replaceState(null, '', `?room=${room}`);
       connectWs(room);
     } catch {
@@ -233,6 +266,7 @@ export default function WordWolf() {
     }
     nameRef.current = nameInput.trim();
     setRoomId(room);
+    roomIdRef.current = room;
     window.history.replaceState(null, '', `?room=${room}`);
     connectWs(room);
   };
@@ -266,9 +300,12 @@ export default function WordWolf() {
   };
 
   const backToLobby = () => {
+    manualCloseRef.current = true;
+    if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
     wsRef.current?.close();
     wsRef.current = null;
     setScreen('lobby');
+    if (roomId) sessionStorage.removeItem(`${SESSION_KEY}-${roomId}`);
     setRoomId(null);
     setPlayerId(null);
     setPlayers({});
@@ -283,6 +320,8 @@ export default function WordWolf() {
     setSelectedVote(null);
     setVoteCounts({});
     setGuessInput('');
+    reconnectAttemptsRef.current = 0;
+    roomIdRef.current = null;
     window.history.replaceState(null, '', '/wordwolf');
   };
 

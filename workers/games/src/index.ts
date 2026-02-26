@@ -90,7 +90,10 @@ export default {
 
       const id = namespace.idFromName(roomId);
       const stub = namespace.get(id);
-      return stub.fetch(new Request(new URL("/ws", request.url).toString(), request));
+      const doUrl = new URL("/ws", request.url);
+      const playerId = url.searchParams.get("playerId");
+      if (playerId) doUrl.searchParams.set("playerId", playerId);
+      return stub.fetch(new Request(doUrl.toString(), request));
     }
 
     return corsResponse("Not found", { status: 404 });

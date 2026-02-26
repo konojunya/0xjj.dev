@@ -33,9 +33,42 @@ export class WordWolfRoom extends DurableObject {
     if (url.pathname !== "/ws") return new Response("Not found", { status: 404 });
     if (request.headers.get("Upgrade") !== "websocket") return new Response("Expected WebSocket", { status: 426 });
 
-    const playerId = crypto.randomUUID().slice(0, 8);
+    const incomingId = url.searchParams.get("playerId");
+    let isReconnect = false;
+    let playerId: string;
+
+    // Check for reconnection
+    if (incomingId && this.state.players[incomingId] && !this.state.players[incomingId].connected) {
+      playerId = incomingId;
+      isReconnect = true;
+    } else {
+      playerId = crypto.randomUUID().slice(0, 8);
+    }
+
     const pair = new WebSocketPair();
     this.ctx.acceptWebSocket(pair[1], [playerId]);
+
+    if (isReconnect) {
+      this.state.players[playerId].connected = true;
+      await this.saveState();
+
+      // Send state based on current phase
+      this.send(pair[1], { type: "joined", playerId, players: this.state.players, isHost: this.state.hostId === playerId, hostId: this.state.hostId! });
+
+      if (this.state.phase === "playing") {
+        this.send(pair[1], { type: "game_started", word: getWordForPlayer(this.state, playerId)!, phase: "playing", endTime: this.state.discussionEndTime!, players: this.state.players });
+      } else if (this.state.phase === "voting") {
+        this.send(pair[1], { type: "game_started", word: getWordForPlayer(this.state, playerId)!, phase: "playing", endTime: this.state.discussionEndTime!, players: this.state.players });
+        this.send(pair[1], { type: "phase_changed", phase: "voting" });
+        this.send(pair[1], { type: "vote_update", voteCount: getVoteCounts(this.state) });
+      } else if (this.state.phase === "result") {
+        this.send(pair[1], { type: "result", wolfId: this.state.wolfId!, wolfWord: this.state.wolfWord!, citizenWord: this.state.citizenWord!, votes: this.state.votes, winner: this.state.winner!, canGuess: this.state.winner === "citizen" && !this.state.wolfGuessed && playerId === this.state.wolfId });
+      }
+
+      // Notify others
+      this.broadcastExcept(playerId, { type: "player_joined", players: this.state.players, hostId: this.state.hostId! });
+    }
+
     return new Response(null, { status: 101, webSocket: pair[0] });
   }
 

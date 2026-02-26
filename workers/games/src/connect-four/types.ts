@@ -14,7 +14,7 @@ export interface GameState {
 export type ClientMessage = { type: "drop"; column: number } | { type: "rematch" };
 
 export type ServerMessage =
-  | { type: "joined"; playerId: Mark; state: GameState }
+  | { type: "joined"; playerId: Mark; sessionId: string; state: GameState }
   | { type: "state"; state: GameState }
   | { type: "error"; message: string }
   | { type: "opponent_connected" }

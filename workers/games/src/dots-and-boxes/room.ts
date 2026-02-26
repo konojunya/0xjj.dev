@@ -2,8 +2,12 @@ import { DurableObject } from "cloudflare:workers";
 import { createInitialState, drawLine, resetForRematch } from "./logic";
 import type { ClientMessage, GameState, Mark, ServerMessage } from "./types";
 
+const RECONNECT_TIMEOUT = 60_000;
+
 export class DotsAndBoxesRoom extends DurableObject {
   private state: GameState;
+  private initialized = false;
+  private playerIds: Partial<Record<Mark, string>> = {};
 
   constructor(ctx: DurableObjectState, env: unknown) {
     super(ctx, env);
@@ -11,25 +15,60 @@ export class DotsAndBoxesRoom extends DurableObject {
     this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
   }
 
+  private async ensureState(): Promise<void> {
+    if (this.initialized) return;
+    const stored = await this.ctx.storage.get<GameState>("state");
+    if (stored) this.state = stored;
+    const ids = await this.ctx.storage.get<Partial<Record<Mark, string>>>("playerIds");
+    if (ids) this.playerIds = ids;
+    this.initialized = true;
+  }
+
+  private async saveState(): Promise<void> {
+    await this.ctx.storage.put("state", this.state);
+    await this.ctx.storage.put("playerIds", this.playerIds);
+  }
+
   async fetch(request: Request): Promise<Response> {
+    await this.ensureState();
     const url = new URL(request.url);
     if (url.pathname !== "/ws") return new Response("Not found", { status: 404 });
     if (request.headers.get("Upgrade") !== "websocket") return new Response("Expected WebSocket", { status: 426 });
 
-    let mark: Mark;
-    if (!this.state.players.A) mark = "A";
-    else if (!this.state.players.B) mark = "B";
-    else return new Response("Room is full", { status: 409 });
+    const incomingId = url.searchParams.get("playerId");
+    let mark: Mark | null = null;
+    let isReconnect = false;
+
+    if (incomingId) {
+      for (const m of ["A", "B"] as Mark[]) {
+        if (this.playerIds[m] === incomingId && this.state.players[m] && !this.state.players[m]!.connected) {
+          mark = m;
+          isReconnect = true;
+          break;
+        }
+      }
+    }
+
+    if (!mark) {
+      if (!this.state.players.A) mark = "A";
+      else if (!this.state.players.B) mark = "B";
+      else return new Response("Room is full", { status: 409 });
+    }
+
+    const sessionId = isReconnect ? incomingId! : crypto.randomUUID().slice(0, 8);
+    if (!isReconnect) this.playerIds[mark] = sessionId;
 
     const pair = new WebSocketPair();
     this.ctx.acceptWebSocket(pair[1], [mark]);
     this.state.players[mark] = { connected: true };
 
-    if (this.state.players.A && this.state.players.B && this.state.status === "waiting") {
+    if (this.state.players.A?.connected && this.state.players.B?.connected && this.state.status === "waiting") {
       this.state.status = "playing";
     }
 
-    this.send(pair[1], { type: "joined", playerId: mark, state: this.state });
+    await this.saveState();
+
+    this.send(pair[1], { type: "joined", playerId: mark, sessionId, state: this.state });
     const opp = this.getWs(mark === "A" ? "B" : "A");
     if (opp) { this.send(opp, { type: "opponent_connected" }); this.send(opp, { type: "state", state: this.state }); }
 
@@ -38,6 +77,7 @@ export class DotsAndBoxesRoom extends DurableObject {
 
   async webSocketMessage(ws: WebSocket, rawMessage: string | ArrayBuffer): Promise<void> {
     if (typeof rawMessage !== "string") return;
+    await this.ensureState();
     let msg: ClientMessage;
     try { msg = JSON.parse(rawMessage); } catch { this.send(ws, { type: "error", message: "Invalid JSON" }); return; }
     const mark = this.ctx.getTags(ws)[0] as Mark;
@@ -46,7 +86,7 @@ export class DotsAndBoxesRoom extends DurableObject {
       case "line": {
         const prev = this.state;
         this.state = drawLine(this.state, msg.lineType, msg.row, msg.col, mark);
-        if (this.state !== prev) this.broadcastState();
+        if (this.state !== prev) { await this.saveState(); this.broadcastState(); }
         else this.send(ws, { type: "error", message: "Invalid move" });
         break;
       }
@@ -54,6 +94,7 @@ export class DotsAndBoxesRoom extends DurableObject {
         if (this.state.status !== "ended") { this.send(ws, { type: "error", message: "Game is not over" }); return; }
         this.state.rematchRequested[mark] = true;
         if (this.state.rematchRequested.A && this.state.rematchRequested.B) this.state = resetForRematch(this.state);
+        await this.saveState();
         this.broadcastState();
         break;
       }
@@ -62,11 +103,35 @@ export class DotsAndBoxesRoom extends DurableObject {
   }
 
   async webSocketClose(ws: WebSocket): Promise<void> {
+    await this.ensureState();
     const mark = this.ctx.getTags(ws)[0] as Mark;
-    if (this.state.players[mark]) this.state.players[mark] = null;
+    if (this.state.players[mark]) {
+      this.state.players[mark] = { connected: false };
+    }
+    await this.saveState();
     const opp = this.getWs(mark === "A" ? "B" : "A");
     if (opp) { this.send(opp, { type: "opponent_disconnected" }); this.send(opp, { type: "state", state: this.state }); }
-    if (!this.state.players.A && !this.state.players.B) this.state = createInitialState();
+    await this.ctx.storage.setAlarm(Date.now() + RECONNECT_TIMEOUT);
+  }
+
+  async alarm(): Promise<void> {
+    await this.ensureState();
+    let changed = false;
+    for (const m of ["A", "B"] as Mark[]) {
+      if (this.state.players[m] && !this.state.players[m]!.connected && !this.getWs(m)) {
+        this.state.players[m] = null;
+        delete this.playerIds[m];
+        changed = true;
+      }
+    }
+    if (changed) {
+      if (!this.state.players.A && !this.state.players.B) {
+        this.state = createInitialState();
+        this.playerIds = {};
+      }
+      await this.saveState();
+      this.broadcastState();
+    }
   }
 
   async webSocketError(ws: WebSocket): Promise<void> { await this.webSocketClose(ws); }
