@@ -55,6 +55,7 @@ export default function TicTacToe() {
     };
 
     ws.onmessage = (event) => {
+      if (event.data === 'pong') return;
       const msg: ServerMessage = JSON.parse(event.data);
       switch (msg.type) {
         case 'joined':
