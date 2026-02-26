@@ -1,14 +1,9 @@
 import type { Cell, GameState, Mark } from "./types";
 
 const WIN_LINES: number[][] = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6],
 ];
 
 export function createInitialState(): GameState {
@@ -33,10 +28,6 @@ export function checkWinner(board: Cell[]): { winner: Mark; line: number[] } | n
   return null;
 }
 
-export function isDraw(board: Cell[]): boolean {
-  return board.every((cell) => cell !== null);
-}
-
 export function applyMove(state: GameState, index: number, player: Mark): GameState {
   if (state.status !== "playing") return state;
   if (state.turn !== player) return state;
@@ -48,30 +39,14 @@ export function applyMove(state: GameState, index: number, player: Mark): GameSt
 
   const result = checkWinner(newBoard);
   if (result) {
-    return {
-      ...state,
-      board: newBoard,
-      status: "won",
-      winner: result.winner,
-      winLine: result.line,
-    };
+    return { ...state, board: newBoard, status: "won", winner: result.winner, winLine: result.line };
   }
 
-  if (isDraw(newBoard)) {
-    return {
-      ...state,
-      board: newBoard,
-      status: "draw",
-      winner: null,
-      winLine: null,
-    };
+  if (newBoard.every((cell) => cell !== null)) {
+    return { ...state, board: newBoard, status: "draw", winner: null, winLine: null };
   }
 
-  return {
-    ...state,
-    board: newBoard,
-    turn: player === "X" ? "O" : "X",
-  };
+  return { ...state, board: newBoard, turn: player === "X" ? "O" : "X" };
 }
 
 export function resetForRematch(state: GameState): GameState {

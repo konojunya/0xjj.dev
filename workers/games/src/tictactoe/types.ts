@@ -21,20 +21,14 @@ export interface GameState {
   };
 }
 
-// Client → Server messages
 export type ClientMessage =
   | { type: "join" }
   | { type: "move"; index: number }
   | { type: "rematch" };
 
-// Server → Client messages
 export type ServerMessage =
   | { type: "joined"; playerId: Mark; state: GameState }
   | { type: "state"; state: GameState }
   | { type: "error"; message: string }
   | { type: "opponent_connected" }
   | { type: "opponent_disconnected" };
-
-export interface Env {
-  GAME_ROOM: DurableObjectNamespace;
-}

@@ -1,0 +1,28 @@
+{
+  "name": "games-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-12-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "durable_objects": {
+    "bindings": [
+      { "name": "TICTACTOE_ROOM", "class_name": "TicTacToeRoom" },
+      { "name": "WORDWOLF_ROOM", "class_name": "WordWolfRoom" },
+      { "name": "CONNECT_FOUR_ROOM", "class_name": "ConnectFourRoom" },
+      { "name": "REVERSI_ROOM", "class_name": "ReversiRoom" },
+      { "name": "DOTS_AND_BOXES_ROOM", "class_name": "DotsAndBoxesRoom" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "TicTacToeRoom",
+        "WordWolfRoom",
+        "ConnectFourRoom",
+        "ReversiRoom",
+        "DotsAndBoxesRoom"
+      ]
+    }
+  ]
+}

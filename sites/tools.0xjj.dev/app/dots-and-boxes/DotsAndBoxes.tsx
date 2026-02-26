@@ -233,7 +233,7 @@ export default function DotsAndBoxes() {
     const rows = 5;
     const cols = 5;
 
-    const elements: JSX.Element[] = [];
+    const elements: React.ReactElement[] = [];
 
     // The board is built as a CSS grid where:
     // - Even rows/cols are dots

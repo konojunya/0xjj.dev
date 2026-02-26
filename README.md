@@ -10,8 +10,7 @@ JJ (Junya Kono) の個人サイト。
 │   ├── 0xjj.dev/        ← Astro サイト本体
 │   └── tools.0xjj.dev/  ← 開発者向けツール集
 ├── workers/
-│   ├── tictactoe/       ← Durable Objects ゲームサーバー (tictactoe-api.0xjj.dev)
-│   └── wordwolf/        ← Durable Objects ゲームサーバー (wordwolf-api.0xjj.dev)
+│   └── games/           ← 統合ゲームサーバー (games-api.0xjj.dev)
 └── scripts/
     └── generate-ogp/    ← OGP 背景画像生成スクリプト (Go)
 ```
@@ -40,23 +39,12 @@ bun dev
 
 ## Workers
 
-### [workers/tictactoe](./workers/tictactoe)
+### [workers/games](./workers/games)
 
-Tic-Tac-Toe のリアルタイム対戦用ゲームサーバー。Cloudflare Durable Objects + WebSocket (Hibernation API) で実装。
-
-```sh
-cd workers/tictactoe
-bun install
-npx wrangler dev     # ローカル開発
-npx wrangler deploy  # デプロイ
-```
-
-### [workers/wordwolf](./workers/wordwolf)
-
-ワードウルフのリアルタイム対戦用ゲームサーバー。Cloudflare Durable Objects + WebSocket (Hibernation API) + Alarm API で実装。
+統合ゲームサーバー。1つの Worker で複数のゲーム (Tic-Tac-Toe, Word Wolf, Connect Four, Reversi, Dots & Boxes) を提供。各ゲームは独立した Durable Object クラスで実装。
 
 ```sh
-cd workers/wordwolf
+cd workers/games
 bun install
 npx wrangler dev     # ローカル開発
 npx wrangler deploy  # デプロイ

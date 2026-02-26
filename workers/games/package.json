@@ -1,12 +1,12 @@
 {
-  "name": "wordwolf-api",
+  "name": "games-api",
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250214.0",
+    "@cloudflare/workers-types": "^4.20241127.0",
     "wrangler": "^4.0.0"
   }
 }

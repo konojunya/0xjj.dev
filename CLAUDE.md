@@ -12,8 +12,7 @@ This is a monorepo:
 │   ├── 0xjj.dev/        ← Astro site (main)
 │   └── tools.0xjj.dev/  ← Next.js developer tools
 ├── workers/
-│   ├── tictactoe/       ← Durable Objects game server (tictactoe-api.0xjj.dev)
-│   └── wordwolf/        ← Durable Objects game server (wordwolf-api.0xjj.dev)
+│   └── games/           ← Unified game server with multiple DOs (games-api.0xjj.dev)
 └── scripts/
     └── generate-ogp/    ← Go script for OGP background image generation
 ```

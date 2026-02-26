@@ -113,6 +113,27 @@ export const tools: Tool[] = [
     category: 'game',
   },
   {
+    slug: 'connect-four',
+    name: 'Connect Four',
+    description: 'Drop discs to connect four in a row. Real-time multiplayer.',
+    href: '/connect-four',
+    category: 'game',
+  },
+  {
+    slug: 'reversi',
+    name: 'Reversi',
+    description: 'Classic disc-flipping strategy game. Real-time multiplayer.',
+    href: '/reversi',
+    category: 'game',
+  },
+  {
+    slug: 'dots-and-boxes',
+    name: 'Dots & Boxes',
+    description: 'Draw lines to complete boxes and outscore your opponent.',
+    href: '/dots-and-boxes',
+    category: 'game',
+  },
+  {
     slug: 'tictactoe',
     name: 'Tic-Tac-Toe',
     description: 'Real-time multiplayer Tic-Tac-Toe. Create a room, share the link, and play.',

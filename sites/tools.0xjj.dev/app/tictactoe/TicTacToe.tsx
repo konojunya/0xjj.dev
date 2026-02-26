@@ -27,7 +27,7 @@ type ServerMessage =
 // ── Constants ──
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_TICTACTOE_API ?? 'https://tictactoe-api.0xjj.dev';
+  process.env.NEXT_PUBLIC_GAMES_API ?? 'https://games-api.0xjj.dev';
 
 // ── Component ──
 
@@ -46,7 +46,7 @@ export default function TicTacToe() {
   // ── WebSocket connection ──
 
   const connectWs = useCallback((room: string) => {
-    const wsUrl = `${API_BASE.replace(/^http/, 'ws')}/ws?room=${room}`;
+    const wsUrl = `${API_BASE.replace(/^http/, 'ws')}/ws?game=tictactoe&room=${room}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -127,7 +127,7 @@ export default function TicTacToe() {
   const createRoom = async () => {
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/rooms`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/rooms?game=tictactoe`, { method: 'POST' });
       const data = await res.json();
       const room = data.roomId as string;
       setRoomId(room);

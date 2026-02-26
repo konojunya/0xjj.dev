@@ -33,7 +33,7 @@ type ServerMessage =
 // ── Constants ──
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_WORDWOLF_API ?? 'https://wordwolf-api.0xjj.dev';
+  process.env.NEXT_PUBLIC_GAMES_API ?? 'https://games-api.0xjj.dev';
 
 type Screen = 'lobby' | 'waiting' | 'playing' | 'voting' | 'result';
 
@@ -69,7 +69,7 @@ export default function WordWolf() {
   // ── WebSocket ──
 
   const connectWs = useCallback((room: string) => {
-    const wsUrl = `${API_BASE.replace(/^http/, 'ws')}/ws?room=${room}`;
+    const wsUrl = `${API_BASE.replace(/^http/, 'ws')}/ws?game=wordwolf&room=${room}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -206,7 +206,7 @@ export default function WordWolf() {
     setError(null);
     nameRef.current = nameInput.trim();
     try {
-      const res = await fetch(`${API_BASE}/rooms`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/rooms?game=wordwolf`, { method: 'POST' });
       const data = await res.json();
       const room = data.roomId as string;
       setRoomId(room);

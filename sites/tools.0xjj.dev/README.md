@@ -24,6 +24,9 @@
 | `base` | Number Base Converter | https://tools.0xjj.dev/base |
 | `cron` | Cron Expression Parser | https://tools.0xjj.dev/cron |
 | `2048` | 2048 | https://tools.0xjj.dev/2048 |
+| `connect-four` | Connect Four | https://tools.0xjj.dev/connect-four |
+| `reversi` | Reversi | https://tools.0xjj.dev/reversi |
+| `dots-and-boxes` | Dots & Boxes | https://tools.0xjj.dev/dots-and-boxes |
 | `tictactoe` | Tic-Tac-Toe | https://tools.0xjj.dev/tictactoe |
 | `wordwolf` | Word Wolf | https://tools.0xjj.dev/wordwolf |
 
@@ -213,31 +216,69 @@
 
 ---
 
+### Connect Four
+
+> Drop discs to connect four in a row. Real-time 2-player game.
+
+- 7x6 board with column-based disc dropping
+- Win detection: 4 in a row (horizontal, vertical, diagonal)
+- Game server: `games-api.0xjj.dev` (`workers/games/`)
+
+**Route**: `app/connect-four/`
+**API**: `POST /rooms?game=connect-four`, `GET /ws?game=connect-four&room=XXXXXX` (WebSocket)
+
+---
+
+### Reversi
+
+> Classic disc-flipping strategy game. Real-time 2-player.
+
+- 8x8 board with Black/White discs
+- Valid move highlighting, automatic disc flipping
+- Turn passes if no valid moves; game ends when neither can move
+- Game server: `games-api.0xjj.dev` (`workers/games/`)
+
+**Route**: `app/reversi/`
+**API**: `POST /rooms?game=reversi`, `GET /ws?game=reversi&room=XXXXXX` (WebSocket)
+
+---
+
+### Dots & Boxes
+
+> Draw lines to complete boxes and outscore your opponent. Real-time 2-player.
+
+- 5x5 dot grid (4x4 boxes, 40 lines)
+- Completing a box scores a point and grants an extra turn
+- Game server: `games-api.0xjj.dev` (`workers/games/`)
+
+**Route**: `app/dots-and-boxes/`
+**API**: `POST /rooms?game=dots-and-boxes`, `GET /ws?game=dots-and-boxes&room=XXXXXX` (WebSocket)
+
+---
+
 ### Tic-Tac-Toe
 
-> リアルタイム対戦の○×ゲーム。ルームを作成してリンクを共有し、対戦する。
+> Real-time 2-player Tic-Tac-Toe. Create a room, share the link, and play.
 
-- Cloudflare Durable Objects + WebSocket (Hibernation API) によるリアルタイム通信
-- ルーム作成 → リンク共有 → 対戦 → リマッチのフロー
-- URL パラメータ (`?room=XXX`) での自動参加
-- ゲームサーバー: `tictactoe-api.0xjj.dev` (`workers/tictactoe/`)
+- Classic 3x3 board with X and O
+- Game server: `games-api.0xjj.dev` (`workers/games/`)
 
 **Route**: `app/tictactoe/`
-**API**: `POST /rooms`, `GET /ws?room=XXXXXX` (WebSocket)
+**API**: `POST /rooms?game=tictactoe`, `GET /ws?game=tictactoe&room=XXXXXX` (WebSocket)
 
 ---
 
 ### Word Wolf
 
-> ワードウルフ - 仲間の中に紛れた「ウルフ」を見つけ出せ! 3〜8人のリアルタイムパーティゲーム。
+> Find the wolf hiding among your friends! A real-time party game for 3-8 players.
 
-- Cloudflare Durable Objects + WebSocket (Hibernation API) + Alarm API によるリアルタイム通信
-- ルーム作成 → 名前入力 → 参加 → 3分議論 → 投票 → 結果公開のフロー
-- ウルフが捕まった場合の逆転推測チャンス
-- ゲームサーバー: `wordwolf-api.0xjj.dev` (`workers/wordwolf/`)
+- Cloudflare Durable Objects + WebSocket + Alarm API
+- Room → Name → Join → 3min Discussion → Vote → Result
+- Wolf reversal guess chance when caught
+- Game server: `games-api.0xjj.dev` (`workers/games/`)
 
 **Route**: `app/wordwolf/`
-**API**: `POST /rooms`, `GET /ws?room=XXXXXX` (WebSocket)
+**API**: `POST /rooms?game=wordwolf`, `GET /ws?game=wordwolf&room=XXXXXX` (WebSocket)
 
 ---
 

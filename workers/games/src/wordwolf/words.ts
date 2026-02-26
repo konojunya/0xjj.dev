@@ -53,6 +53,5 @@ export const WORD_PAIRS: [string, string][] = [
 
 export function pickRandomPair(): [string, string] {
   const pair = WORD_PAIRS[Math.floor(Math.random() * WORD_PAIRS.length)];
-  // Randomly swap which is citizen vs wolf word
   return Math.random() < 0.5 ? pair : [pair[1], pair[0]];
 }
