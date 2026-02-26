@@ -19,7 +19,7 @@ interface GameState {
 }
 
 type ServerMessage =
-  | { type: 'joined'; playerId: Mark; state: GameState }
+  | { type: 'joined'; playerId: Mark; sessionId: string; state: GameState }
   | { type: 'state'; state: GameState }
   | { type: 'error'; message: string }
   | { type: 'opponent_connected' }
@@ -28,6 +28,9 @@ type ServerMessage =
 // ── Constants ──
 
 const API_BASE = process.env.NEXT_PUBLIC_GAMES_API ?? 'https://games-api.0xjj.dev';
+const MAX_RECONNECT = 3;
+const RECONNECT_DELAY = 2000;
+const SESSION_KEY = 'reversi';
 
 const BOARD_SIZE = 8;
 const CELL_SIZE = 44;
@@ -48,6 +51,10 @@ export default function Reversi() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
+  const roomIdRef = useRef<string | null>(null);
+  const manualCloseRef = useRef(false);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttemptsRef = useRef(0);
 
   // ── Helpers ──
 
@@ -61,9 +68,13 @@ export default function Reversi() {
 
   // ── WebSocket connection ──
 
-  const connectWs = useCallback((room: string) => {
+  const connectWs = useCallback((room: string, existingSessionId?: string) => {
+    manualCloseRef.current = false;
     const wsBase = API_BASE.replace(/^http/, 'ws');
-    const wsUrl = `${wsBase}/ws?game=reversi&room=${room}`;
+    let wsUrl = `${wsBase}/ws?game=reversi&room=${room}`;
+    if (existingSessionId) {
+      wsUrl += `&playerId=${existingSessionId}`;
+    }
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -78,6 +89,8 @@ export default function Reversi() {
         case 'joined':
           setPlayerId(msg.playerId);
           setGameState(msg.state);
+          sessionStorage.setItem(`${SESSION_KEY}-${room}`, msg.sessionId);
+          reconnectAttemptsRef.current = 0;
           if (msg.state.status === 'waiting') {
             setScreen('waiting');
           } else {
@@ -102,6 +115,20 @@ export default function Reversi() {
 
     ws.onclose = () => {
       wsRef.current = null;
+      if (!manualCloseRef.current && roomIdRef.current) {
+        const sid = sessionStorage.getItem(`${SESSION_KEY}-${roomIdRef.current}`);
+        if (sid && reconnectAttemptsRef.current < MAX_RECONNECT) {
+          reconnectAttemptsRef.current++;
+          setError('Reconnecting...');
+          reconnectTimerRef.current = setTimeout(() => {
+            connectWs(roomIdRef.current!, sid);
+          }, RECONNECT_DELAY);
+          return;
+        }
+        if (reconnectAttemptsRef.current >= MAX_RECONNECT) {
+          setError('Connection lost');
+        }
+      }
     };
 
     ws.onerror = () => {
@@ -116,6 +143,7 @@ export default function Reversi() {
     const room = params.get('room');
     if (room) {
       setRoomId(room);
+      roomIdRef.current = room;
       connectWs(room);
     }
   }, [connectWs]);
@@ -125,6 +153,12 @@ export default function Reversi() {
   useEffect(() => {
     return () => {
       wsRef.current?.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
     };
   }, []);
 
@@ -148,6 +182,7 @@ export default function Reversi() {
       const data = await res.json();
       const room = data.roomId as string;
       setRoomId(room);
+      roomIdRef.current = room;
       window.history.replaceState(null, '', `?room=${room}`);
       connectWs(room);
     } catch {
@@ -167,6 +202,7 @@ export default function Reversi() {
       // Not a URL, use as-is
     }
     setRoomId(room);
+    roomIdRef.current = room;
     window.history.replaceState(null, '', `?room=${room}`);
     connectWs(room);
   };
@@ -190,9 +226,14 @@ export default function Reversi() {
   };
 
   const backToLobby = () => {
+    manualCloseRef.current = true;
+    if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
     wsRef.current?.close();
     wsRef.current = null;
     setScreen('lobby');
+    if (roomId) sessionStorage.removeItem(`${SESSION_KEY}-${roomId}`);
+    reconnectAttemptsRef.current = 0;
+    roomIdRef.current = null;
     setRoomId(null);
     setPlayerId(null);
     setGameState(null);

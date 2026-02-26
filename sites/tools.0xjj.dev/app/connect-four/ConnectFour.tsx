@@ -18,7 +18,7 @@ interface GameState {
 }
 
 type ServerMessage =
-  | { type: 'joined'; playerId: Player; state: GameState }
+  | { type: 'joined'; playerId: Player; sessionId: string; state: GameState }
   | { type: 'state'; state: GameState }
   | { type: 'error'; message: string }
   | { type: 'opponent_connected' }
@@ -31,6 +31,10 @@ const API_BASE =
 
 const ROWS = 6;
 const COLS = 7;
+
+const MAX_RECONNECT = 3;
+const RECONNECT_DELAY = 2000;
+const SESSION_KEY = 'connect-four';
 
 const DISC_RED = '#ef4444';
 const DISC_YELLOW = '#eab308';
@@ -51,12 +55,20 @@ export default function ConnectFour() {
   const [copied, setCopied] = useState(false);
   const [hoverCol, setHoverCol] = useState<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const roomIdRef = useRef<string | null>(null);
+  const manualCloseRef = useRef(false);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttemptsRef = useRef(0);
 
   // ── WebSocket connection ──
 
-  const connectWs = useCallback((room: string) => {
+  const connectWs = useCallback((room: string, existingSessionId?: string) => {
+    manualCloseRef.current = false;
     const wsBase = API_BASE.replace(/^http/, 'ws');
-    const wsUrl = `${wsBase}/ws?game=connect-four&room=${room}`;
+    let wsUrl = `${wsBase}/ws?game=connect-four&room=${room}`;
+    if (existingSessionId) {
+      wsUrl += `&playerId=${existingSessionId}`;
+    }
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -71,6 +83,8 @@ export default function ConnectFour() {
         case 'joined':
           setPlayerId(msg.playerId);
           setGameState(msg.state);
+          sessionStorage.setItem(`${SESSION_KEY}-${room}`, msg.sessionId);
+          reconnectAttemptsRef.current = 0;
           if (msg.state.status === 'waiting') {
             setScreen('waiting');
           } else {
@@ -95,6 +109,20 @@ export default function ConnectFour() {
 
     ws.onclose = () => {
       wsRef.current = null;
+      if (!manualCloseRef.current && roomIdRef.current) {
+        const sid = sessionStorage.getItem(`${SESSION_KEY}-${roomIdRef.current}`);
+        if (sid && reconnectAttemptsRef.current < MAX_RECONNECT) {
+          reconnectAttemptsRef.current++;
+          setError('Reconnecting...');
+          reconnectTimerRef.current = setTimeout(() => {
+            connectWs(roomIdRef.current!, sid);
+          }, RECONNECT_DELAY);
+          return;
+        }
+        if (reconnectAttemptsRef.current >= MAX_RECONNECT) {
+          setError('Connection lost');
+        }
+      }
     };
 
     ws.onerror = () => {
@@ -109,6 +137,7 @@ export default function ConnectFour() {
     const room = params.get('room');
     if (room) {
       setRoomId(room);
+      roomIdRef.current = room;
       connectWs(room);
     }
   }, [connectWs]);
@@ -118,6 +147,12 @@ export default function ConnectFour() {
   useEffect(() => {
     return () => {
       wsRef.current?.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
     };
   }, []);
 
@@ -141,6 +176,7 @@ export default function ConnectFour() {
       const data = await res.json();
       const room = data.roomId as string;
       setRoomId(room);
+      roomIdRef.current = room;
       window.history.replaceState(null, '', `?room=${room}`);
       connectWs(room);
     } catch {
@@ -161,6 +197,7 @@ export default function ConnectFour() {
       // Not a URL, use as-is
     }
     setRoomId(room);
+    roomIdRef.current = room;
     window.history.replaceState(null, '', `?room=${room}`);
     connectWs(room);
   };
@@ -184,6 +221,8 @@ export default function ConnectFour() {
   };
 
   const backToLobby = () => {
+    manualCloseRef.current = true;
+    if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
     wsRef.current?.close();
     wsRef.current = null;
     setScreen('lobby');
@@ -193,6 +232,9 @@ export default function ConnectFour() {
     setError(null);
     setJoinInput('');
     setHoverCol(null);
+    if (roomId) sessionStorage.removeItem(`${SESSION_KEY}-${roomId}`);
+    reconnectAttemptsRef.current = 0;
+    roomIdRef.current = null;
     window.history.replaceState(null, '', '/connect-four');
   };
 
