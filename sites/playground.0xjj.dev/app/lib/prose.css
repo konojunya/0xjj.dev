@@ -71,6 +71,21 @@
   line-height: 1.7;
 }
 
+.prose pre code .line {
+  display: inline;
+}
+
+.prose [data-rehype-pretty-code-figure] pre {
+  background: color-mix(in srgb, var(--color-fg) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  .prose pre code [style] {
+    color: var(--shiki-dark) !important;
+  }
+}
+
 .prose blockquote {
   border-left: 2px solid color-mix(in srgb, var(--color-fg) 18%, transparent);
   margin: 1.5rem 0;

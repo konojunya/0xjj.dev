@@ -26,7 +26,7 @@ export default function Page() {
       </h1>
       <p className="mt-1 text-sm text-muted">{tool.description}</p>
 
-      <div className="-mx-4 mt-8 flex items-center justify-center bg-black/5 py-16 dark:bg-white/5 sm:-mx-8 md:-mx-16 lg:-mx-32">
+      <div className="mt-8 flex items-center justify-center rounded-xl bg-black/5 py-16 dark:bg-white/5">
         <div className="w-60">
           <TiltCard
             src="https://assets.xross-stars.com/card/BP02/BP02-087_e065c07289840e4acafe8ee5cfa59ac8.png"
