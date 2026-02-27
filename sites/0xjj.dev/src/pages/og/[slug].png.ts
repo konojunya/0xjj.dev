@@ -103,7 +103,7 @@ export const GET: APIRoute = async ({ props }) => {
                 justifyContent: 'space-between',
                 width: W,
                 height: H,
-                padding: '48px 72px 28px',
+                padding: '48px 72px 36px',
                 position: 'relative',
               },
               children: [
@@ -129,6 +129,7 @@ export const GET: APIRoute = async ({ props }) => {
                           lineHeight: 1.25,
                           letterSpacing: `${(-fs * 0.025).toFixed(1)}px`,
                           maxWidth: W - 144,
+                          wordBreak: 'keep-all',
                         },
                         children: title,
                       },
@@ -144,7 +145,7 @@ export const GET: APIRoute = async ({ props }) => {
                       justifyContent: 'space-between',
                       alignItems: 'flex-end',
                       borderTop: `1px solid rgba(30,14,78,0.15)`,
-                      paddingTop: 12,
+                      paddingTop: 14,
                     },
                     children: [
                       {
@@ -152,7 +153,7 @@ export const GET: APIRoute = async ({ props }) => {
                         props: {
                           style: {
                             fontFamily: 'Inter',
-                            fontSize: 13,
+                            fontSize: 18,
                             fontWeight: 400,
                             color: `rgba(30,14,78,0.45)`,
                             letterSpacing: '0.5px',
@@ -165,7 +166,7 @@ export const GET: APIRoute = async ({ props }) => {
                         props: {
                           style: {
                             fontFamily: 'Inter',
-                            fontSize: 13,
+                            fontSize: 18,
                             fontWeight: 400,
                             color: `rgba(30,14,78,0.55)`,
                             letterSpacing: '0.5px',
