@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { tools } from '../lib/tools';
-import { renderMarkdown } from '../lib/markdown';
 import Article from '../lib/Article';
 import Demo from './Demo';
 import FloatingNavDemo from './FloatingNavDemo';
-import enRaw from './en.md';
-import jaRaw from './ja.md';
+import En from './en.mdx';
+import Ja from './ja.mdx';
 
 const tool = tools.find((t) => t.slug === 'liquid-glass')!;
 
@@ -14,12 +13,7 @@ export const metadata: Metadata = {
   description: tool.description,
 };
 
-export default async function Page() {
-  const [en, ja] = await Promise.all([
-    renderMarkdown(enRaw),
-    renderMarkdown(jaRaw),
-  ]);
-
+export default function Page() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
       <a
@@ -50,7 +44,7 @@ export default async function Page() {
         />
       </div>
 
-      <Article en={en} ja={ja} />
+      <Article en={<En />} ja={<Ja />} />
       <FloatingNavDemo />
 
       <div className="mt-6">

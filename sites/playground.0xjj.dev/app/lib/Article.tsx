@@ -1,13 +1,14 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import './prose.css';
 
 type Lang = 'ja' | 'en';
 
 interface Props {
-  ja?: string;
-  en?: string;
+  ja?: ReactNode;
+  en?: ReactNode;
 }
 
 export default function Article({ ja, en }: Props) {
@@ -20,8 +21,8 @@ export default function Article({ ja, en }: Props) {
 
   if (available.length === 0) return null;
 
-  const html = lang === 'ja' ? ja : en;
-  if (!html) return null;
+  const content = lang === 'ja' ? ja : en;
+  if (!content) return null;
 
   return (
     <article className="mt-12 max-w-3xl">
@@ -43,11 +44,9 @@ export default function Article({ ja, en }: Props) {
           ))}
         </div>
       )}
-      {/* HTML is pre-rendered from our own .md files at build time, not user input */}
-      <div
-        className="prose"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <div className="prose">
+        {content}
+      </div>
     </article>
   );
 }
