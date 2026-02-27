@@ -46,15 +46,7 @@ function excerpt(body: string, maxLen = 150): string {
 const description = excerpt(post.body ?? '');
 ---
 
-<Layout title={post.data.title}>
-  <meta slot="head" name="description" content={description} />
-  <meta slot="head" property="og:title" content={post.data.title} />
-  <meta slot="head" property="og:description" content={description} />
-  <meta slot="head" property="og:type" content="article" />
-  <meta slot="head" property="og:image" content={`/og/${post.id}.png`} />
-  <meta slot="head" property="og:url" content={`https://0xjj.dev/blog/${post.id}`} />
-  <meta slot="head" name="twitter:card" content="summary_large_image" />
-  <meta slot="head" name="twitter:image" content={`/og/${post.id}.png`} />
+<Layout title={post.data.title} description={description} ogImage={`https://0xjj.dev/og/${post.id}.png`}>
   <div class="container">
     <a href="/blog" class="back">← Blog</a>
     <article>

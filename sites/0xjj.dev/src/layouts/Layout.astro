@@ -4,9 +4,11 @@ import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title?: string;
+  ogImage?: string;
+  description?: string;
 }
 
-const { title = "JJ" } = Astro.props;
+const { title = "JJ", ogImage = "https://0xjj.dev/og/ogp.png", description = "All of me" } = Astro.props;
 const pageTitle = title === "JJ" ? "JJ" : `${title} | JJ`;
 ---
 
@@ -19,14 +21,14 @@ const pageTitle = title === "JJ" ? "JJ" : `${title} | JJ`;
     <title>{pageTitle}</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
-    <meta name="description" content="All of me" />
+    <meta name="description" content={description} />
     <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content="All of me" />
+    <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://0xjj.dev" />
-    <meta property="og:image" content="https://0xjj.dev/og/ogp.png" />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://0xjj.dev/og/ogp.png" />
+    <meta name="twitter:image" content={ogImage} />
     <slot name="head" />
     <ClientRouter />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
