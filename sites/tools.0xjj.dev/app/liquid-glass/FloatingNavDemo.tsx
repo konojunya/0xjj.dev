@@ -149,8 +149,10 @@ export default function FloatingNavDemo() {
                 height: GH,
                 borderRadius: GR,
                 overflow: 'hidden',
-                transform: 'scale(1.2)',
-                transition: isDraggingRef.current ? 'none' : 'left 0.45s cubic-bezier(0.32, 0.72, 0, 1)',
+                transform: isDraggingRef.current ? 'scale(1.2)' : 'scale(1)',
+                transition: isDraggingRef.current
+                  ? 'transform 0.2s ease-out'
+                  : 'left 0.45s cubic-bezier(0.32, 0.72, 0, 1), transform 0.2s ease-out',
               }}
             >
               {/* SVG filter */}
