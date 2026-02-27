@@ -59,6 +59,17 @@ export default async function Page() {
 
       <Article en={en} ja={ja} />
       <FloatingNavDemo />
+
+      <div className="mt-6">
+        <video
+          src="/liquid-glass/demo2.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full rounded-xl border border-black/10 dark:border-white/10"
+        />
+      </div>
     </div>
   );
 }
