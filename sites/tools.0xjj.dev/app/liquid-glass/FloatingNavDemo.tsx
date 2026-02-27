@@ -149,29 +149,16 @@ export default function FloatingNavDemo() {
                 height: GH,
                 borderRadius: GR,
                 overflow: 'hidden',
+                transform: 'scale(1.2)',
                 transition: isDraggingRef.current ? 'none' : 'left 0.45s cubic-bezier(0.32, 0.72, 0, 1)',
               }}
             >
-              {/* SVG filters — nav-glass (static) / nav-glass-drag (with zoom) */}
+              {/* SVG filter */}
               <svg colorInterpolationFilters="sRGB" style={{ display: 'none' }}>
                 <defs>
                   <filter id="nav-glass">
                     <feImage href="/liquid-glass/refract.png" x={0} y={0} width={GW} height={GH} result="rf" />
                     <feDisplacementMap in="SourceGraphic" in2="rf" scale={98} xChannelSelector="R" yChannelSelector="G" result="bent" />
-                    <feColorMatrix in="bent" type="saturate" values="9" result="vivid" />
-                    <feImage href="/liquid-glass/highlight.png" x={0} y={0} width={GW} height={GH} result="hl" />
-                    <feComposite in="vivid" in2="hl" operator="in" result="hl-sat" />
-                    <feComponentTransfer in="hl" result="hl-fade">
-                      <feFuncA type="linear" slope={0.5} />
-                    </feComponentTransfer>
-                    <feBlend in="hl-sat" in2="bent" mode="normal" result="merged" />
-                    <feBlend in="hl-fade" in2="merged" mode="normal" />
-                  </filter>
-                  <filter id="nav-glass-drag">
-                    <feImage href="/liquid-glass/zoom.png" x={0} y={0} width={GW} height={GH} result="zm" />
-                    <feDisplacementMap in="SourceGraphic" in2="zm" scale={24} xChannelSelector="R" yChannelSelector="G" result="zoomed" />
-                    <feImage href="/liquid-glass/refract.png" x={0} y={0} width={GW} height={GH} result="rf" />
-                    <feDisplacementMap in="zoomed" in2="rf" scale={98} xChannelSelector="R" yChannelSelector="G" result="bent" />
                     <feColorMatrix in="bent" type="saturate" values="9" result="vivid" />
                     <feImage href="/liquid-glass/highlight.png" x={0} y={0} width={GW} height={GH} result="hl" />
                     <feComposite in="vivid" in2="hl" operator="in" result="hl-sat" />
@@ -188,8 +175,8 @@ export default function FloatingNavDemo() {
                 className="pointer-events-none absolute inset-0 ring-1 ring-white/10"
                 style={{
                   borderRadius: GR,
-                  backdropFilter: isDraggingRef.current ? 'url(#nav-glass-drag)' : 'url(#nav-glass)',
-                  WebkitBackdropFilter: isDraggingRef.current ? 'url(#nav-glass-drag)' : 'url(#nav-glass)',
+                  backdropFilter: 'url(#nav-glass)',
+                  WebkitBackdropFilter: 'url(#nav-glass)',
                   boxShadow:
                     '0 4px 9px rgba(0,0,0,.16), inset 0 2px 24px rgba(0,0,0,.2), inset 0 -2px 24px rgba(255,255,255,.2)',
                 }}
