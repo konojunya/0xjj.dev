@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { tools } from '../lib/tools';
 import Article from '../lib/Article';
 import Demo from './Demo';
-import FloatingNavDemo from './FloatingNavDemo';
 import En from './en.mdx';
 import Ja from './ja.mdx';
 
@@ -32,31 +31,7 @@ export default function Page() {
 
       <Demo />
 
-      {/* Demo video for browsers that don't support the effect (iOS, Firefox, etc.) */}
-      <div className="mt-6">
-        <video
-          src="/liquid-glass/demo.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full rounded-xl border border-black/10 dark:border-white/10"
-        />
-      </div>
-
       <Article en={<En />} ja={<Ja />} />
-      <FloatingNavDemo />
-
-      <div className="mt-6">
-        <video
-          src="/liquid-glass/demo2.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full rounded-xl border border-black/10 dark:border-white/10"
-        />
-      </div>
     </div>
   );
 }

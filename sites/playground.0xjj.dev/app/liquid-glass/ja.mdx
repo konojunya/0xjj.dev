@@ -1,3 +1,5 @@
+import FloatingNavDemo from './FloatingNavDemo';
+
 ## How it works
 
 ### backdrop-filter で「背面」を加工する
@@ -35,3 +37,16 @@ Pointer Events API を使ったシンプルなドラッグです。`setPointerCa
 ### 制約とブラウザ対応
 
 `backdrop-filter: url(#svg-filter)` は現在 Chrome / Edge のみ対応しています。Firefox は backdrop-filter 自体には対応していますが、SVG フィルターの参照はサポートしていません。また、`feImage` で外部画像を読み込む方式は、フィルターの解像度が要素サイズに固定されるため、サイズを動的に変えたい場合は map 画像も合わせて再生成する必要があります。
+
+## Floating Nav デモ
+
+<FloatingNavDemo />
+
+<video
+  src="/liquid-glass/demo2.mp4"
+  autoPlay
+  loop
+  muted
+  playsInline
+  className="mt-6 w-full rounded-xl border border-black/10 dark:border-white/10"
+/>
