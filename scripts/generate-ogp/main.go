@@ -365,6 +365,39 @@ func renderBlobLayers(blobs []colorBlob, n int) *floatBuf {
 	return buf
 }
 
+// shadePixelStrength is like shadePixelNoNoise but with configurable blend strength.
+func shadePixelStrength(x, y int, blobs []colorBlob, strength float64) (float64, float64, float64) {
+	col := [3]float64{0.96, 0.93, 0.95}
+	px, py := float64(x), float64(y)
+	for _, b := range blobs {
+		dx := px - b.px
+		dy := py - b.py
+		w := math.Exp(-(dx*dx + dy*dy) / (2 * b.radius * b.radius))
+		s := w * strength
+		col[0] = lerp(col[0], b.col[0], s)
+		col[1] = lerp(col[1], b.col[1], s)
+		col[2] = lerp(col[2], b.col[2], s)
+	}
+	return col[0], col[1], col[2]
+}
+
+func renderWithStrength(blobs []colorBlob, strength float64) *floatBuf {
+	buf := newFloatBuf(imgW, imgH)
+	var wg sync.WaitGroup
+	for row := range imgH {
+		wg.Add(1)
+		go func(y int) {
+			defer wg.Done()
+			for x := range imgW {
+				r, g, b := shadePixelStrength(x, y, blobs, strength)
+				buf.set(x, y, r, g, b)
+			}
+		}(row)
+	}
+	wg.Wait()
+	return buf
+}
+
 func renderStages(root string) {
 	title := "GoでOGP背景画像を冪等に生成する"
 	seed := titleSeed(title)
@@ -376,23 +409,36 @@ func renderStages(root string) {
 		os.Exit(1)
 	}
 
-	// Step 1: 1 blob only
+	save := func(name string, img *image.RGBA) {
+		savePNG(filepath.Join(outputDir, name), img)
+	}
+
+	// ── Blob layer progression ──
 	fmt.Println("rendering step1 (1 blob) ...")
-	savePNG(filepath.Join(outputDir, "step1-1blob.png"), renderBlobLayers(blobs, 1).toRGBA())
+	save("step1-1blob.png", renderBlobLayers(blobs, 1).toRGBA())
 
-	// Step 2: 3 blobs
 	fmt.Println("rendering step2 (3 blobs) ...")
-	savePNG(filepath.Join(outputDir, "step2-3blobs.png"), renderBlobLayers(blobs, 3).toRGBA())
+	save("step2-3blobs.png", renderBlobLayers(blobs, 3).toRGBA())
 
-	// Step 3: all 7 blobs
 	fmt.Println("rendering step3 (7 blobs) ...")
-	savePNG(filepath.Join(outputDir, "step3-7blobs.png"), renderBlobLayers(blobs, numBlobs).toRGBA())
+	save("step3-7blobs.png", renderBlobLayers(blobs, numBlobs).toRGBA())
 
-	// Step 4: after gaussian blur (final)
 	fmt.Println("rendering step4 (blurred) ...")
 	buf := renderBlobLayers(blobs, numBlobs)
 	gaussianBlur(buf, blurR)
-	savePNG(filepath.Join(outputDir, "step4-blurred.png"), buf.toRGBA())
+	save("step4-blurred.png", buf.toRGBA())
+
+	// ── Strength comparison ──
+	fmt.Println("rendering strength-100 ...")
+	save("strength-100.png", renderWithStrength(blobs, 1.0).toRGBA())
+
+	// ── Blur radius comparison ──
+	for _, r := range []int{5, 15} {
+		fmt.Printf("rendering blur-r%d ...\n", r)
+		b := renderBlobLayers(blobs, numBlobs)
+		gaussianBlur(b, r)
+		save(fmt.Sprintf("blur-r%d.png", r), b.toRGBA())
+	}
 }
 
 // ── Text drawing ─────────────────────────────────────────────────────────
