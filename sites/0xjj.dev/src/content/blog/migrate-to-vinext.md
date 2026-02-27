@@ -192,6 +192,40 @@ export async function GET(request: Request) {
 }
 ```
 
+## OGP 画像の動的生成が動かない
+
+playground.0xjj.dev では各ツールページに OGP 画像を設定しています。`@opennextjs/cloudflare` 時代は `@vercel/og`（内部的に satori + resvg-wasm）を使って動的に生成していましたが、vinext 移行後にこれが動かなくなりました。
+
+### WASM の初期化問題
+
+satori は内部で yoga.wasm を、resvg-wasm は index_bg.wasm をそれぞれ使います。Cloudflare Workers では WASM モジュールの読み込み方法が Node.js と異なるため、`?module` サフィックスで import する必要があります。
+
+```ts
+// @ts-expect-error — wasm module imports handled by Vite/Cloudflare
+import resvgWasm from '@resvg/resvg-wasm/index_bg.wasm?module';
+// @ts-expect-error — wasm module imports handled by Vite/Cloudflare
+import yogaWasm from '../../node_modules/satori/yoga.wasm?module';
+```
+
+しかしこの方法でも `Already initialized` エラーや初期化タイミングの競合が発生し、安定しませんでした。
+
+### フォントの読み込み問題
+
+satori でテキストを描画するにはフォントデータ（ArrayBuffer）が必要です。通常は Google Fonts から `fetch` してフォントを読み込みますが、Cloudflare Workers では自分自身への fetch（self-fetch）が制限されています。`public/` に配置したフォントファイルを `fetch` で取得する方法も使えません。
+
+回避策として `@fontsource/noto-sans` の TTF を base64 エンコードして TypeScript ファイルに埋め込む方法を試しましたが、ファイルサイズが巨大になり Workers のバンドルサイズ制限に引っかかる問題がありました。
+
+### 解決策：Go で静的事前生成
+
+最終的に、ランタイムでの動的生成を諦めて事前に静的な PNG を生成する方針に切り替えました。既にブログ記事の OGP 背景画像を生成するための Go スクリプト（`scripts/generate-ogp/`）が存在していたので、これを拡張して playground 用のテキスト入り OGP 画像も生成するようにしました。
+
+```sh
+cd scripts/generate-ogp
+make gen-playground  # 22枚のOGP画像を生成
+```
+
+Go の `golang.org/x/image/font` パッケージと `go:embed` で NotoSans フォントを埋め込み、パステルグラデーション背景の上にツール名と説明文を描画しています。生成した PNG は `public/og/` に配置して静的に配信するだけなので、Workers の制約を一切受けません。
+
 ## まとめ
 
 `@opennextjs/cloudflare` から vinext への移行は、互換性チェックの結果通りスムーズに進みました。ビルドが 2 段階から 1 段階になり、`open-next.config.ts` も不要になったことで構成がシンプルになっています。Vite プラグインのエコシステムをそのまま使えるのも大きなメリットです。
