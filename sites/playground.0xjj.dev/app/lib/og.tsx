@@ -1,8 +1,7 @@
-import { ImageResponse } from 'next/og';
-
 export const OG_SIZE = { width: 1200, height: 630 };
 
-export function createOgImage(title: string, description: string) {
+export async function createOgImage(title: string, description: string) {
+  const { ImageResponse } = await import('next/og');
   return new ImageResponse(
     (
       <div
