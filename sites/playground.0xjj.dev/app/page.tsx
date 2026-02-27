@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Playground',
     description: 'A playground for tools, games & experiments.',
-    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+    images: [{ url: '/og/index.png', width: 1200, height: 630 }],
   },
   twitter: {
     title: 'Playground',
     description: 'A playground for tools, games & experiments.',
-    images: ['/opengraph-image'],
+    images: ['/og/index.png'],
   },
 };
 

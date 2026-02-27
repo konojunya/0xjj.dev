@@ -1,25 +1,39 @@
 // generate-ogp generates soft gradient-mesh background images for OGP.
 // Pastel color blobs with heavy gaussian blur produce a dreamy, ethereal look.
-// Text is overlaid separately by Astro's SSG pipeline.
 //
-// Usage (from repo root):
+// For 0xjj.dev blog posts, it generates background-only PNGs (text is overlaid
+// separately by Astro's SSG pipeline).
 //
-//	go run ./scripts/generate-ogp/
-//	go run ./scripts/generate-ogp/ -root /path/to/repo
+// For playground.0xjj.dev, it generates complete OGP images with text overlay
+// (tool name + description on a pastel gradient background).
+//
+// Usage:
+//
+//	go run . --root ../..                     # generate all (blog + playground)
+//	go run . --root ../.. --site blog         # blog backgrounds only
+//	go run . --root ../.. --site playground   # playground OGP only
 package main
 
 import (
 	"bufio"
+	_ "embed"
 	"flag"
 	"fmt"
 	"image"
+	"image/color"
 	"image/png"
 	"math"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
+
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
+	"golang.org/x/image/math/fixed"
 )
 
 const (
@@ -35,6 +49,41 @@ type Post struct {
 	Slug  string
 	Title string
 	Date  time.Time
+}
+
+type Tool struct {
+	Slug        string
+	Name        string
+	Description string
+}
+
+// ── Font ──────────────────────────────────────────────────────────────────
+
+//go:embed fonts/NotoSans-Bold.ttf
+var notoSansTTF []byte
+
+var parsedFont *opentype.Font
+
+func initFont() {
+	var err error
+	parsedFont, err = opentype.Parse(notoSansTTF)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "font parse: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func loadFace(size float64) font.Face {
+	face, err := opentype.NewFace(parsedFont, &opentype.FaceOptions{
+		Size:    size,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "font face: %v\n", err)
+		os.Exit(1)
+	}
+	return face
 }
 
 // ── Shader math ───────────────────────────────────────────────────────────
@@ -278,6 +327,99 @@ func renderBackground(seed float64) *image.RGBA {
 	return buf.toRGBA()
 }
 
+// ── Text drawing ─────────────────────────────────────────────────────────
+
+func drawText(img *image.RGBA, face font.Face, x, y int, col color.RGBA, text string) {
+	d := &font.Drawer{
+		Dst:  img,
+		Src:  image.NewUniform(col),
+		Face: face,
+		Dot:  fixed.P(x, y),
+	}
+	d.DrawString(text)
+}
+
+// measureText returns the advance width of text in pixels.
+func measureText(face font.Face, text string) int {
+	d := &font.Drawer{Face: face}
+	return d.MeasureString(text).Ceil()
+}
+
+// wrapText splits text into lines that fit within maxWidth pixels.
+func wrapText(face font.Face, text string, maxWidth int) []string {
+	words := strings.Fields(text)
+	if len(words) == 0 {
+		return nil
+	}
+
+	var lines []string
+	current := words[0]
+	for _, w := range words[1:] {
+		test := current + " " + w
+		if measureText(face, test) <= maxWidth {
+			current = test
+		} else {
+			lines = append(lines, current)
+			current = w
+		}
+	}
+	lines = append(lines, current)
+	return lines
+}
+
+// truncateText truncates text to fit within maxWidth, adding "…" if needed.
+func truncateText(face font.Face, text string, maxWidth int) string {
+	if measureText(face, text) <= maxWidth {
+		return text
+	}
+	ellipsis := "…"
+	ellipsisW := measureText(face, ellipsis)
+	for len(text) > 0 {
+		_, size := utf8.DecodeLastRuneInString(text)
+		text = text[:len(text)-size]
+		if measureText(face, text)+ellipsisW <= maxWidth {
+			return text + ellipsis
+		}
+	}
+	return ellipsis
+}
+
+// ── Playground OGP rendering ──────────────────────────────────────────────
+
+func renderPlaygroundOGP(tool Tool) *image.RGBA {
+	seed := titleSeed(tool.Name)
+	img := renderBackground(seed)
+
+	domainFace := loadFace(22)
+	titleFace := loadFace(64)
+	descFace := loadFace(28)
+
+	mutedColor := color.RGBA{R: 120, G: 120, B: 120, A: 255}
+	darkColor := color.RGBA{R: 15, G: 15, B: 15, A: 255}
+	descColor := color.RGBA{R: 82, G: 82, B: 82, A: 255}
+
+	padX := 80
+	maxTextW := imgW - padX*2
+
+	// Domain label at top
+	drawText(img, domainFace, padX, 100, mutedColor, "playground.0xjj.dev")
+
+	// Title — possibly truncated if very long
+	titleText := truncateText(titleFace, tool.Name, maxTextW)
+	drawText(img, titleFace, padX, imgH-200, darkColor, titleText)
+
+	// Description — word-wrapped, up to 2 lines
+	descLines := wrapText(descFace, tool.Description, maxTextW)
+	if len(descLines) > 2 {
+		descLines = descLines[:2]
+	}
+	for i, line := range descLines {
+		drawText(img, descFace, padX, imgH-140+i*40, descColor, line)
+	}
+
+	return img
+}
+
 // ── Seed ─────────────────────────────────────────────────────────────────
 
 func titleSeed(title string) float64 {
@@ -333,14 +475,48 @@ func parsePost(path, slug string) Post {
 	return Post{Slug: slug, Title: title, Date: date}
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────
+// ── Tools parser ──────────────────────────────────────────────────────────
 
-func main() {
-	root := flag.String("root", ".", "path to repo root (default: current directory)")
-	flag.Parse()
+var (
+	reSlug = regexp.MustCompile(`slug:\s*'([^']+)'`)
+	reName = regexp.MustCompile(`name:\s*'([^']+)'`)
+	reDesc = regexp.MustCompile(`description:\s*'([^']+)'`)
+)
 
-	contentDir := filepath.Join(*root, "sites", "0xjj.dev", "src", "content", "blog")
-	outputDir := filepath.Join(*root, "sites", "0xjj.dev", "public", "og", "bg")
+func parseTools(path string) []Tool {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "read tools.ts: %v\n", err)
+		os.Exit(1)
+	}
+	content := string(data)
+
+	// Split by object boundaries: each tool starts with "{"
+	// We look for slug/name/description triples within each block
+	blocks := regexp.MustCompile(`\{[^}]+\}`).FindAllString(content, -1)
+
+	var tools []Tool
+	for _, block := range blocks {
+		slugMatch := reSlug.FindStringSubmatch(block)
+		nameMatch := reName.FindStringSubmatch(block)
+		descMatch := reDesc.FindStringSubmatch(block)
+		if slugMatch == nil || nameMatch == nil || descMatch == nil {
+			continue
+		}
+		tools = append(tools, Tool{
+			Slug:        slugMatch[1],
+			Name:        nameMatch[1],
+			Description: descMatch[1],
+		})
+	}
+	return tools
+}
+
+// ── Generators ────────────────────────────────────────────────────────────
+
+func generateBlogOGP(root string) {
+	contentDir := filepath.Join(root, "sites", "0xjj.dev", "src", "content", "blog")
+	outputDir := filepath.Join(root, "sites", "0xjj.dev", "public", "og", "bg")
 
 	if err := os.MkdirAll(outputDir, 0o755); err != nil {
 		fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
@@ -365,19 +541,78 @@ func main() {
 			continue
 		}
 
-		fmt.Printf("generating %s ...\n", slug)
+		fmt.Printf("generating blog/%s ...\n", slug)
 		img := renderBackground(titleSeed(post.Title))
 
 		outPath := filepath.Join(outputDir, slug+".png")
-		out, err := os.Create(outPath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "create %s: %v\n", outPath, err)
-			continue
-		}
-		if err := png.Encode(out, img); err != nil {
-			fmt.Fprintf(os.Stderr, "encode: %v\n", err)
-		}
-		out.Close()
-		fmt.Printf("  → %s\n", outPath)
+		savePNG(outPath, img)
+	}
+}
+
+func generatePlaygroundOGP(root string) {
+	initFont()
+
+	toolsPath := filepath.Join(root, "sites", "playground.0xjj.dev", "app", "lib", "tools.ts")
+	outputDir := filepath.Join(root, "sites", "playground.0xjj.dev", "public", "og")
+
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
+		os.Exit(1)
+	}
+
+	tools := parseTools(toolsPath)
+
+	// Generate index.png for the root page
+	fmt.Println("generating playground/index ...")
+	indexImg := renderPlaygroundOGP(Tool{
+		Slug:        "index",
+		Name:        "Playground",
+		Description: "Tools, games & experiments.",
+	})
+	savePNG(filepath.Join(outputDir, "index.png"), indexImg)
+
+	// Generate per-tool images
+	for _, tool := range tools {
+		fmt.Printf("generating playground/%s ...\n", tool.Slug)
+		img := renderPlaygroundOGP(tool)
+		savePNG(filepath.Join(outputDir, tool.Slug+".png"), img)
+	}
+}
+
+func savePNG(path string, img *image.RGBA) {
+	out, err := os.Create(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "create %s: %v\n", path, err)
+		return
+	}
+	defer out.Close()
+
+	w := bufio.NewWriter(out)
+	if err := png.Encode(w, img); err != nil {
+		fmt.Fprintf(os.Stderr, "encode %s: %v\n", path, err)
+		return
+	}
+	w.Flush()
+	fmt.Printf("  → %s\n", path)
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────
+
+func main() {
+	root := flag.String("root", ".", "path to repo root (default: current directory)")
+	site := flag.String("site", "all", "which site to generate for: blog, playground, or all")
+	flag.Parse()
+
+	switch *site {
+	case "blog":
+		generateBlogOGP(*root)
+	case "playground":
+		generatePlaygroundOGP(*root)
+	case "all":
+		generateBlogOGP(*root)
+		generatePlaygroundOGP(*root)
+	default:
+		fmt.Fprintf(os.Stderr, "unknown --site value: %s (expected: blog, playground, all)\n", *site)
+		os.Exit(1)
 	}
 }
