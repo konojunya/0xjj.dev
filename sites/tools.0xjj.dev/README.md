@@ -29,6 +29,7 @@
 | `reversi` | Reversi | https://tools.0xjj.dev/reversi |
 | `tictactoe` | Tic-Tac-Toe | https://tools.0xjj.dev/tictactoe |
 | `wordwolf` | Word Wolf | https://tools.0xjj.dev/wordwolf |
+| `liquid-glass` | Liquid Glass | https://tools.0xjj.dev/liquid-glass |
 
 ---
 
@@ -279,6 +280,20 @@
 
 **Route**: `app/wordwolf/`
 **API**: `POST /rooms?game=wordwolf`, `GET /ws?game=wordwolf&room=XXXXXX` (WebSocket)
+
+---
+
+### Liquid Glass
+
+> Apple-inspired Liquid Glass effect using SVG filters and backdrop-filter.
+
+- SVG フィルター: feTurbulence + feDisplacementMap + feGaussianBlur + feSpecularLighting
+- マウス追従するガラスパネル (lerp でスムーズ追従)
+- パラメータ調整 UI: Blur / Distortion / Turbulence / Specular / Panel Size
+- プリセット: Subtle / Default / Wavy / Crystal / Molten
+- Chrome/Edge 推奨 (SVG filter + backdrop-filter の組み合わせ)
+
+**Route**: `app/liquid-glass/`
 
 ---
 

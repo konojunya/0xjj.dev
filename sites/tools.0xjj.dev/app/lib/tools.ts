@@ -1,4 +1,4 @@
-export type Category = 'tool' | 'game';
+export type Category = 'tool' | 'game' | 'ui';
 
 export interface Tool {
   slug: string;
@@ -11,6 +11,7 @@ export interface Tool {
 export const categories: { value: Category; label: string }[] = [
   { value: 'tool', label: 'Tools' },
   { value: 'game', label: 'Games' },
+  { value: 'ui', label: 'UI Lab' },
 ];
 
 export const tools: Tool[] = [
@@ -105,6 +106,14 @@ export const tools: Tool[] = [
     description: 'Generate v4 UUIDs instantly, in bulk.',
     href: '/uuid',
     category: 'tool',
+  },
+  // ── UI Lab (A→Z) ──
+  {
+    slug: 'liquid-glass',
+    name: 'Liquid Glass',
+    description: 'Apple-inspired Liquid Glass effect using SVG filters and backdrop-filter.',
+    href: '/liquid-glass',
+    category: 'ui',
   },
   // ── Games (A→Z) ──
   {
