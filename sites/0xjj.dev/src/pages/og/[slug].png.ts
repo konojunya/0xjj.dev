@@ -47,7 +47,7 @@ const W = 1200, H = 630;
 const INK = '#1e0e4e';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
+  const posts = (await getCollection('blog')).filter(p => !p.data.externalUrl);
   return posts.map(post => ({ params: { slug: post.id }, props: { post } }));
 }
 

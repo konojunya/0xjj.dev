@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import { readingTime } from '../../lib/reading-time';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
+  const posts = (await getCollection('blog')).filter(p => !p.data.externalUrl);
   const sorted = posts.sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
   return sorted.map((post, i) => ({
     params: { slug: post.id },

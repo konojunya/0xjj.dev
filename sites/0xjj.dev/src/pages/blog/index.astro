@@ -11,6 +11,7 @@ const sorted = posts
     title: post.data.title,
     date: post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
     minutes: readingTime(post.body ?? ''),
+    externalUrl: post.data.externalUrl,
   }));
 ---
 
@@ -41,15 +42,26 @@ const sorted = posts
     <ul class="post-list" id="post-list">
       {sorted.map(post => (
         <li class="post-item" data-title={post.title.toLowerCase()}>
-          <a href={`/blog/${post.id}`} class="post-link" data-animate>
-            <div class="post-thumb" transition:name={`blog-thumb-${post.id}`}>
-              <img src={`/og/bg/${post.id}.png`} alt="" />
+          <a
+            href={post.externalUrl ?? `/blog/${post.id}`}
+            class="post-link"
+            data-animate
+            {...(post.externalUrl ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          >
+            <div class:list={['post-thumb', { 'post-thumb--external': !!post.externalUrl }]} transition:name={post.externalUrl ? undefined : `blog-thumb-${post.id}`}>
+              {!post.externalUrl && <img src={`/og/bg/${post.id}.png`} alt="" />}
               <div class="post-body">
-                <span class="post-title" transition:name={`blog-title-${post.id}`}>{post.title}</span>
+                <span class="post-title" transition:name={post.externalUrl ? undefined : `blog-title-${post.id}`}>{post.title}</span>
                 <span class="post-meta">
                   <time>{post.date}</time>
                   <span class="sep">·</span>
-                  <span>{post.minutes} min read</span>
+                  {post.externalUrl ? (
+                    <span class="post-tag">UI Lab
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </span>
+                  ) : (
+                    <span>{post.minutes} min read</span>
+                  )}
                 </span>
               </div>
             </div>
@@ -225,12 +237,22 @@ const sorted = posts
     transform: scale(1.04);
   }
 
+  .post-thumb--external {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
   .post-thumb::after {
     content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom, transparent 30%, rgba(255,255,255,0.72) 100%);
     pointer-events: none;
+  }
+
+  .post-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
   }
 
   .post-body {
