@@ -1,5 +1,5 @@
 {
-  "name": "tools-0xjj-dev",
+  "name": "playground-0xjj-dev",
   "main": ".open-next/worker.js",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
@@ -10,7 +10,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "tools-0xjj-dev"
+      "service": "playground-0xjj-dev"
     }
   ],
   "observability": {

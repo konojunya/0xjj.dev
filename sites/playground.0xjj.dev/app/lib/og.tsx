@@ -28,7 +28,7 @@ export function createOgImage(title: string, description: string) {
             marginBottom: 'auto',
           }}
         >
-          tools.0xjj.dev
+          playground.0xjj.dev
         </div>
 
         {/* title + description */}

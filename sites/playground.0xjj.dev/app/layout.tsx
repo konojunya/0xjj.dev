@@ -3,12 +3,12 @@ import { tools } from './lib/tools';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://tools.0xjj.dev'),
+  metadataBase: new URL('https://playground.0xjj.dev'),
   title: {
-    template: '%s | tools.0xjj.dev',
-    default: 'tools.0xjj.dev',
+    template: '%s | playground.0xjj.dev',
+    default: 'playground.0xjj.dev',
   },
-  description: 'Useful tools by JJ',
+  description: 'A playground for tools, games & experiments.',
   icons: {
     icon: [
       { url: '/favicon.ico' },

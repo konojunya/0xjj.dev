@@ -10,7 +10,7 @@ This is a monorepo:
 /
 ├── sites/
 │   ├── 0xjj.dev/        ← Astro site (main)
-│   └── tools.0xjj.dev/  ← Next.js developer tools
+│   └── playground.0xjj.dev/ ← Next.js playground (tools, games & experiments)
 ├── workers/
 │   └── games/           ← Unified game server with multiple DOs (games-api.0xjj.dev)
 └── scripts/

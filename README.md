@@ -8,7 +8,7 @@ JJ (Junya Kono) の個人サイト。
 /
 ├── sites/
 │   ├── 0xjj.dev/        ← Astro サイト本体
-│   └── tools.0xjj.dev/  ← 開発者向けツール集
+│   └── playground.0xjj.dev/ ← ツール・ゲーム・実験場
 ├── workers/
 │   └── games/           ← 統合ゲームサーバー (games-api.0xjj.dev)
 └── scripts/
@@ -27,12 +27,12 @@ bun install
 bun dev
 ```
 
-### [sites/tools.0xjj.dev](./sites/tools.0xjj.dev)
+### [sites/playground.0xjj.dev](./sites/playground.0xjj.dev)
 
-Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築された便利ツール集。
+Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築されたツール・ゲーム・実験場。
 
 ```sh
-cd sites/tools.0xjj.dev
+cd sites/playground.0xjj.dev
 bun install
 bun dev
 ```

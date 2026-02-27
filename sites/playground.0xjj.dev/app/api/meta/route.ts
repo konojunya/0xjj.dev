@@ -4,7 +4,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 const FETCH_INIT = {
   headers: {
     'User-Agent':
-      'Mozilla/5.0 (compatible; OGPChecker/1.0; +https://tools.0xjj.dev/ogpchecker)',
+      'Mozilla/5.0 (compatible; OGPChecker/1.0; +https://playground.0xjj.dev/ogpchecker)',
     Accept: 'text/html,application/xhtml+xml',
     'Accept-Language': 'en-US,en;q=0.9,ja;q=0.8',
   },
@@ -18,7 +18,7 @@ async function fetchUrl(url: string): Promise<Response> {
     const { env } = getCloudflareContext();
     const binding = (env as Record<string, { fetch: typeof fetch } | undefined>)
       .WORKER_SELF_REFERENCE;
-    if (binding && new URL(url).hostname === 'tools.0xjj.dev') {
+    if (binding && new URL(url).hostname === 'playground.0xjj.dev') {
       return binding.fetch(new Request(url, FETCH_INIT));
     }
   } catch {

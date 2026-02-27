@@ -1,8 +1,8 @@
-# tools.0xjj.dev
+# playground.0xjj.dev
 
-便利ツール集。Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築。
+ツール・ゲーム・実験場。Next.js 15 + Tailwind CSS v4 + Cloudflare Workers で構築。
 
-**URL**: https://tools.0xjj.dev
+**URL**: https://playground.0xjj.dev
 
 ## Tools
 
@@ -10,26 +10,26 @@
 
 | slug | Tool | URL |
 |---|---|---|
-| `base64` | Base64 Encoder / Decoder | https://tools.0xjj.dev/base64 |
-| `color` | Color Converter | https://tools.0xjj.dev/color |
-| `cron` | Cron Expression Parser | https://tools.0xjj.dev/cron |
-| `easing` | Easing Visualizer | https://tools.0xjj.dev/easing |
-| `exif` | EXIF Viewer | https://tools.0xjj.dev/exif |
-| `hash` | Hash Calculator | https://tools.0xjj.dev/hash |
-| `json` | JSON Formatter | https://tools.0xjj.dev/json |
-| `jwt` | JWT Decoder | https://tools.0xjj.dev/jwt |
-| `base` | Number Base Converter | https://tools.0xjj.dev/base |
-| `ogpchecker` | OGP Checker | https://tools.0xjj.dev/ogpchecker |
-| `ratio` | Ratio Calculator | https://tools.0xjj.dev/ratio |
-| `regex` | RegEx Tester | https://tools.0xjj.dev/regex |
-| `uuid` | UUID Generator | https://tools.0xjj.dev/uuid |
-| `2048` | 2048 | https://tools.0xjj.dev/2048 |
-| `connect-four` | Connect Four | https://tools.0xjj.dev/connect-four |
-| `dots-and-boxes` | Dots & Boxes | https://tools.0xjj.dev/dots-and-boxes |
-| `reversi` | Reversi | https://tools.0xjj.dev/reversi |
-| `tictactoe` | Tic-Tac-Toe | https://tools.0xjj.dev/tictactoe |
-| `wordwolf` | Word Wolf | https://tools.0xjj.dev/wordwolf |
-| `liquid-glass` | Liquid Glass | https://tools.0xjj.dev/liquid-glass |
+| `base64` | Base64 Encoder / Decoder | https://playground.0xjj.dev/base64 |
+| `color` | Color Converter | https://playground.0xjj.dev/color |
+| `cron` | Cron Expression Parser | https://playground.0xjj.dev/cron |
+| `easing` | Easing Visualizer | https://playground.0xjj.dev/easing |
+| `exif` | EXIF Viewer | https://playground.0xjj.dev/exif |
+| `hash` | Hash Calculator | https://playground.0xjj.dev/hash |
+| `json` | JSON Formatter | https://playground.0xjj.dev/json |
+| `jwt` | JWT Decoder | https://playground.0xjj.dev/jwt |
+| `base` | Number Base Converter | https://playground.0xjj.dev/base |
+| `ogpchecker` | OGP Checker | https://playground.0xjj.dev/ogpchecker |
+| `ratio` | Ratio Calculator | https://playground.0xjj.dev/ratio |
+| `regex` | RegEx Tester | https://playground.0xjj.dev/regex |
+| `uuid` | UUID Generator | https://playground.0xjj.dev/uuid |
+| `2048` | 2048 | https://playground.0xjj.dev/2048 |
+| `connect-four` | Connect Four | https://playground.0xjj.dev/connect-four |
+| `dots-and-boxes` | Dots & Boxes | https://playground.0xjj.dev/dots-and-boxes |
+| `reversi` | Reversi | https://playground.0xjj.dev/reversi |
+| `tictactoe` | Tic-Tac-Toe | https://playground.0xjj.dev/tictactoe |
+| `wordwolf` | Word Wolf | https://playground.0xjj.dev/wordwolf |
+| `liquid-glass` | Liquid Glass | https://playground.0xjj.dev/liquid-glass |
 
 ---
 
