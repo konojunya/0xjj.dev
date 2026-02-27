@@ -5,6 +5,7 @@ import { tools } from '../lib/tools';
 import { renderMarkdown } from '../lib/markdown';
 import Article from '../lib/Article';
 import Demo from './Demo';
+import FloatingNavDemo from './FloatingNavDemo';
 
 const tool = tools.find((t) => t.slug === 'liquid-glass')!;
 
@@ -57,6 +58,7 @@ export default async function Page() {
       </div>
 
       <Article en={en} ja={ja} />
+      <FloatingNavDemo />
     </div>
   );
 }
