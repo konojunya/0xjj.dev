@@ -156,10 +156,8 @@ export default function FloatingNavDemo() {
               <svg colorInterpolationFilters="sRGB" style={{ display: 'none' }}>
                 <defs>
                   <filter id="nav-glass">
-                    <feImage href="/liquid-glass/zoom.png" x={0} y={0} width={GW} height={GH} result="zm" />
-                    <feDisplacementMap in="SourceGraphic" in2="zm" scale={24} xChannelSelector="R" yChannelSelector="G" result="zoomed" />
                     <feImage href="/liquid-glass/refract.png" x={0} y={0} width={GW} height={GH} result="rf" />
-                    <feDisplacementMap in="zoomed" in2="rf" scale={98} xChannelSelector="R" yChannelSelector="G" result="bent" />
+                    <feDisplacementMap in="SourceGraphic" in2="rf" scale={98} xChannelSelector="R" yChannelSelector="G" result="bent" />
                     <feColorMatrix in="bent" type="saturate" values="9" result="vivid" />
                     <feImage href="/liquid-glass/highlight.png" x={0} y={0} width={GW} height={GH} result="hl" />
                     <feComposite in="vivid" in2="hl" operator="in" result="hl-sat" />
