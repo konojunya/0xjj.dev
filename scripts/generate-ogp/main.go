@@ -386,9 +386,19 @@ func truncateText(face font.Face, text string, maxWidth int) string {
 
 // ── Playground OGP rendering ──────────────────────────────────────────────
 
+func whiteBackground() *image.RGBA {
+	img := image.NewRGBA(image.Rect(0, 0, imgW, imgH))
+	for i := 0; i < len(img.Pix); i += 4 {
+		img.Pix[i] = 0xFA   // R
+		img.Pix[i+1] = 0xFA // G
+		img.Pix[i+2] = 0xFA // B
+		img.Pix[i+3] = 0xFF // A
+	}
+	return img
+}
+
 func renderPlaygroundOGP(tool Tool) *image.RGBA {
-	seed := titleSeed(tool.Name)
-	img := renderBackground(seed)
+	img := whiteBackground()
 
 	domainFace := loadFace(22)
 	titleFace := loadFace(64)
