@@ -1,5 +1,5 @@
 ---
-title: "Next.jsにおけるenvのベストプラクティス"
+title: "Next.jsにおける\nenvのベストプラクティス"
 date: 2021-11-03
 ---
 

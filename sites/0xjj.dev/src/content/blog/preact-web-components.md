@@ -1,5 +1,5 @@
 ---
-title: "Preactで作ったコンポーネントをWeb Components として公開する"
+title: "Preactで作ったコンポーネントを\nWeb Components として公開する"
 date: 2020-11-19
 ---
 

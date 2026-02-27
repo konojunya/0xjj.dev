@@ -1,5 +1,5 @@
 ---
-title: "Gemini API でポーカーの役を判定する"
+title: "Gemini API で\nポーカーの役を判定する"
 date: 2024-02-03
 ---
 
