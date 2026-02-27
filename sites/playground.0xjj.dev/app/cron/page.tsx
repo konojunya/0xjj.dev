@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import { tools } from '../lib/tools';
+import { createToolMetadata } from '../lib/metadata';
 import CronParser from './CronParser';
 
-const tool = tools.find((t) => t.slug === 'cron')!;
-
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('cron');
 
 export default function Page() {
   return <CronParser />;

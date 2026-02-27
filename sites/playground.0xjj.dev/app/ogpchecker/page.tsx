@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import { tools } from '../lib/tools';
+import { createToolMetadata } from '../lib/metadata';
 import OgpChecker from './OgpChecker';
 
-const tool = tools.find((t) => t.slug === 'ogpchecker')!;
-
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('ogpchecker');
 
 export default function Page() {
   return <OgpChecker />;

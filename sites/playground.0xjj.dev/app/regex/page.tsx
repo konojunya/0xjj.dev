@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import { tools } from '../lib/tools';
+import { createToolMetadata } from '../lib/metadata';
 import RegexTester from './RegexTester';
 
-const tool = tools.find((t) => t.slug === 'regex')!;
-
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('regex');
 
 export default function Page() {
   return <RegexTester />;

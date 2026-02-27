@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import { tools } from '../lib/tools';
+import { createToolMetadata } from '../lib/metadata';
 import Game2048 from './Game2048';
 
-const tool = tools.find((t) => t.slug === '2048')!;
-
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('2048');
 
 export default function Page() {
   return <Game2048 />;

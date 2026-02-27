@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import { tools } from '../lib/tools';
+import { createToolMetadata } from '../lib/metadata';
 import ConnectFour from './ConnectFour';
 
-const tool = tools.find((t) => t.slug === 'connect-four')!;
-
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('connect-four');
 
 export default function Page() {
   return <ConnectFour />;

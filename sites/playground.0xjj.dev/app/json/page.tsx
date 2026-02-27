@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import { tools } from '../lib/tools';
+import { createToolMetadata } from '../lib/metadata';
 import JsonFormatter from './JsonFormatter';
 
-const tool = tools.find((t) => t.slug === 'json')!;
-
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('json');
 
 export default function Page() {
   return <JsonFormatter />;

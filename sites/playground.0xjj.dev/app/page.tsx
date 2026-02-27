@@ -1,4 +1,18 @@
+import type { Metadata } from 'next';
 import ToolGrid from './ToolGrid';
+
+export const metadata: Metadata = {
+  openGraph: {
+    title: 'Playground',
+    description: 'A playground for tools, games & experiments.',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
+  },
+  twitter: {
+    title: 'Playground',
+    description: 'A playground for tools, games & experiments.',
+    images: ['/opengraph-image'],
+  },
+};
 
 export default function Home() {
   return (

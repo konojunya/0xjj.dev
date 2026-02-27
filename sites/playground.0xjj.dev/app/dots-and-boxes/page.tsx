@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import { tools } from '../lib/tools';
+import { createToolMetadata } from '../lib/metadata';
 import DotsAndBoxes from './DotsAndBoxes';
 
-const tool = tools.find((t) => t.slug === 'dots-and-boxes')!;
-
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('dots-and-boxes');
 
 export default function Page() {
   return <DotsAndBoxes />;

@@ -1,16 +1,10 @@
-import type { Metadata } from 'next';
-import { tools } from '../lib/tools';
+import { createToolMetadata } from '../lib/metadata';
 import Article from '../lib/Article';
 import Demo from './Demo';
 import En from './en.mdx';
 import Ja from './ja.mdx';
 
-const tool = tools.find((t) => t.slug === 'liquid-glass')!;
-
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('liquid-glass');
 
 export default function Page() {
   return (

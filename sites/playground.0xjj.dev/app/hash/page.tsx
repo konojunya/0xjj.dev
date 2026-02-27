@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import { tools } from '../lib/tools';
+import { createToolMetadata } from '../lib/metadata';
 import HashCalculator from './HashCalculator';
 
-const tool = tools.find((t) => t.slug === 'hash')!;
-
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('hash');
 
 export default function Page() {
   return <HashCalculator />;

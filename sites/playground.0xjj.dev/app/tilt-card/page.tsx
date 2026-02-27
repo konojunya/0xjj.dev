@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import { createToolMetadata } from '../lib/metadata';
 import { tools } from '../lib/tools';
 import Article from '../lib/Article';
 import { TiltCard } from './TiltCard';
@@ -7,10 +7,7 @@ import Ja from './ja.mdx';
 
 const tool = tools.find((t) => t.slug === 'tilt-card')!;
 
-export const metadata: Metadata = {
-  title: tool.name,
-  description: tool.description,
-};
+export const metadata = createToolMetadata('tilt-card');
 
 export default function Page() {
   return (

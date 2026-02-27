@@ -9,6 +9,14 @@ export const metadata: Metadata = {
     default: 'Playground',
   },
   description: 'A playground for tools, games & experiments.',
+  openGraph: {
+    siteName: 'Playground',
+    type: 'website',
+    locale: 'en',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico' },
