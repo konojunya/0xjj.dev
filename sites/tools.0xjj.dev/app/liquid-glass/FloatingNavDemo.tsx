@@ -4,209 +4,187 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Globe, AlarmClock, Timer, Clock } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-const NAV_ITEMS: { icon: LucideIcon; label: string }[] = [
+const ITEMS: { icon: LucideIcon; label: string }[] = [
   { icon: Globe, label: 'World' },
   { icon: AlarmClock, label: 'Alarm' },
   { icon: Timer, label: 'Stopwatch' },
   { icon: Clock, label: 'Timer' },
 ];
 
-/** Glass indicator dimensions */
-const GLASS_W = 90;
-const GLASS_H = 56;
-const GLASS_R = 22;
+/** Glass indicator size — matches one tab item */
+const GW = 100;
+const GH = 68;
+const GR = 18;
 
 const MAP_SRCS = ['/liquid-glass/zoom.png', '/liquid-glass/refract.png', '/liquid-glass/highlight.png'];
 
 export default function FloatingNavDemo() {
   const [active, setActive] = useState(0);
   const [mapsReady, setMapsReady] = useState(false);
-  const [dragging, setDragging] = useState(false);
-  const [dragX, setDragX] = useState(0);
-  const navRef = useRef<HTMLElement>(null);
+  const [, forceRender] = useState(0);
+  const navRef = useRef<HTMLDivElement>(null);
+  const glassRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
-  const itemPositions = useRef<{ center: number; left: number; width: number }[]>([]);
+  const itemCenters = useRef<number[]>([]);
+  const isDraggingRef = useRef(false);
+  const dragXRef = useRef<number | null>(null);
 
-  // Preload displacement maps
+  // Preload maps
   useEffect(() => {
     let cancelled = false;
     Promise.all(
       MAP_SRCS.map(
-        (src) =>
-          new Promise<void>((resolve) => {
-            const img = new Image();
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-            img.src = src;
-          }),
+        (src) => new Promise<void>((res) => {
+          const img = new Image();
+          img.onload = () => res();
+          img.onerror = () => res();
+          img.src = src;
+        }),
       ),
-    ).then(() => {
-      if (!cancelled) setMapsReady(true);
-    });
+    ).then(() => { if (!cancelled) setMapsReady(true); });
     return () => { cancelled = true; };
   }, []);
 
-  // Measure item positions
+  // Measure tab centers
   useEffect(() => {
-    if (!navRef.current) return;
-    const buttons = navRef.current.querySelectorAll<HTMLButtonElement>('[data-nav-item]');
-    const navRect = navRef.current.getBoundingClientRect();
-    itemPositions.current = Array.from(buttons).map((btn) => {
-      const r = btn.getBoundingClientRect();
-      const left = r.left - navRect.left;
-      return { left, width: r.width, center: left + r.width / 2 };
+    const nav = navRef.current;
+    if (!nav) return;
+    const btns = nav.querySelectorAll<HTMLButtonElement>('[data-item]');
+    const navLeft = nav.getBoundingClientRect().left;
+    itemCenters.current = Array.from(btns).map((b) => {
+      const r = b.getBoundingClientRect();
+      return r.left - navLeft + r.width / 2;
     });
   }, [mapsReady]);
 
-  const getSnapX = useCallback((idx: number) => {
-    const pos = itemPositions.current[idx];
-    if (!pos) return 0;
-    return pos.center - GLASS_W / 2;
+  const snapX = (i: number) => (itemCenters.current[i] ?? 0) - GW / 2;
+  const glassLeft = isDraggingRef.current ? (dragXRef.current ?? 0) : snapX(active);
+
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    glassRef.current?.setPointerCapture(e.pointerId);
+    const currentSnap = snapX(active);
+    offsetRef.current = e.clientX - currentSnap;
+    isDraggingRef.current = true;
+    dragXRef.current = currentSnap;
+    forceRender((n) => n + 1);
+  }, [active]);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    const nav = navRef.current;
+    if (!nav) return;
+    const x = e.clientX - offsetRef.current;
+    dragXRef.current = Math.max(0, Math.min(x, nav.offsetWidth - GW));
+    forceRender((n) => n + 1);
   }, []);
 
-  const indicatorX = dragging ? dragX : getSnapX(active);
-
-  const onPointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      setDragging(true);
-      const currentX = getSnapX(active);
-      offsetRef.current = e.clientX - currentX;
-      setDragX(currentX);
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    },
-    [active, getSnapX],
-  );
-
-  const onPointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (!dragging) return;
-      const nav = navRef.current;
-      if (!nav) return;
-      const x = e.clientX - offsetRef.current;
-      const maxX = nav.offsetWidth - GLASS_W;
-      setDragX(Math.max(0, Math.min(x, maxX)));
-    },
-    [dragging],
-  );
-
   const onPointerUp = useCallback(() => {
-    if (!dragging) return;
-    setDragging(false);
-    // Snap to nearest tab
-    const centerX = dragX + GLASS_W / 2;
+    if (!isDraggingRef.current) return;
+    const cx = (dragXRef.current ?? 0) + GW / 2;
     let closest = 0;
-    let minDist = Infinity;
-    itemPositions.current.forEach((pos, i) => {
-      const dist = Math.abs(pos.center - centerX);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = i;
-      }
+    let minD = Infinity;
+    itemCenters.current.forEach((c, i) => {
+      const d = Math.abs(c - cx);
+      if (d < minD) { minD = d; closest = i; }
     });
+    isDraggingRef.current = false;
+    dragXRef.current = null;
     setActive(closest);
-  }, [dragging, dragX]);
+    forceRender((n) => n + 1);
+  }, []);
 
   return (
     <section className="mt-16">
       <h2 className="text-xl font-bold tracking-tight text-fg">UI Example: Floating Navigation</h2>
       <p className="mt-2 text-sm text-muted">
-        Drag the glass indicator across tabs — icons refract through the liquid glass as it moves.
+        Drag the glass indicator across tabs — the same SVG displacement filter from the demo above.
       </p>
 
       <div className="relative mt-4 flex h-[200px] items-center justify-center overflow-hidden rounded-xl bg-[#1c1c1e]">
-        {/* Colored background shapes so refraction is visible */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-[8%] top-[10%] h-32 w-32 rounded-full bg-orange-500/20 blur-2xl" />
-          <div className="absolute right-[12%] bottom-[15%] h-40 w-40 rounded-full bg-purple-500/15 blur-2xl" />
-          <div className="absolute left-[40%] bottom-[20%] h-28 w-28 rounded-full bg-blue-500/15 blur-2xl" />
-        </div>
-
-        <nav
+        {/* Nav bar */}
+        <div
           ref={navRef}
-          className="relative flex items-center rounded-[28px] p-1.5"
-          style={{
-            background: 'rgba(255,255,255,0.06)',
-            border: '0.5px solid rgba(255,255,255,0.08)',
-          }}
+          className="relative flex items-stretch rounded-full"
+          style={{ background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.1)', padding: 4 }}
         >
-          {/* Draggable glass indicator */}
-          {mapsReady && (
-            <div
-              className="absolute z-10 cursor-grab active:cursor-grabbing"
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
-              onPointerLeave={onPointerUp}
-              style={{
-                left: indicatorX,
-                top: 6,
-                width: GLASS_W,
-                height: GLASS_H,
-                borderRadius: GLASS_R,
-                transition: dragging ? 'none' : 'left 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                touchAction: 'none',
-                userSelect: 'none',
-              }}
-            >
-              <svg colorInterpolationFilters="sRGB" style={{ display: 'none' }}>
-                <defs>
-                  <filter id="nav-glass">
-                    <feImage href="/liquid-glass/zoom.png" x={0} y={0} width={GLASS_W} height={GLASS_H} result="zm" />
-                    <feDisplacementMap in="SourceGraphic" in2="zm" scale={16} xChannelSelector="R" yChannelSelector="G" result="zoomed" />
-                    <feImage href="/liquid-glass/refract.png" x={0} y={0} width={GLASS_W} height={GLASS_H} result="rf" />
-                    <feDisplacementMap in="zoomed" in2="rf" scale={60} xChannelSelector="R" yChannelSelector="G" result="bent" />
-                    <feColorMatrix in="bent" type="saturate" values="6" result="vivid" />
-                    <feImage href="/liquid-glass/highlight.png" x={0} y={0} width={GLASS_W} height={GLASS_H} result="hl" />
-                    <feComposite in="vivid" in2="hl" operator="in" result="hl-sat" />
-                    <feComponentTransfer in="hl" result="hl-fade">
-                      <feFuncA type="linear" slope={0.4} />
-                    </feComponentTransfer>
-                    <feBlend in="hl-sat" in2="bent" mode="normal" result="merged" />
-                    <feBlend in="hl-fade" in2="merged" mode="normal" />
-                  </filter>
-                </defs>
-              </svg>
-              <div
-                className="absolute inset-0"
-                style={{
-                  borderRadius: GLASS_R,
-                  backdropFilter: 'url(#nav-glass)',
-                  WebkitBackdropFilter: 'url(#nav-glass)',
-                  background: 'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 100%)',
-                  boxShadow:
-                    'inset 0 0.5px 0 rgba(255,255,255,0.3), inset 0 -0.5px 0 rgba(255,255,255,0.06), 0 4px 16px rgba(0,0,0,0.4)',
-                  border: '0.5px solid rgba(255,255,255,0.18)',
-                }}
-              />
-            </div>
-          )}
-
-          {/* Nav items */}
-          {NAV_ITEMS.map((item, i) => {
+          {/* Tab items */}
+          {ITEMS.map((item, i) => {
             const Icon = item.icon;
             const isActive = active === i;
             return (
               <button
                 key={item.label}
                 type="button"
-                data-nav-item
-                onClick={() => !dragging && setActive(i)}
-                className="relative z-20 flex flex-col items-center gap-1 px-5 py-2"
+                data-item
+                onClick={() => { if (!isDraggingRef.current) setActive(i); }}
+                className="relative z-10 flex flex-col items-center gap-1 px-6 py-3"
               >
                 <Icon
                   size={24}
-                  strokeWidth={isActive ? 2.2 : 1.5}
+                  strokeWidth={isActive ? 2 : 1.5}
                   className={`transition-colors duration-300 ${isActive ? 'text-orange-400' : 'text-white/40'}`}
                 />
-                <span
-                  className={`text-[11px] font-medium transition-colors duration-300 ${isActive ? 'text-orange-400' : 'text-white/40'}`}
-                >
+                <span className={`text-[11px] font-medium transition-colors duration-300 ${isActive ? 'text-orange-400' : 'text-white/40'}`}>
                   {item.label}
                 </span>
               </button>
             );
           })}
-        </nav>
+
+          {/* Glass indicator — above buttons so backdrop-filter refracts the icons/text */}
+          {mapsReady && (
+            <div
+              ref={glassRef}
+              className="absolute z-20 cursor-grab touch-none select-none active:cursor-grabbing"
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerCancel={onPointerUp}
+              draggable={false}
+              style={{
+                left: glassLeft,
+                top: 4,
+                width: GW,
+                height: GH,
+                borderRadius: GR,
+                overflow: 'hidden',
+                transition: isDraggingRef.current ? 'none' : 'left 0.45s cubic-bezier(0.32, 0.72, 0, 1)',
+              }}
+            >
+              {/* SVG filter — same chain as Demo */}
+              <svg colorInterpolationFilters="sRGB" style={{ display: 'none' }}>
+                <defs>
+                  <filter id="nav-glass">
+                    <feImage href="/liquid-glass/zoom.png" x={0} y={0} width={GW} height={GH} result="zm" />
+                    <feDisplacementMap in="SourceGraphic" in2="zm" scale={24} xChannelSelector="R" yChannelSelector="G" result="zoomed" />
+                    <feImage href="/liquid-glass/refract.png" x={0} y={0} width={GW} height={GH} result="rf" />
+                    <feDisplacementMap in="zoomed" in2="rf" scale={98} xChannelSelector="R" yChannelSelector="G" result="bent" />
+                    <feColorMatrix in="bent" type="saturate" values="9" result="vivid" />
+                    <feImage href="/liquid-glass/highlight.png" x={0} y={0} width={GW} height={GH} result="hl" />
+                    <feComposite in="vivid" in2="hl" operator="in" result="hl-sat" />
+                    <feComponentTransfer in="hl" result="hl-fade">
+                      <feFuncA type="linear" slope={0.5} />
+                    </feComponentTransfer>
+                    <feBlend in="hl-sat" in2="bent" mode="normal" result="merged" />
+                    <feBlend in="hl-fade" in2="merged" mode="normal" />
+                  </filter>
+                </defs>
+              </svg>
+              {/* Glass surface — same as Demo */}
+              <div
+                className="pointer-events-none absolute inset-0 ring-1 ring-white/10"
+                style={{
+                  borderRadius: GR,
+                  backdropFilter: 'url(#nav-glass)',
+                  WebkitBackdropFilter: 'url(#nav-glass)',
+                  boxShadow:
+                    '0 4px 9px rgba(0,0,0,.16), inset 0 2px 24px rgba(0,0,0,.2), inset 0 -2px 24px rgba(255,255,255,.2)',
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
