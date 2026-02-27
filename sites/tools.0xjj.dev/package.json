@@ -16,7 +16,12 @@
     "pdf-lib": "^1.17.1",
     "piexifjs": "^1.0.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",
