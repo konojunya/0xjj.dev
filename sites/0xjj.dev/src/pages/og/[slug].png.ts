@@ -153,7 +153,7 @@ export const GET: APIRoute = async ({ props }) => {
                         props: {
                           style: {
                             fontFamily: 'Inter',
-                            fontSize: 64,
+                            fontSize: 32,
                             fontWeight: 400,
                             color: `rgba(30,14,78,0.45)`,
                             letterSpacing: '0.5px',
@@ -166,7 +166,7 @@ export const GET: APIRoute = async ({ props }) => {
                         props: {
                           style: {
                             fontFamily: 'Inter',
-                            fontSize: 64,
+                            fontSize: 32,
                             fontWeight: 400,
                             color: `rgba(30,14,78,0.55)`,
                             letterSpacing: '0.5px',
