@@ -1,128 +1,40 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
-interface Params {
-  blur: number;
-  distortion: number;
-  turbulence: number;
-  specular: number;
-  panelSize: number;
-}
-
-const DEFAULT_PARAMS: Params = {
-  blur: 4,
-  distortion: 30,
-  turbulence: 0.015,
-  specular: 0.75,
-  panelSize: 280,
-};
-
-const PRESETS: { label: string; value: Params }[] = [
-  { label: 'Subtle', value: { blur: 2, distortion: 12, turbulence: 0.01, specular: 0.4, panelSize: 260 } },
-  { label: 'Default', value: DEFAULT_PARAMS },
-  { label: 'Wavy', value: { blur: 3, distortion: 50, turbulence: 0.025, specular: 0.6, panelSize: 300 } },
-  { label: 'Crystal', value: { blur: 6, distortion: 8, turbulence: 0.005, specular: 1.2, panelSize: 320 } },
-  { label: 'Molten', value: { blur: 5, distortion: 80, turbulence: 0.04, specular: 0.9, panelSize: 240 } },
-];
-
-const SLIDERS: { key: keyof Params; label: string; min: number; max: number; step: number }[] = [
-  { key: 'blur', label: 'Blur', min: 0, max: 20, step: 0.5 },
-  { key: 'distortion', label: 'Distortion', min: 0, max: 120, step: 1 },
-  { key: 'turbulence', label: 'Turbulence', min: 0.001, max: 0.08, step: 0.001 },
-  { key: 'specular', label: 'Specular', min: 0, max: 2, step: 0.05 },
-  { key: 'panelSize', label: 'Panel Size', min: 120, max: 500, step: 10 },
-];
+const GLASS_W = 210;
+const GLASS_H = 150;
+const BORDER_RADIUS = 75;
+const DISPLACEMENT_SCALE = 98;
+const MAGNIFY_SCALE = 24;
+const SATURATION = 9;
+const SPECULAR_OPACITY = 0.5;
 
 export default function LiquidGlass() {
-  const [params, setParams] = useState<Params>(DEFAULT_PARAMS);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [panelPos, setPanelPos] = useState({ x: 0, y: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
-  const targetRef = useRef({ x: 0, y: 0 });
+  const [pos, setPos] = useState({ x: 24, y: 24 });
+  const dragging = useRef(false);
+  const offset = useRef({ x: 0, y: 0 });
 
-  // Smooth mouse tracking with lerp
-  const animate = useCallback(() => {
-    setPanelPos((prev) => ({
-      x: prev.x + (targetRef.current.x - prev.x) * 0.12,
-      y: prev.y + (targetRef.current.y - prev.y) * 0.12,
-    }));
-    rafRef.current = requestAnimationFrame(animate);
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      dragging.current = true;
+      offset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    },
+    [pos],
+  );
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragging.current) return;
+    setPos({ x: e.clientX - offset.current.x, y: e.clientY - offset.current.y });
   }, []);
 
-  useEffect(() => {
-    rafRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [animate]);
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      setMouse({ x, y });
-      targetRef.current = {
-        x: x - params.panelSize / 2,
-        y: y - params.panelSize / 2,
-      };
-    },
-    [params.panelSize],
-  );
-
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const touch = e.touches[0];
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      setMouse({ x, y });
-      targetRef.current = {
-        x: x - params.panelSize / 2,
-        y: y - params.panelSize / 2,
-      };
-    },
-    [params.panelSize],
-  );
+  const onPointerUp = useCallback(() => {
+    dragging.current = false;
+  }, []);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
-      {/* Hidden SVG filter definitions */}
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <filter id="liquid-glass-filter" x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency={params.turbulence}
-              numOctaves={3}
-              seed={2}
-              result="noise"
-            />
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="noise"
-              scale={params.distortion}
-              xChannelSelector="R"
-              yChannelSelector="G"
-              result="distorted"
-            />
-            <feGaussianBlur in="distorted" stdDeviation={params.blur} result="blurred" />
-            <feSpecularLighting
-              in="noise"
-              surfaceScale={5}
-              specularConstant={params.specular}
-              specularExponent={20}
-              lightingColor="#ffffff"
-              result="specular"
-            >
-              <fePointLight x={mouse.x} y={mouse.y} z={200} />
-            </feSpecularLighting>
-            <feComposite in="specular" in2="SourceGraphic" operator="in" result="specular-shape" />
-            <feComposite in="blurred" in2="specular-shape" operator="arithmetic" k1={0} k2={1} k3={0.6} k4={0} />
-          </filter>
-        </defs>
-      </svg>
-
       <a
         href="/"
         className="mb-6 inline-block font-mono text-xs text-muted transition-colors hover:text-fg"
@@ -131,120 +43,163 @@ export default function LiquidGlass() {
       </a>
       <h1 className="text-2xl font-semibold tracking-tight text-fg">Liquid Glass</h1>
       <p className="mt-1 text-sm text-muted">
-        Apple-inspired Liquid Glass effect using SVG filters. Move your cursor over the canvas.
+        Drag the capsule to bend the page. SVG displacement filter refracts whatever sits beneath it.
       </p>
-
       <p className="mt-2 rounded bg-yellow-500/10 px-3 py-1.5 text-xs text-yellow-600 dark:text-yellow-400">
-        Best experienced in Chrome/Edge. Other browsers may render the effect differently due to SVG filter support.
+        Requires Chrome / Edge. backdrop-filter + SVG filter is not supported in Firefox / Safari.
       </p>
 
-      {/* Canvas area */}
-      <div
-        ref={containerRef}
-        onMouseMove={handleMouseMove}
-        onTouchMove={handleTouchMove}
-        className="relative mt-6 h-[500px] w-full cursor-none select-none overflow-hidden rounded-xl border border-white/10"
-        style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
-        }}
-      >
-        {/* Decorative blobs */}
-        <div
-          className="absolute left-[10%] top-[15%] h-40 w-40 rounded-full opacity-70"
-          style={{ background: 'radial-gradient(circle, #ff6b6b, transparent 70%)' }}
-        />
-        <div
-          className="absolute right-[15%] top-[20%] h-52 w-52 rounded-full opacity-60"
-          style={{ background: 'radial-gradient(circle, #48dbfb, transparent 70%)' }}
-        />
-        <div
-          className="absolute bottom-[15%] left-[25%] h-44 w-44 rounded-full opacity-65"
-          style={{ background: 'radial-gradient(circle, #feca57, transparent 70%)' }}
-        />
-        <div
-          className="absolute bottom-[10%] right-[20%] h-36 w-36 rounded-full opacity-70"
-          style={{ background: 'radial-gradient(circle, #ff9ff3, transparent 70%)' }}
-        />
-        <div
-          className="absolute left-[50%] top-[50%] h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50"
-          style={{ background: 'radial-gradient(circle, #54a0ff, transparent 70%)' }}
-        />
-
-        {/* Decorative shapes */}
-        <div className="absolute left-[60%] top-[10%] h-20 w-20 rotate-45 rounded-lg bg-white/15" />
-        <div className="absolute bottom-[25%] left-[8%] h-16 w-16 rounded-full border-4 border-white/20" />
-        <div className="absolute right-[10%] top-[60%] h-0 w-0 border-l-[25px] border-r-[25px] border-b-[40px] border-l-transparent border-r-transparent border-b-white/15" />
-
-        {/* Text for visual context */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-6xl font-bold text-white/25 select-none">Liquid Glass</span>
-        </div>
-
-        {/* Glass panel */}
-        <div
-          className="pointer-events-none absolute rounded-2xl"
-          style={{
-            width: params.panelSize,
-            height: params.panelSize,
-            transform: `translate(${panelPos.x}px, ${panelPos.y}px)`,
-            willChange: 'transform',
-            backdropFilter: `url(#liquid-glass-filter) blur(${params.blur}px)`,
-            WebkitBackdropFilter: `url(#liquid-glass-filter) blur(${params.blur}px)`,
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.3)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3)',
-          }}
-        >
-          {/* Inner highlight */}
-          <div
-            className="absolute inset-0 rounded-2xl"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(255,255,255,0.05) 100%)',
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="mt-6 space-y-4">
-        {/* Presets */}
-        <div>
-          <span className="mb-2 block text-xs font-medium text-muted">Presets</span>
-          <div className="flex flex-wrap gap-2">
-            {PRESETS.map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                onClick={() => setParams(preset.value)}
-                className="rounded-md border border-white/10 bg-white/5 px-3 py-1 font-mono text-xs text-muted transition-colors hover:bg-white/10 hover:text-fg"
-              >
-                {preset.label}
-              </button>
-            ))}
+      {/* Demo area */}
+      <div className="relative mt-6 h-[440px] overflow-hidden rounded-xl border border-black/10 bg-white select-none dark:border-white/10 dark:bg-black sm:h-[460px]">
+        {/* Background scene */}
+        <div className="absolute inset-0 grid grid-cols-1 gap-6 p-6 sm:grid-cols-[1fr_46%] sm:gap-10 sm:p-10">
+          {/* Left: text */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-3 text-violet-600 dark:text-violet-400">
+              <span className="h-[2px] w-10 bg-current" />
+              <span className="text-[11px] font-medium uppercase tracking-[0.25em]">UI Lab</span>
+            </div>
+            <h3 className="mt-4 text-[36px] font-extrabold leading-[0.95] tracking-tight text-black sm:text-[54px] dark:text-white">
+              Liquid&nbsp;Glass Demo
+            </h3>
+            <div className="mt-4 max-w-[60ch] space-y-3 text-[15px] leading-[1.55] text-black/70 sm:text-[16px] dark:text-white/70">
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                exercitation ullamco laboris.
+              </p>
+              <p>
+                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+                fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
+              </p>
+              <p className="text-black/60 dark:text-white/60">
+                Sunt in culpa qui officia deserunt mollit anim id est laborum.
+              </p>
+            </div>
+          </div>
+          {/* Right: background image */}
+          <div className="relative hidden overflow-hidden rounded-lg ring-1 ring-black/10 sm:block dark:ring-white/10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/liquid-glass/bg.png"
+              alt="JJ logo"
+              loading="lazy"
+              draggable={false}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
           </div>
         </div>
 
-        {/* Sliders */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SLIDERS.map((slider) => (
-            <label key={slider.key} className="block">
-              <span className="mb-1 flex items-center justify-between text-xs text-muted">
-                <span>{slider.label}</span>
-                <span className="font-mono">{params[slider.key]}</span>
-              </span>
-              <input
-                type="range"
-                min={slider.min}
-                max={slider.max}
-                step={slider.step}
-                value={params[slider.key]}
-                onChange={(e) =>
-                  setParams((prev) => ({ ...prev, [slider.key]: Number(e.target.value) }))
-                }
-                className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-accent"
-              />
-            </label>
-          ))}
+        {/* Draggable glass element */}
+        <div
+          className="absolute z-10 cursor-grab active:cursor-grabbing"
+          draggable={false}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerLeave={onPointerUp}
+          style={{
+            left: pos.x,
+            top: pos.y,
+            width: GLASS_W,
+            height: GLASS_H,
+            borderRadius: BORDER_RADIUS,
+            transform: 'scaleY(0.8)',
+            touchAction: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+          }}
+        >
+          {/* SVG filter (hidden) */}
+          <svg colorInterpolationFilters="sRGB" style={{ display: 'none' }}>
+            <defs>
+              <filter id="liquid-glass-filter">
+                {/* Magnification displacement */}
+                <feImage
+                  href="/liquid-glass/magnifying-map.png"
+                  x={0} y={0}
+                  width={GLASS_W} height={GLASS_H}
+                  result="magnifying_displacement_map"
+                />
+                <feDisplacementMap
+                  in="SourceGraphic"
+                  in2="magnifying_displacement_map"
+                  scale={MAGNIFY_SCALE}
+                  xChannelSelector="R"
+                  yChannelSelector="G"
+                  result="magnified_source"
+                />
+                <feGaussianBlur
+                  in="magnified_source"
+                  stdDeviation={0}
+                  result="blurred_source"
+                />
+                {/* Refraction displacement */}
+                <feImage
+                  href="/liquid-glass/displacement-map.png"
+                  x={0} y={0}
+                  width={GLASS_W} height={GLASS_H}
+                  result="displacement_map"
+                />
+                <feDisplacementMap
+                  in="blurred_source"
+                  in2="displacement_map"
+                  scale={DISPLACEMENT_SCALE}
+                  xChannelSelector="R"
+                  yChannelSelector="G"
+                  result="displaced"
+                />
+                {/* Saturation boost */}
+                <feColorMatrix
+                  in="displaced"
+                  type="saturate"
+                  values={String(SATURATION)}
+                  result="displaced_saturated"
+                />
+                {/* Specular highlight */}
+                <feImage
+                  href="/liquid-glass/specular-map.png"
+                  x={0} y={0}
+                  width={GLASS_W} height={GLASS_H}
+                  result="specular_layer"
+                />
+                <feComposite
+                  in="displaced_saturated"
+                  in2="specular_layer"
+                  operator="in"
+                  result="specular_saturated"
+                />
+                <feComponentTransfer in="specular_layer" result="specular_faded">
+                  <feFuncA type="linear" slope={SPECULAR_OPACITY} />
+                </feComponentTransfer>
+                {/* Blend layers */}
+                <feBlend
+                  in="specular_saturated"
+                  in2="displaced"
+                  mode="normal"
+                  result="withSaturation"
+                />
+                <feBlend
+                  in="specular_faded"
+                  in2="withSaturation"
+                  mode="normal"
+                />
+              </filter>
+            </defs>
+          </svg>
+
+          {/* Glass surface */}
+          <div
+            className="absolute inset-0 ring-1 ring-black/10 dark:ring-white/10"
+            style={{
+              borderRadius: BORDER_RADIUS,
+              backdropFilter: 'url(#liquid-glass-filter)',
+              WebkitBackdropFilter: 'url(#liquid-glass-filter)',
+              boxShadow: `0px 4px 9px rgba(0,0,0,0.16),
+      inset 0px 2px 24px rgba(0,0,0,0.2),
+      inset 0px -2px 24px rgba(255,255,255,0.2)`,
+            }}
+          />
         </div>
       </div>
     </div>
