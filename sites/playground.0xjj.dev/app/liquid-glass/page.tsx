@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
 import { tools } from '../lib/tools';
 import { renderMarkdown } from '../lib/markdown';
 import Article from '../lib/Article';
 import Demo from './Demo';
 import FloatingNavDemo from './FloatingNavDemo';
+import enRaw from './en.md';
+import jaRaw from './ja.md';
 
 const tool = tools.find((t) => t.slug === 'liquid-glass')!;
 
@@ -14,17 +14,10 @@ export const metadata: Metadata = {
   description: tool.description,
 };
 
-async function loadArticle(dir: string, file: string): Promise<string | undefined> {
-  const path = join(dir, file);
-  if (!existsSync(path)) return undefined;
-  return renderMarkdown(readFileSync(path, 'utf-8'));
-}
-
 export default async function Page() {
-  const dir = join(process.cwd(), 'app/liquid-glass');
   const [en, ja] = await Promise.all([
-    loadArticle(dir, 'en.md'),
-    loadArticle(dir, 'ja.md'),
+    renderMarkdown(enRaw),
+    renderMarkdown(jaRaw),
   ]);
 
   return (
