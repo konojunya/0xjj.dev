@@ -93,6 +93,10 @@ func generateBlobs(seed float64) []colorBlob {
 
 `i*7` でインデックスをずらすことで、各 blob のパラメータが互いに独立な乱数になります。半径の範囲を `[180, 530]` にしているのは、小さすぎるとブラー後に消えてしまいますし、大きすぎると画面全体が単色になってしまうためです。
 
+この段階での出力はこのようになります。ガウシアン減衰で色が滑らかに広がっていますが、まだノイズもブラーもかかっていない状態です。
+
+![](https://0xjj.dev/images/blog/ogp-background-generator/step1-blobs.png)
+
 # ピクセルシェーディング
 
 ここからが画像生成の本体です。各ピクセルに対して、ベースカラーの上に各 blob をガウシアン減衰で混ぜ込み、さらにノイズを加えます。やっていることは GPU のフラグメントシェーダと同じ発想です。
@@ -126,6 +130,10 @@ func shadePixel(x, y int, seed float64, blobs []colorBlob) (float64, float64, fl
 ガウシアン減衰 `exp(-(d²) / (2σ²))` は blob の中心からの距離に応じて影響度が滑らかに減少するベル型のカーブで、`w * 0.55` で最大影響度を 55% に制限することで色が飽和しすぎないようにしています。
 
 最後に `noise()` で微妙な有機的ムラを加えます。スケール `0.003` は 1200px の画面に対して 3〜4 個の緩やかな波ができる程度の周波数になっています。
+
+ノイズを加えた状態がこちらです。先ほどの画像と見比べると、微妙な色の揺らぎが加わっているのがわかります。
+
+![](https://0xjj.dev/images/blog/ogp-background-generator/step2-blobs-noise.png)
 
 ## ノイズ関数
 
@@ -252,5 +260,9 @@ func renderBackground(seed float64) *image.RGBA {
                                          ↓
                               uint8 RGBA → PNG 出力
 ```
+
+最終的な出力がこちらです。ブラーによって blob の境界が完全に溶け合い、ふわっとしたパステルグラデーションになっています。
+
+![](https://0xjj.dev/images/blog/ogp-background-generator/step3-blurred.png)
 
 すべてが `titleSeed(title)` から始まり、途中に非決定的な要素が一切ありません。そのため `make gen` を何度実行してもビット単位で同一の PNG が出力されます。

@@ -195,6 +195,24 @@ func shadePixel(x, y int, seed float64, blobs []colorBlob) (float64, float64, fl
 	return col[0], col[1], col[2]
 }
 
+// shadePixelNoNoise is like shadePixel but without the noise pass.
+func shadePixelNoNoise(x, y int, blobs []colorBlob) (float64, float64, float64) {
+	col := [3]float64{0.96, 0.93, 0.95}
+
+	px, py := float64(x), float64(y)
+	for _, b := range blobs {
+		dx := px - b.px
+		dy := py - b.py
+		w := math.Exp(-(dx*dx + dy*dy) / (2 * b.radius * b.radius))
+		s := w * 0.55
+		col[0] = lerp(col[0], b.col[0], s)
+		col[1] = lerp(col[1], b.col[1], s)
+		col[2] = lerp(col[2], b.col[2], s)
+	}
+
+	return col[0], col[1], col[2]
+}
+
 // ── Float buffer for blur pipeline ────────────────────────────────────────
 
 type floatBuf struct {
@@ -325,6 +343,59 @@ func renderBackground(seed float64) *image.RGBA {
 	gaussianBlur(buf, blurR)
 
 	return buf.toRGBA()
+}
+
+// ── Stage rendering (for blog article images) ────────────────────────
+
+func renderStages(root string) {
+	title := "GoでOGP背景画像を冪等に生成する"
+	seed := titleSeed(title)
+	blobs := generateBlobs(seed)
+
+	outputDir := filepath.Join(root, "sites", "0xjj.dev", "public", "images", "blog", "ogp-background-generator")
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Stage 1: blobs only (no noise, no blur)
+	fmt.Println("rendering step1-blobs ...")
+	buf1 := newFloatBuf(imgW, imgH)
+	var wg1 sync.WaitGroup
+	for row := range imgH {
+		wg1.Add(1)
+		go func(y int) {
+			defer wg1.Done()
+			for x := range imgW {
+				r, g, b := shadePixelNoNoise(x, y, blobs)
+				buf1.set(x, y, r, g, b)
+			}
+		}(row)
+	}
+	wg1.Wait()
+	savePNG(filepath.Join(outputDir, "step1-blobs.png"), buf1.toRGBA())
+
+	// Stage 2: blobs + noise (before blur)
+	fmt.Println("rendering step2-blobs-noise ...")
+	buf2 := newFloatBuf(imgW, imgH)
+	var wg2 sync.WaitGroup
+	for row := range imgH {
+		wg2.Add(1)
+		go func(y int) {
+			defer wg2.Done()
+			for x := range imgW {
+				r, g, b := shadePixel(x, y, seed, blobs)
+				buf2.set(x, y, r, g, b)
+			}
+		}(row)
+	}
+	wg2.Wait()
+	savePNG(filepath.Join(outputDir, "step2-blobs-noise.png"), buf2.toRGBA())
+
+	// Stage 3: after blur (final)
+	fmt.Println("rendering step3-blurred ...")
+	gaussianBlur(buf2, blurR)
+	savePNG(filepath.Join(outputDir, "step3-blurred.png"), buf2.toRGBA())
 }
 
 // ── Text drawing ─────────────────────────────────────────────────────────
@@ -611,7 +682,13 @@ func savePNG(path string, img *image.RGBA) {
 func main() {
 	root := flag.String("root", ".", "path to repo root (default: current directory)")
 	site := flag.String("site", "all", "which site to generate for: blog, playground, or all")
+	stages := flag.Bool("stages", false, "generate intermediate stage images for the OGP blog article")
 	flag.Parse()
+
+	if *stages {
+		renderStages(*root)
+		return
+	}
 
 	switch *site {
 	case "blog":
