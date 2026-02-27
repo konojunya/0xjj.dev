@@ -9,20 +9,20 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { motion, useSpring, useTransform } from 'motion/react';
-import Image from 'next/image';
 import { useRef, useState } from 'react';
 
-interface Props extends React.ComponentProps<typeof Image> {
+interface Props {
   src: string;
   backSrc: string;
+  alt?: string;
   maxTilt?: number;
 }
 
 export const TiltCard: React.FC<Props> = ({
   src,
   backSrc,
+  alt = '',
   maxTilt = 30,
-  ...props
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const z = useSpring(0);
@@ -98,12 +98,11 @@ export const TiltCard: React.FC<Props> = ({
             WebkitTapHighlightColor: 'transparent',
           }}
         >
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={src}
-            width={430}
-            height={600}
+            alt={alt}
             className="aspect-trading-card w-full"
-            {...props}
           />
         </Button>
       </DialogTrigger>
@@ -145,14 +144,11 @@ export const TiltCard: React.FC<Props> = ({
             }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={src}
               alt=""
-              width={300}
-              height={417}
-              quality={100}
               className="h-full w-full object-cover outline-none"
-              style={{ outline: 'none' }}
             />
           </motion.div>
           <motion.div
@@ -162,14 +158,11 @@ export const TiltCard: React.FC<Props> = ({
             }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={backSrc}
               alt=""
-              width={300}
-              height={417}
-              quality={100}
               className="h-full w-full object-cover outline-none"
-              style={{ outline: 'none' }}
             />
           </motion.div>
         </motion.div>

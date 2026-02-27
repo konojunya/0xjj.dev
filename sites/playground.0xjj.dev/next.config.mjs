@@ -18,11 +18,6 @@ const withMDX = createMDX({
 /** @type {import('next').NextConfig} */
 const config = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'assets.xross-stars.com' },
-    ],
-  },
 };
 
 export default withMDX(config);

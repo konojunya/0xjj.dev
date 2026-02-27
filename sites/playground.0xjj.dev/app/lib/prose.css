@@ -80,8 +80,17 @@
   border: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
 }
 
+.prose [data-rehype-pretty-code-figure] pre code {
+  background: none;
+  padding: 0;
+}
+
+.prose pre code span[style] {
+  color: var(--shiki-light);
+}
+
 @media (prefers-color-scheme: dark) {
-  .prose pre code [style] {
+  .prose pre code span[style] {
     color: var(--shiki-dark) !important;
   }
 }
