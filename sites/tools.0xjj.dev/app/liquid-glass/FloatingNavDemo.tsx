@@ -14,7 +14,7 @@ const ITEMS: { icon: LucideIcon; label: string }[] = [
 /** Glass indicator size — matches one tab item */
 const GW = 100;
 const GH = 68;
-const GR = 18;
+const GR = 50;
 
 const MAP_SRCS = ['/liquid-glass/zoom.png', '/liquid-glass/refract.png', '/liquid-glass/highlight.png'];
 
