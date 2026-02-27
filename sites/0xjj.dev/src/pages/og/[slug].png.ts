@@ -129,7 +129,7 @@ export const GET: APIRoute = async ({ props }) => {
                           lineHeight: 1.25,
                           letterSpacing: `${(-fs * 0.025).toFixed(1)}px`,
                           maxWidth: W - 144,
-                          wordBreak: 'keep-all',
+                          whiteSpace: 'pre-wrap',
                         },
                         children: title,
                       },

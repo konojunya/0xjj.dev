@@ -1,5 +1,5 @@
 ---
-title: "@opennextjs/cloudflare から vinext に移行した"
+title: "@opennextjs/cloudflare から\nvinext に移行した"
 date: 2026-02-28
 ---
 
