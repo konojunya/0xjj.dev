@@ -1,16 +1,38 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /** Glass capsule dimensions (px) */
 const W = 210;
 const H = 150;
 const R = 75;
 
+const MAP_SRCS = ['/liquid-glass/zoom.png', '/liquid-glass/refract.png', '/liquid-glass/highlight.png'];
+
 export default function LiquidGlass() {
   const [pos, setPos] = useState({ x: 24, y: 24 });
+  const [mapsReady, setMapsReady] = useState(false);
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
+
+  // Preload displacement map images before showing the glass
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(
+      MAP_SRCS.map(
+        (src) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            img.src = src;
+          }),
+      ),
+    ).then(() => {
+      if (!cancelled) setMapsReady(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -85,8 +107,8 @@ export default function LiquidGlass() {
           </div>
         </div>
 
-        {/* Draggable glass */}
-        <div
+        {/* Draggable glass — hidden until displacement maps are loaded */}
+        {mapsReady && <div
           className="absolute z-10 cursor-grab active:cursor-grabbing"
           draggable={false}
           onPointerDown={onPointerDown}
@@ -138,7 +160,7 @@ export default function LiquidGlass() {
                 '0 4px 9px rgba(0,0,0,.16), inset 0 2px 24px rgba(0,0,0,.2), inset 0 -2px 24px rgba(255,255,255,.2)',
             }}
           />
-        </div>
+        </div>}
       </div>
 
       {/* ── How it works ── */}
