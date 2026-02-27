@@ -8,7 +8,7 @@ const works = await getCollection('work');
 const projects = await getCollection('project');
 
 type Entry =
-  | { type: 'blog'; date: Date; id: string; title: string }
+  | { type: 'blog'; date: Date; id: string; title: string; externalUrl?: string }
   | { type: 'work'; date: Date; title: string; role: string; url?: string; current?: boolean }
   | { type: 'project'; date: Date; title: string; url: string; projectType?: string; render?: string };
 
@@ -17,6 +17,7 @@ const blogEntries: Entry[] = blogs.map(b => ({
   date: b.data.date,
   id: b.id,
   title: b.data.title,
+  externalUrl: b.data.externalUrl,
 }));
 
 const workEntries: Entry[] = works.map(w => ({
