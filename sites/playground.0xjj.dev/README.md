@@ -30,6 +30,7 @@
 | `tictactoe` | Tic-Tac-Toe | https://playground.0xjj.dev/tictactoe |
 | `wordwolf` | Word Wolf | https://playground.0xjj.dev/wordwolf |
 | `liquid-glass` | Liquid Glass | https://playground.0xjj.dev/liquid-glass |
+| `tilt-card` | Tilt Card | https://playground.0xjj.dev/tilt-card |
 
 ---
 
@@ -294,6 +295,19 @@
 - Chrome/Edge 推奨 (SVG filter + backdrop-filter の組み合わせ)
 
 **Route**: `app/liquid-glass/`
+
+---
+
+### Tilt Card
+
+> Interactive 3D tilt card with flip animation powered by Motion.
+
+- マウス追従で 3D チルトエフェクト
+- 端まで引っ張るとカードがフリップ
+- クリックで Dialog を開いてインタラクション
+- motion/react (useSpring, useTransform) でスプリングアニメーション
+
+**Route**: `app/tilt-card/`
 
 ---
 

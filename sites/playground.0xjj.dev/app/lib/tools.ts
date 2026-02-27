@@ -115,6 +115,13 @@ export const tools: Tool[] = [
     href: '/liquid-glass',
     category: 'ui',
   },
+  {
+    slug: 'tilt-card',
+    name: 'Tilt Card',
+    description: 'Interactive 3D tilt card with flip animation powered by Motion.',
+    href: '/tilt-card',
+    category: 'ui',
+  },
   // ── Games (A→Z) ──
   {
     slug: '2048',
