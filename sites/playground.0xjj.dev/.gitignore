@@ -2,3 +2,4 @@ node_modules/
 .next/
 .vinext/
 .wrangler/
+tsconfig.tsbuildinfo
