@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { getCloudflareContext } from 'cloudflare:workers';
 
 const FETCH_INIT = {
   headers: {
