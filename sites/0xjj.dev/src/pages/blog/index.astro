@@ -47,8 +47,8 @@ const sorted = posts
             class="post-link"
             data-animate
           >
-            <div class:list={['post-thumb', { 'post-thumb--external': !!post.externalUrl }]} transition:name={post.externalUrl ? undefined : `blog-thumb-${post.id}`}>
-              {!post.externalUrl && <img src={`/og/bg/${post.id}.png`} alt="" />}
+            <div class="post-thumb" transition:name={post.externalUrl ? undefined : `blog-thumb-${post.id}`}>
+              <img src={`/og/bg/${post.id}.png`} alt="" />
               <div class="post-body">
                 <span class="post-title" transition:name={post.externalUrl ? undefined : `blog-title-${post.id}`}>{post.title}</span>
                 <span class="post-meta">
@@ -234,10 +234,6 @@ const sorted = posts
   }
   .post-link:hover .post-thumb img {
     transform: scale(1.04);
-  }
-
-  .post-thumb--external {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 
   .post-thumb::after {
