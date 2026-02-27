@@ -398,6 +398,41 @@ func renderWithStrength(blobs []colorBlob, strength float64) *floatBuf {
 	return buf
 }
 
+// shadePixelFlat renders hard-edged flat circles (step function) instead of gaussian falloff.
+// This makes blur effects dramatically visible.
+func shadePixelFlat(x, y int, blobs []colorBlob) (float64, float64, float64) {
+	col := [3]float64{0.96, 0.93, 0.95}
+	px, py := float64(x), float64(y)
+	for _, b := range blobs {
+		dx := px - b.px
+		dy := py - b.py
+		dist := math.Sqrt(dx*dx + dy*dy)
+		if dist < b.radius {
+			col[0] = lerp(col[0], b.col[0], 0.85)
+			col[1] = lerp(col[1], b.col[1], 0.85)
+			col[2] = lerp(col[2], b.col[2], 0.85)
+		}
+	}
+	return col[0], col[1], col[2]
+}
+
+func renderFlatCircles(blobs []colorBlob) *floatBuf {
+	buf := newFloatBuf(imgW, imgH)
+	var wg sync.WaitGroup
+	for row := range imgH {
+		wg.Add(1)
+		go func(y int) {
+			defer wg.Done()
+			for x := range imgW {
+				r, g, b := shadePixelFlat(x, y, blobs)
+				buf.set(x, y, r, g, b)
+			}
+		}(row)
+	}
+	wg.Wait()
+	return buf
+}
+
 func renderStages(root string) {
 	title := "GoでOGP背景画像を冪等に生成する"
 	seed := titleSeed(title)
@@ -432,13 +467,16 @@ func renderStages(root string) {
 	fmt.Println("rendering strength-100 ...")
 	save("strength-100.png", renderWithStrength(blobs, 1.0).toRGBA())
 
-	// ── Blur radius comparison ──
-	for _, r := range []int{5, 15} {
-		fmt.Printf("rendering blur-r%d ...\n", r)
-		b := renderBlobLayers(blobs, numBlobs)
-		gaussianBlur(b, r)
-		save(fmt.Sprintf("blur-r%d.png", r), b.toRGBA())
-	}
+	// ── Blur comparison: use flat circles (hard edges) so blur effect is dramatic ──
+	fmt.Println("rendering blur-r5 (flat circles, r=5) ...")
+	br5 := renderFlatCircles(blobs)
+	gaussianBlur(br5, 5)
+	save("blur-r5.png", br5.toRGBA())
+
+	fmt.Println("rendering blur-r15 (flat circles, r=15) ...")
+	br15 := renderFlatCircles(blobs)
+	gaussianBlur(br15, 15)
+	save("blur-r15.png", br15.toRGBA())
 }
 
 // ── Text drawing ─────────────────────────────────────────────────────────
