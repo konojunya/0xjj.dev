@@ -1,0 +1,54 @@
+## How it works
+
+This component combines **3D CSS transforms** with **spring physics** from [Motion](https://motion.dev/) to create a card that responds to the pointer position and flips when tilted far enough.
+
+### Tilt calculation
+
+On every `pointerMove`, the pointer coordinates are converted to a percentage within the card bounds. The center of the card is the neutral point (0, 0). Moving toward any edge produces a proportional tilt angle up to `maxTilt` (default 30 degrees).
+
+```ts
+const xPercent = x / rect.width;   // 0 → 1
+const yPercent = y / rect.height;  // 0 → 1
+
+const tiltX = maxTilt * (0.5 - yPercent); // vertical tilt
+const tiltY = maxTilt * (xPercent - 0.5); // horizontal tilt
+```
+
+The resulting `tiltX` and `tiltY` values are fed into `useSpring` motion values, which apply spring interpolation and drive the `rotateX` / `rotateY` CSS transforms.
+
+### Spring animation with Motion
+
+Instead of directly setting transform values, we use `useSpring` from `motion/react`. This wraps a raw number in a spring-damped motion value, so every update glides smoothly rather than snapping.
+
+```ts
+const rotateX = useSpring(0);
+const rotateY = useSpring(0);
+```
+
+When the pointer leaves the card, we reset both springs to 0, producing a satisfying "snap back" animation. The `z` spring adds a subtle depth shift on hover (`-10` on enter, `0` on leave).
+
+### Perspective and 3D context
+
+The card container uses `transformPerspective: 1000` to set a local perspective origin. Combined with `transformStyle: 'preserve-3d'` on the parent, the front and back faces can rotate independently in 3D space.
+
+### Flip gesture
+
+Flipping uses a threshold-based system. When the tilt magnitude exceeds 60% of `maxTilt`, or the horizontal tilt exceeds 30%, the card flips. A `hasFlippedThisGesture` flag prevents repeated toggling — the pointer must return to the center zone (below the release threshold) before flipping can trigger again.
+
+```ts
+const shouldFlip =
+  tiltMagnitude > tiltThreshold ||
+  tiltYAbs > tiltYThreshold;
+```
+
+The flip itself is a separate `useSpring` value (`flipRotateY`) that transitions between 0 and 180. The back face uses `useTransform` to offset by 180 degrees:
+
+```ts
+const backRotateY = useTransform(flipRotateY, (v) => v + 180);
+```
+
+Both faces have `backfaceVisibility: 'hidden'`, so only the face pointing toward the viewer is visible at any time.
+
+### Dialog integration
+
+Clicking the card thumbnail opens a Radix Dialog. The dialog content is styled as transparent and borderless — only the interactive 3D card is displayed. All tilt and flip state is reset on close via `onOpenChange`.

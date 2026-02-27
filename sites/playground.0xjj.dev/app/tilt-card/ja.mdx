@@ -1,0 +1,54 @@
+## How it works
+
+このコンポーネントは **CSS 3D Transform** と [Motion](https://motion.dev/) の **スプリング物理** を組み合わせて、ポインター位置に追従するカードと、傾けると裏返るフリップ機能を実現しています。
+
+### チルトの計算
+
+`pointerMove` イベントのたびに、ポインター座標をカード領域内のパーセンテージに変換します。カード中央がニュートラル（0, 0）で、端に近づくほど `maxTilt`（デフォルト 30 度）に比例した傾斜角度が生成されます。
+
+```ts
+const xPercent = x / rect.width;   // 0 → 1
+const yPercent = y / rect.height;  // 0 → 1
+
+const tiltX = maxTilt * (0.5 - yPercent); // 上下方向の傾き
+const tiltY = maxTilt * (xPercent - 0.5); // 左右方向の傾き
+```
+
+得られた `tiltX`・`tiltY` を `useSpring` のモーション値に渡すことで、スプリング補間が適用され、`rotateX` / `rotateY` の CSS Transform を滑らかに駆動します。
+
+### Motion によるスプリングアニメーション
+
+Transform の値を直接設定する代わりに、`motion/react` の `useSpring` を使用しています。生の数値をスプリングダンピング付きのモーション値でラップするため、すべての更新がスナップせずに滑らかにアニメーションします。
+
+```ts
+const rotateX = useSpring(0);
+const rotateY = useSpring(0);
+```
+
+ポインターがカードから離れると両方のスプリングを 0 にリセットし、心地よい「元に戻る」アニメーションが再生されます。`z` スプリングはホバー時の微妙な奥行きシフトを担当します（enter 時 `-10`、leave 時 `0`）。
+
+### パースペクティブと 3D コンテキスト
+
+カードのコンテナには `transformPerspective: 1000` でローカルなパースペクティブ原点を設定しています。親要素の `transformStyle: 'preserve-3d'` と組み合わせることで、表面と裏面が 3D 空間内で独立して回転できます。
+
+### フリップジェスチャー
+
+フリップは閾値ベースのシステムで実現しています。チルトの大きさが `maxTilt` の 60% を超えるか、水平方向の傾きが 30% を超えるとカードがフリップします。`hasFlippedThisGesture` フラグにより連続トグルを防止し、ポインターが中央ゾーン（解除閾値以下）に戻るまで次のフリップはトリガーされません。
+
+```ts
+const shouldFlip =
+  tiltMagnitude > tiltThreshold ||
+  tiltYAbs > tiltYThreshold;
+```
+
+フリップ自体は別の `useSpring` 値（`flipRotateY`）が 0 ↔ 180 間を遷移します。裏面は `useTransform` で 180 度オフセットしています。
+
+```ts
+const backRotateY = useTransform(flipRotateY, (v) => v + 180);
+```
+
+両面とも `backfaceVisibility: 'hidden'` を設定しているため、常に視点に向いている面だけが表示されます。
+
+### Dialog との統合
+
+カードのサムネイルをクリックすると Radix Dialog が開きます。Dialog のコンテンツは透明・ボーダーなしにスタイリングされ、インタラクティブな 3D カードだけが表示されます。`onOpenChange` で閉じるときにすべてのチルト・フリップ状態をリセットします。
