@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCloudflareContext } from 'cloudflare:workers';
+import { env } from 'cloudflare:workers';
 
 const FETCH_INIT = {
   headers: {
@@ -15,7 +15,6 @@ const FETCH_INIT = {
 // WORKER_SELF_REFERENCE service binding を経由して内部呼び出しにする。
 async function fetchUrl(url: string): Promise<Response> {
   try {
-    const { env } = getCloudflareContext();
     const binding = (env as Record<string, { fetch: typeof fetch } | undefined>)
       .WORKER_SELF_REFERENCE;
     if (binding && new URL(url).hostname === 'playground.0xjj.dev') {
