@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { env } from 'cloudflare:workers';
 
 const FETCH_INIT = {
@@ -100,8 +100,8 @@ function extract(html: string): { title: string; entries: MetaEntry[] } {
   return { title, entries };
 }
 
-export async function GET(request: NextRequest) {
-  const raw = request.nextUrl.searchParams.get('url');
+export async function GET(request: Request) {
+  const raw = new URL(request.url).searchParams.get('url');
   if (!raw) {
     return NextResponse.json({ error: 'url is required' }, { status: 400 });
   }
