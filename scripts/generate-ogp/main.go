@@ -347,6 +347,24 @@ func renderBackground(seed float64) *image.RGBA {
 
 // ── Stage rendering (for blog article images) ────────────────────────
 
+func renderBlobLayers(blobs []colorBlob, n int) *floatBuf {
+	buf := newFloatBuf(imgW, imgH)
+	subset := blobs[:n]
+	var wg sync.WaitGroup
+	for row := range imgH {
+		wg.Add(1)
+		go func(y int) {
+			defer wg.Done()
+			for x := range imgW {
+				r, g, b := shadePixelNoNoise(x, y, subset)
+				buf.set(x, y, r, g, b)
+			}
+		}(row)
+	}
+	wg.Wait()
+	return buf
+}
+
 func renderStages(root string) {
 	title := "GoでOGP背景画像を冪等に生成する"
 	seed := titleSeed(title)
@@ -358,44 +376,23 @@ func renderStages(root string) {
 		os.Exit(1)
 	}
 
-	// Stage 1: blobs only (no noise, no blur)
-	fmt.Println("rendering step1-blobs ...")
-	buf1 := newFloatBuf(imgW, imgH)
-	var wg1 sync.WaitGroup
-	for row := range imgH {
-		wg1.Add(1)
-		go func(y int) {
-			defer wg1.Done()
-			for x := range imgW {
-				r, g, b := shadePixelNoNoise(x, y, blobs)
-				buf1.set(x, y, r, g, b)
-			}
-		}(row)
-	}
-	wg1.Wait()
-	savePNG(filepath.Join(outputDir, "step1-blobs.png"), buf1.toRGBA())
+	// Step 1: 1 blob only
+	fmt.Println("rendering step1 (1 blob) ...")
+	savePNG(filepath.Join(outputDir, "step1-1blob.png"), renderBlobLayers(blobs, 1).toRGBA())
 
-	// Stage 2: blobs + noise (before blur)
-	fmt.Println("rendering step2-blobs-noise ...")
-	buf2 := newFloatBuf(imgW, imgH)
-	var wg2 sync.WaitGroup
-	for row := range imgH {
-		wg2.Add(1)
-		go func(y int) {
-			defer wg2.Done()
-			for x := range imgW {
-				r, g, b := shadePixel(x, y, seed, blobs)
-				buf2.set(x, y, r, g, b)
-			}
-		}(row)
-	}
-	wg2.Wait()
-	savePNG(filepath.Join(outputDir, "step2-blobs-noise.png"), buf2.toRGBA())
+	// Step 2: 3 blobs
+	fmt.Println("rendering step2 (3 blobs) ...")
+	savePNG(filepath.Join(outputDir, "step2-3blobs.png"), renderBlobLayers(blobs, 3).toRGBA())
 
-	// Stage 3: after blur (final)
-	fmt.Println("rendering step3-blurred ...")
-	gaussianBlur(buf2, blurR)
-	savePNG(filepath.Join(outputDir, "step3-blurred.png"), buf2.toRGBA())
+	// Step 3: all 7 blobs
+	fmt.Println("rendering step3 (7 blobs) ...")
+	savePNG(filepath.Join(outputDir, "step3-7blobs.png"), renderBlobLayers(blobs, numBlobs).toRGBA())
+
+	// Step 4: after gaussian blur (final)
+	fmt.Println("rendering step4 (blurred) ...")
+	buf := renderBlobLayers(blobs, numBlobs)
+	gaussianBlur(buf, blurR)
+	savePNG(filepath.Join(outputDir, "step4-blurred.png"), buf.toRGBA())
 }
 
 // ── Text drawing ─────────────────────────────────────────────────────────
