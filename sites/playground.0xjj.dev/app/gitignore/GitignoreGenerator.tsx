@@ -13,7 +13,7 @@ export default function GitignoreGenerator() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    fetch('https://www.toptal.com/developers/gitignore/api/list')
+    fetch('/api/gitignore/list')
       .then((r) => r.text())
       .then((text) => {
         const list = text
@@ -43,7 +43,7 @@ export default function GitignoreGenerator() {
     setGenerating(true);
     try {
       const text = await fetch(
-        `https://www.toptal.com/developers/gitignore/api/${selected.join(',')}`,
+        `/api/gitignore/generate?templates=${selected.join(',')}`,
       ).then((r) => r.text());
       setOutput(text);
     } catch {
