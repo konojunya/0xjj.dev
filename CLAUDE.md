@@ -39,7 +39,8 @@ Personal portfolio/blog site for JJ (Junya Kono) — v4 is built with **Astro 5*
 - **Astro 5** with Vite — static site generation
 - **React 19** via `@astrojs/react` — used for interactive components (e.g. `Signature.tsx`)
 - **Tailwind CSS v4** via `@tailwindcss/vite` plugin (no `tailwind.config.*` file needed)
-- **Wrangler** for Cloudflare Workers deployment (static assets)
+- **Wrangler** for Cloudflare Workers deployment (static assets + Worker hybrid)
+- **Cloudflare KV** (`BLOG_VIEWS`) — blog post view count storage
 - **Astro View Transitions** (`ClientRouter`) — SPA-like navigation
 
 ### Key Files
@@ -49,13 +50,14 @@ Personal portfolio/blog site for JJ (Junya Kono) — v4 is built with **Astro 5*
 | `sites/0xjj.dev/src/layouts/Layout.astro` | Root HTML shell — `global.css`, OG meta, `lang="ja"`, `ClientRouter` |
 | `sites/0xjj.dev/src/styles/global.css` | Tailwind import + CSS variables (colors, fonts) |
 | `sites/0xjj.dev/src/pages/index.astro` | Top page (Hero + Skills + Timeline) |
-| `sites/0xjj.dev/src/pages/blog/index.astro` | Blog list with client-side search |
-| `sites/0xjj.dev/src/pages/blog/[slug].astro` | Blog post page |
+| `sites/0xjj.dev/src/pages/blog/index.astro` | Blog list with client-side search + Popular Posts Top 3 |
+| `sites/0xjj.dev/src/pages/blog/[slug].astro` | Blog post page with view tracking |
+| `sites/0xjj.dev/worker/index.ts` | Worker API — blog view count endpoints (KV) |
 | `sites/0xjj.dev/src/pages/og/[slug].png.ts` | Dynamic OGP image generation (satori + resvg-wasm) |
 | `sites/0xjj.dev/src/pages/rss.xml.ts` | RSS feed |
 | `sites/0xjj.dev/src/content/config.ts` | Astro content collections schema |
 | `sites/0xjj.dev/astro.config.mjs` | Astro config — integrations, markdown plugins, Vite setup |
-| `sites/0xjj.dev/wrangler.jsonc` | Cloudflare Workers config (observability enabled) |
+| `sites/0xjj.dev/wrangler.jsonc` | Cloudflare Workers config (static assets + Worker hybrid, KV binding) |
 
 ### Content Collections
 
@@ -75,6 +77,19 @@ Blog posts get dynamic OGP images at `/og/[slug].png`:
 - **Runtime**: `satori` renders an HTML-like tree to SVG; `@resvg/resvg-wasm` converts SVG → PNG
 - **Background**: Pre-generated pastel PNGs at `public/og/bg/[slug].png` — regenerate via `make gen` in `scripts/generate-ogp/`
 - **Fonts for OGP**: Inter + Noto Sans JP loaded from `@fontsource` packages (not Google Fonts)
+
+### Blog View Tracking
+
+Blog post views are tracked via a Cloudflare Worker API backed by KV (`BLOG_VIEWS` namespace):
+
+- **Architecture**: Static assets + Worker hybrid — `run_worker_first: ["/api/*"]` routes only `/api/*` to the Worker; all other requests serve static Astro files directly
+- **Worker**: `worker/index.ts` — 3 endpoints:
+  - `POST /api/views/:slug` — increment view count (fire-and-forget via `ctx.waitUntil`)
+  - `GET /api/views/top` — return Top 3 posts from `_top` KV key
+  - `GET /api/views/:slug` — return single post view count
+- **KV structure**: per-slug keys (`"gemini-api-poker"` → `"42"`) + `_top` index key (JSON array of top 3 sorted by views)
+- **Blog post page**: `astro:page-load` event fires POST (tracking) + GET (display view count) — progressive enhancement
+- **Blog index**: fetches `/api/views/top` and dynamically renders Popular Posts section — hidden if API fails
 
 ### CSS Variables
 
