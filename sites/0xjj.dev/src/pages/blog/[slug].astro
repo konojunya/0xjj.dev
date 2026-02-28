@@ -64,10 +64,12 @@ const description = excerpt(post.body ?? '');
         <h1 transition:name={`blog-title-${post.id}`}>{post.data.title}</h1>
         <div class="meta">
           <time class="date">{dateStr}</time>
-          <span class="sep">·</span>
-          <span class="reading-time">{minutes} min read</span>
-          <span class="sep view-sep" style="display:none">·</span>
-          <span class="view-count" style="display:none"></span>
+          <span class="sep date-sep">·</span>
+          <span class="meta-stats">
+            <span class="reading-time">{minutes} min read</span>
+            <span class="sep view-sep" style="display:none">·</span>
+            <span class="view-count" style="display:none"></span>
+          </span>
         </div>
       </header>
       {tocHeadings.length >= 2 && (
@@ -214,6 +216,23 @@ const description = excerpt(post.body ?? '');
     font-size: 0.72rem;
     color: rgba(30, 14, 78, 0.55);
     letter-spacing: 0.04em;
+  }
+
+  .meta-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  @media (max-width: 639px) {
+    .meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.2rem;
+    }
+    .date-sep {
+      display: none;
+    }
   }
 
   .sep { opacity: 0.5; }
