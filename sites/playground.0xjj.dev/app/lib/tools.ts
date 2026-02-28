@@ -52,6 +52,13 @@ export const tools: Tool[] = [
     category: 'tool',
   },
   {
+    slug: 'httpinspector',
+    name: 'HTTP Inspector',
+    description: 'Inspect HTTP response headers, body preview, and DNS records for any URL.',
+    href: '/httpinspector',
+    category: 'tool',
+  },
+  {
     slug: 'hash',
     name: 'Hash Calculator',
     description: 'Compute SHA-1, SHA-256, SHA-384, and SHA-512 hashes of any text.',
