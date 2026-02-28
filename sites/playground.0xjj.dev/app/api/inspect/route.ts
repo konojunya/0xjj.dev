@@ -78,7 +78,7 @@ function isCfProxyHeader(key: string): boolean {
   if (key.startsWith('cf-')) return true;
   // CF Worker fetch() always overwrites 'server' with 'cloudflare',
   // so the original value is lost — hide it to avoid confusion.
-  const CF_HEADERS = new Set(['server', 'nel', 'report-to', 'alt-svc']);
+  const CF_HEADERS = new Set(['server', 'nel', 'report-to', 'alt-svc', 'transfer-encoding']);
   return CF_HEADERS.has(key);
 }
 
