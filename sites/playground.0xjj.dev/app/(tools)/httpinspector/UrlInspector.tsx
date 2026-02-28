@@ -84,9 +84,9 @@ function Technologies({ technologies }: { technologies: TechDetection[] }) {
   );
 }
 
-// ─── Well-known browser headers ──────────────────────────────────────────────
+// ─── Categorized response headers ─────────────────────────────────────────────
 
-const WELL_KNOWN_HEADERS: Array<{ category: string; headers: Array<{ key: string; description: string }> }> = [
+const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string; description: string }> }> = [
   {
     category: 'Security',
     headers: [
@@ -104,9 +104,14 @@ const WELL_KNOWN_HEADERS: Array<{ category: string; headers: Array<{ key: string
     ],
   },
   {
-    category: 'Cookies',
+    category: 'Caching',
     headers: [
-      { key: 'set-cookie', description: 'Set browser cookies' },
+      { key: 'cache-control', description: 'Caching directives' },
+      { key: 'etag', description: 'Resource version identifier' },
+      { key: 'last-modified', description: 'Last modification timestamp' },
+      { key: 'expires', description: 'Expiration date for the resource' },
+      { key: 'age', description: 'Time in cache (seconds)' },
+      { key: 'vary', description: 'Headers that affect caching' },
     ],
   },
   {
@@ -117,31 +122,62 @@ const WELL_KNOWN_HEADERS: Array<{ category: string; headers: Array<{ key: string
       { key: 'access-control-allow-headers', description: 'Allowed request headers' },
       { key: 'access-control-allow-credentials', description: 'Allow credentials' },
       { key: 'access-control-max-age', description: 'Preflight cache duration' },
+      { key: 'access-control-expose-headers', description: 'Headers exposed to JS' },
     ],
   },
   {
-    category: 'Caching',
+    category: 'Cookies',
     headers: [
-      { key: 'cache-control', description: 'Caching directives' },
-      { key: 'etag', description: 'Resource version identifier' },
-      { key: 'last-modified', description: 'Last modification timestamp' },
-      { key: 'age', description: 'Time in cache (seconds)' },
-      { key: 'vary', description: 'Headers that affect caching' },
+      { key: 'set-cookie', description: 'Set browser cookies' },
     ],
   },
   {
-    category: 'Other',
+    category: 'Content',
     headers: [
-      { key: 'origin-trial', description: 'Chrome Origin Trial tokens' },
-      { key: 'www-authenticate', description: 'Authentication challenge' },
-      { key: 'x-robots-tag', description: 'Search engine directives' },
+      { key: 'content-type', description: 'MIME type of the response' },
+      { key: 'content-language', description: 'Language of the content' },
       { key: 'content-disposition', description: 'Download/inline behavior' },
+      { key: 'content-encoding', description: 'Compression encoding' },
+    ],
+  },
+  {
+    category: 'Redirect & Location',
+    headers: [
+      { key: 'location', description: 'Redirect target URL' },
+      { key: 'x-redirect-by', description: 'Redirect origin hint' },
+    ],
+  },
+  {
+    category: 'Hints & Preload',
+    headers: [
       { key: 'link', description: 'Preload / preconnect hints' },
+      { key: 'x-dns-prefetch-control', description: 'DNS prefetch toggle' },
+      { key: 'origin-trial', description: 'Chrome Origin Trial tokens' },
+      { key: 'timing-allow-origin', description: 'Resource Timing API access' },
+    ],
+  },
+  {
+    category: 'Auth',
+    headers: [
+      { key: 'www-authenticate', description: 'Authentication challenge' },
+    ],
+  },
+  {
+    category: 'SEO & Crawling',
+    headers: [
+      { key: 'x-robots-tag', description: 'Search engine directives' },
     ],
   },
 ];
 
-function BrowserHeaders({ headers }: { headers: Array<{ key: string; value: string }> }) {
+// Build a set of all well-known header keys for quick lookup
+const KNOWN_HEADER_KEYS = new Set(
+  HEADER_CATEGORIES.flatMap((cat) => cat.headers.map((h) => h.key)),
+);
+
+function ResponseHeaders({ headers }: { headers: Array<{ key: string; value: string }> }) {
+  if (headers.length === 0) return null;
+
   // Build a map: key → values (multiple values possible, e.g. set-cookie)
   const headerMap = new Map<string, string[]>();
   for (const h of headers) {
@@ -151,97 +187,88 @@ function BrowserHeaders({ headers }: { headers: Array<{ key: string; value: stri
     else headerMap.set(k, [h.value]);
   }
 
-  // Only show categories that have at least one header set
-  const hasAny = WELL_KNOWN_HEADERS.some((cat) =>
-    cat.headers.some((h) => headerMap.has(h.key)),
-  );
-  if (!hasAny) return null;
+  // Collect uncategorized headers into "Other"
+  const otherHeaders: Array<{ key: string; values: string[] }> = [];
+  for (const [k, values] of headerMap) {
+    if (!KNOWN_HEADER_KEYS.has(k)) {
+      otherHeaders.push({ key: k, values });
+    }
+  }
 
-  return (
-    <Section label="Browser Headers">
-      <div className="divide-y divide-[color-mix(in_srgb,var(--color-fg)_6%,transparent)]">
-        {WELL_KNOWN_HEADERS.map((cat) => (
-          <div key={cat.category} className="px-4 py-3">
-            <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
-              {cat.category}
-            </h3>
-            <div className="space-y-1.5">
-              {cat.headers.map((h) => {
-                const values = headerMap.get(h.key);
-                const isSet = !!values;
-                return (
-                  <div key={h.key} className="flex items-start gap-2">
-                    <span
-                      className={`mt-0.5 shrink-0 text-[10px] font-bold ${isSet ? 'text-green-600' : 'text-[color-mix(in_srgb,var(--color-fg)_20%,transparent)]'}`}
-                    >
-                      {isSet ? '✓' : '—'}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-baseline gap-x-2">
-                        <span
-                          className={`font-mono text-xs ${isSet ? 'text-fg' : 'text-[color-mix(in_srgb,var(--color-fg)_30%,transparent)]'}`}
-                        >
-                          {h.key}
-                        </span>
-                        <span className="text-[10px] text-muted hidden sm:inline">{h.description}</span>
-                      </div>
-                      {values?.map((v, i) => (
-                        <div
-                          key={i}
-                          className="mt-0.5 rounded bg-[color-mix(in_srgb,var(--color-fg)_5%,transparent)] px-2 py-1 font-mono text-[11px] text-fg break-all"
-                        >
-                          {v}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
-function HeadersTable({ headers }: { headers: Array<{ key: string; value: string }> }) {
-  if (headers.length === 0) return null;
   return (
     <Section label={`Response Headers (${headers.length})`}>
-      {/* Mobile: stacked layout */}
-      <div className="divide-y divide-[color-mix(in_srgb,var(--color-fg)_6%,transparent)] sm:hidden">
-        {headers.map((h, i) => (
-          <div key={i} className="px-4 py-3 space-y-1">
-            <div className="font-mono text-xs text-muted break-all">{h.key}</div>
-            <div className="text-xs text-fg break-all">{h.value}</div>
+      <div className="divide-y divide-[color-mix(in_srgb,var(--color-fg)_6%,transparent)]">
+        {HEADER_CATEGORIES.map((cat) => {
+          // Skip categories that have zero present headers
+          const hasAny = cat.headers.some((h) => headerMap.has(h.key));
+          if (!hasAny) return null;
+          return (
+            <div key={cat.category} className="px-4 py-3">
+              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
+                {cat.category}
+              </h3>
+              <div className="space-y-1.5">
+                {cat.headers.map((h) => {
+                  const values = headerMap.get(h.key);
+                  const isSet = !!values;
+                  return (
+                    <div key={h.key} className="flex items-start gap-2">
+                      <span
+                        className={`mt-0.5 shrink-0 text-[10px] font-bold ${isSet ? 'text-green-600' : 'text-[color-mix(in_srgb,var(--color-fg)_20%,transparent)]'}`}
+                      >
+                        {isSet ? '✓' : '—'}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-baseline gap-x-2">
+                          <span
+                            className={`font-mono text-xs ${isSet ? 'text-fg' : 'text-[color-mix(in_srgb,var(--color-fg)_30%,transparent)]'}`}
+                          >
+                            {h.key}
+                          </span>
+                          <span className="text-[10px] text-muted hidden sm:inline">{h.description}</span>
+                        </div>
+                        {values?.map((v, i) => (
+                          <div
+                            key={i}
+                            className="mt-0.5 rounded bg-[color-mix(in_srgb,var(--color-fg)_5%,transparent)] px-2 py-1 font-mono text-[11px] text-fg break-all"
+                          >
+                            {v}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+        {otherHeaders.length > 0 && (
+          <div className="px-4 py-3">
+            <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
+              Other
+            </h3>
+            <div className="space-y-1.5">
+              {otherHeaders.map((h) => (
+                <div key={h.key} className="flex items-start gap-2">
+                  <span className="mt-0.5 shrink-0 text-[10px] font-bold text-green-600">✓</span>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-mono text-xs text-fg">{h.key}</span>
+                    {h.values.map((v, i) => (
+                      <div
+                        key={i}
+                        className="mt-0.5 rounded bg-[color-mix(in_srgb,var(--color-fg)_5%,transparent)] px-2 py-1 font-mono text-[11px] text-fg break-all"
+                      >
+                        {v}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+        )}
       </div>
-      {/* Desktop: table layout */}
-      <table className="hidden w-full text-sm sm:table">
-        <thead>
-          <tr className="border-b border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]">
-            <th className="w-56 px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">header</th>
-            <th className="px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {headers.map((h, i) => (
-            <tr
-              key={i}
-              className="border-b border-[color-mix(in_srgb,var(--color-fg)_6%,transparent)] last:border-0 transition-colors hover:bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]"
-            >
-              <td className="w-56 px-4 py-3 align-top">
-                <span className="font-mono text-xs text-muted break-all">{h.key}</span>
-              </td>
-              <td className="px-4 py-3 align-top">
-                <span className="text-xs text-fg break-all">{h.value}</span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </Section>
   );
 }
@@ -437,13 +464,12 @@ export default function UrlInspector() {
         <div className="space-y-6">
           <RequestInfo result={result} />
           <Technologies technologies={result.technologies} />
-          <BrowserHeaders headers={result.headers} />
           {result.httpError && (
             <div className="rounded-xl border border-yellow-400/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-600 dark:text-yellow-400">
               HTTP fetch failed: {result.httpError}
             </div>
           )}
-          <HeadersTable headers={result.headers} />
+          <ResponseHeaders headers={result.headers} />
           <BodyPreview preview={result.bodyPreview} truncated={result.truncated} bodySize={result.bodySize} />
           <DnsTable records={result.dns} />
           {result.dns.length === 0 && result.headers.length === 0 && (
