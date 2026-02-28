@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition } from 'react';
+import { useQueryState } from 'nuqs';
 import type { MetaEntry, MetaResult } from '../api/meta/route';
 
 // ─── grouping ────────────────────────────────────────────────────────────────
@@ -202,10 +203,8 @@ function MetaTable({ entries }: { entries: MetaEntry[] }) {
 // ─── main component ───────────────────────────────────────────────────────────
 
 export default function OgpChecker() {
-  const [input, setInput] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    return new URLSearchParams(window.location.search).get('url') ?? '';
-  });
+  const [urlParam, setUrlParam] = useQueryState('url', { defaultValue: '' });
+  const [input, setInput] = useState(urlParam);
   const [result, setResult] = useState<MetaResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -232,22 +231,15 @@ export default function OgpChecker() {
   }
 
   useEffect(() => {
-    const urlFromQuery = new URLSearchParams(window.location.search).get('url');
-    if (urlFromQuery && !initialCheckDone.current) {
+    if (urlParam && !initialCheckDone.current) {
       initialCheckDone.current = true;
-      check(urlFromQuery);
+      check(urlParam);
     }
   }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const url = new URL(window.location.href);
-    if (input) {
-      url.searchParams.set('url', input);
-    } else {
-      url.searchParams.delete('url');
-    }
-    window.history.replaceState(null, '', url.toString());
+    setUrlParam(input || null);
     check(input);
   }
 
