@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { NuqsAdapter } from 'nuqs/adapters/react';
 import { tools, categories } from './lib/tools';
 import './globals.css';
 
@@ -38,7 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen bg-bg text-fg antialiased">
-        <NuqsAdapter>
         {children}
         <footer className="border-t border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] px-4 py-10">
           <nav className="mx-auto mb-8 grid max-w-3xl gap-8 sm:grid-cols-3">
@@ -77,7 +75,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </a>
           </p>
         </footer>
-        </NuqsAdapter>
       </body>
     </html>
   );
