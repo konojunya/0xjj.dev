@@ -84,6 +84,127 @@ function Technologies({ technologies }: { technologies: TechDetection[] }) {
   );
 }
 
+// ─── Well-known browser headers ──────────────────────────────────────────────
+
+const WELL_KNOWN_HEADERS: Array<{ category: string; headers: Array<{ key: string; description: string }> }> = [
+  {
+    category: 'Security',
+    headers: [
+      { key: 'strict-transport-security', description: 'HSTS — force HTTPS connections' },
+      { key: 'content-security-policy', description: 'CSP — control allowed resource origins' },
+      { key: 'content-security-policy-report-only', description: 'CSP report-only mode' },
+      { key: 'x-frame-options', description: 'Controls iframe embedding' },
+      { key: 'x-content-type-options', description: 'Prevent MIME-type sniffing' },
+      { key: 'x-xss-protection', description: 'Legacy XSS filter (deprecated)' },
+      { key: 'referrer-policy', description: 'Controls Referer header behavior' },
+      { key: 'permissions-policy', description: 'Controls browser feature access' },
+      { key: 'cross-origin-embedder-policy', description: 'COEP — cross-origin isolation' },
+      { key: 'cross-origin-opener-policy', description: 'COOP — window isolation' },
+      { key: 'cross-origin-resource-policy', description: 'CORP — resource sharing control' },
+    ],
+  },
+  {
+    category: 'Cookies',
+    headers: [
+      { key: 'set-cookie', description: 'Set browser cookies' },
+    ],
+  },
+  {
+    category: 'CORS',
+    headers: [
+      { key: 'access-control-allow-origin', description: 'Allowed request origins' },
+      { key: 'access-control-allow-methods', description: 'Allowed HTTP methods' },
+      { key: 'access-control-allow-headers', description: 'Allowed request headers' },
+      { key: 'access-control-allow-credentials', description: 'Allow credentials' },
+      { key: 'access-control-max-age', description: 'Preflight cache duration' },
+    ],
+  },
+  {
+    category: 'Caching',
+    headers: [
+      { key: 'cache-control', description: 'Caching directives' },
+      { key: 'etag', description: 'Resource version identifier' },
+      { key: 'last-modified', description: 'Last modification timestamp' },
+      { key: 'age', description: 'Time in cache (seconds)' },
+      { key: 'vary', description: 'Headers that affect caching' },
+    ],
+  },
+  {
+    category: 'Other',
+    headers: [
+      { key: 'origin-trial', description: 'Chrome Origin Trial tokens' },
+      { key: 'www-authenticate', description: 'Authentication challenge' },
+      { key: 'x-robots-tag', description: 'Search engine directives' },
+      { key: 'content-disposition', description: 'Download/inline behavior' },
+      { key: 'link', description: 'Preload / preconnect hints' },
+    ],
+  },
+];
+
+function BrowserHeaders({ headers }: { headers: Array<{ key: string; value: string }> }) {
+  // Build a map: key → values (multiple values possible, e.g. set-cookie)
+  const headerMap = new Map<string, string[]>();
+  for (const h of headers) {
+    const k = h.key.toLowerCase();
+    const existing = headerMap.get(k);
+    if (existing) existing.push(h.value);
+    else headerMap.set(k, [h.value]);
+  }
+
+  // Only show categories that have at least one header set
+  const hasAny = WELL_KNOWN_HEADERS.some((cat) =>
+    cat.headers.some((h) => headerMap.has(h.key)),
+  );
+  if (!hasAny) return null;
+
+  return (
+    <Section label="Browser Headers">
+      <div className="divide-y divide-[color-mix(in_srgb,var(--color-fg)_6%,transparent)]">
+        {WELL_KNOWN_HEADERS.map((cat) => (
+          <div key={cat.category} className="px-4 py-3">
+            <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
+              {cat.category}
+            </h3>
+            <div className="space-y-1.5">
+              {cat.headers.map((h) => {
+                const values = headerMap.get(h.key);
+                const isSet = !!values;
+                return (
+                  <div key={h.key} className="flex items-start gap-2">
+                    <span
+                      className={`mt-0.5 shrink-0 text-[10px] font-bold ${isSet ? 'text-green-600' : 'text-[color-mix(in_srgb,var(--color-fg)_20%,transparent)]'}`}
+                    >
+                      {isSet ? '✓' : '—'}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-baseline gap-x-2">
+                        <span
+                          className={`font-mono text-xs ${isSet ? 'text-fg' : 'text-[color-mix(in_srgb,var(--color-fg)_30%,transparent)]'}`}
+                        >
+                          {h.key}
+                        </span>
+                        <span className="text-[10px] text-muted hidden sm:inline">{h.description}</span>
+                      </div>
+                      {values?.map((v, i) => (
+                        <div
+                          key={i}
+                          className="mt-0.5 rounded bg-[color-mix(in_srgb,var(--color-fg)_5%,transparent)] px-2 py-1 font-mono text-[11px] text-fg break-all"
+                        >
+                          {v}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 function HeadersTable({ headers }: { headers: Array<{ key: string; value: string }> }) {
   if (headers.length === 0) return null;
   return (
@@ -316,6 +437,7 @@ export default function UrlInspector() {
         <div className="space-y-6">
           <RequestInfo result={result} />
           <Technologies technologies={result.technologies} />
+          <BrowserHeaders headers={result.headers} />
           {result.httpError && (
             <div className="rounded-xl border border-yellow-400/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-600 dark:text-yellow-400">
               HTTP fetch failed: {result.httpError}
