@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { NuqsAdapter } from 'nuqs/adapters/react';
 import { tools, categories } from './lib/tools';
 import './globals.css';
 
