@@ -137,10 +137,10 @@ function BodyPreview({ preview, truncated, bodySize }: { preview: string; trunca
 
   return (
     <Section label={`Body Preview (${sizeLabel}${truncated ? ', truncated' : ''})`}>
-      <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-all px-4 py-3 font-mono text-xs text-fg">
+      <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-all px-4 py-3 font-mono text-xs text-fg">
         {preview}
         {truncated && (
-          <span className="text-muted">{'\n\n'}… truncated at 2,000 characters</span>
+          <span className="text-muted">{'\n\n'}… truncated at 256 KB</span>
         )}
       </pre>
     </Section>

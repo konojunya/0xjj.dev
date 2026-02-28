@@ -230,9 +230,9 @@ function detectTechnologies(
 const MAX_BODY_BYTES = 256 * 1024; // 256KB
 const TIMEOUT_MS = 5000;
 
-async function readBodyLimited(res: Response): Promise<{ preview: string; fullText: string; size: number; truncated: boolean }> {
+async function readBodyLimited(res: Response): Promise<{ text: string; size: number; truncated: boolean }> {
   const reader = res.body?.getReader();
-  if (!reader) return { preview: '', fullText: '', size: 0, truncated: false };
+  if (!reader) return { text: '', size: 0, truncated: false };
 
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
@@ -245,7 +245,6 @@ async function readBodyLimited(res: Response): Promise<{ preview: string; fullTe
 
       totalBytes += value.byteLength;
       if (totalBytes > MAX_BODY_BYTES) {
-        // Take only the bytes we need to reach the limit
         const excess = totalBytes - MAX_BODY_BYTES;
         chunks.push(value.slice(0, value.byteLength - excess));
         truncated = true;
@@ -264,8 +263,8 @@ async function readBodyLimited(res: Response): Promise<{ preview: string; fullTe
     offset += chunk.byteLength;
   }
 
-  const fullText = new TextDecoder('utf-8', { fatal: false }).decode(merged);
-  return { preview: fullText.slice(0, 2000), fullText, size: totalBytes, truncated };
+  const text = new TextDecoder('utf-8', { fatal: false }).decode(merged);
+  return { text, size: totalBytes, truncated };
 }
 
 const FETCH_HEADERS: HeadersInit = {
@@ -305,8 +304,7 @@ async function fetchHttp(url: URL): Promise<{
   statusText: string;
   headers: Array<{ key: string; value: string }>;
   allHeaders: Array<{ key: string; value: string }>;
-  bodyPreview: string;
-  bodyFull: string;
+  body: string;
   bodySize: number;
   contentType: string;
   truncated: boolean;
@@ -334,8 +332,7 @@ async function fetchHttp(url: URL): Promise<{
         statusText: res.statusText,
         headers,
         allHeaders,
-        bodyPreview: '',
-        bodyFull: '',
+        body: '',
         bodySize: 0,
         contentType: res.headers.get('content-type') ?? '',
         truncated: false,
@@ -344,15 +341,14 @@ async function fetchHttp(url: URL): Promise<{
     }
   }
 
-  const { preview, fullText, size, truncated } = await readBodyLimited(res);
+  const { text, size, truncated } = await readBodyLimited(res);
 
   return {
     status: res.status,
     statusText: res.statusText,
     headers,
     allHeaders,
-    bodyPreview: preview,
-    bodyFull: fullText,
+    body: text,
     bodySize: size,
     contentType: res.headers.get('content-type') ?? '',
     truncated,
@@ -458,8 +454,7 @@ export async function GET(request: Request) {
             statusText: 'Failed',
             headers: [] as Array<{ key: string; value: string }>,
             allHeaders: [] as Array<{ key: string; value: string }>,
-            bodyPreview: '',
-            bodyFull: '',
+            body: '',
             bodySize: 0,
             contentType: '',
             truncated: false,
@@ -475,8 +470,7 @@ export async function GET(request: Request) {
           : 'Unknown error'
         : undefined;
 
-    // Use allHeaders (including CF headers) and full body for tech detection
-    const technologies = detectTechnologies(http.allHeaders, http.bodyFull);
+    const technologies = detectTechnologies(http.allHeaders, http.body);
 
     const result: InspectResult & { httpError?: string } = {
       url: raw,
@@ -484,7 +478,7 @@ export async function GET(request: Request) {
       status: http.status,
       statusText: http.statusText,
       headers: http.headers,
-      bodyPreview: http.bodyPreview,
+      bodyPreview: http.body,
       bodySize: http.bodySize,
       contentType: http.contentType,
       truncated: http.truncated,
