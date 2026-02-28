@@ -29,6 +29,11 @@ const sorted = posts
       </a>
     </header>
 
+    <section id="popular-posts" hidden>
+      <h2 class="popular-heading">Popular</h2>
+      <ul class="popular-list" id="popular-list"></ul>
+    </section>
+
     <div class="search-wrap">
       <input
         id="search"
@@ -38,6 +43,13 @@ const sorted = posts
         spellcheck="false"
       />
     </div>
+
+    <script type="application/json" id="posts-meta">{JSON.stringify(
+      sorted.reduce((acc, post) => {
+        acc[post.id] = { title: post.title, date: post.date, externalUrl: post.externalUrl };
+        return acc;
+      }, {} as Record<string, { title: string; date: string; externalUrl?: string }>)
+    )}</script>
 
     <ul class="post-list" id="post-list">
       {sorted.map(post => (
@@ -112,7 +124,70 @@ const sorted = posts
     }
   }
 
-  document.addEventListener('astro:page-load', init);
+  function loadPopular() {
+    const medals = ['\u{1F947}', '\u{1F948}', '\u{1F949}'];
+    const metaEl = document.getElementById('posts-meta');
+    if (!metaEl) return;
+    const postsMeta: Record<string, { title: string; date: string; externalUrl?: string }> =
+      JSON.parse(metaEl.textContent!);
+
+    fetch('/api/views/top')
+      .then(r => r.json())
+      .then((top: { slug: string; views: number }[]) => {
+        if (!top.length) return;
+        const section = document.getElementById('popular-posts')!;
+        const list = document.getElementById('popular-list')!;
+        list.replaceChildren();
+
+        for (let i = 0; i < top.length; i++) {
+          const { slug, views } = top[i];
+          const meta = postsMeta[slug];
+          if (!meta) continue;
+          const href = meta.externalUrl ?? `/blog/${slug}`;
+
+          const li = document.createElement('li');
+          li.className = 'popular-item';
+          li.style.setProperty('--card-delay', `${i * 0.06}s`);
+
+          const a = document.createElement('a');
+          a.href = href;
+          a.className = 'popular-link';
+
+          const medalSpan = document.createElement('span');
+          medalSpan.className = 'popular-medal';
+          medalSpan.textContent = medals[i];
+
+          const infoSpan = document.createElement('span');
+          infoSpan.className = 'popular-info';
+
+          const titleSpan = document.createElement('span');
+          titleSpan.className = 'popular-title';
+          titleSpan.textContent = meta.title;
+
+          const viewsSpan = document.createElement('span');
+          viewsSpan.className = 'popular-views';
+          viewsSpan.textContent = `${views.toLocaleString()} views`;
+
+          infoSpan.append(titleSpan, viewsSpan);
+
+          const arrowSpan = document.createElement('span');
+          arrowSpan.className = 'popular-arrow';
+          arrowSpan.textContent = '\u2192';
+
+          a.append(medalSpan, infoSpan, arrowSpan);
+          li.appendChild(a);
+          list.appendChild(li);
+        }
+
+        section.hidden = false;
+      })
+      .catch(() => {});
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    init();
+    loadPopular();
+  });
 </script>
 
 <style>
@@ -160,6 +235,107 @@ const sorted = posts
     transition: color 0.15s ease;
   }
   .rss:hover { color: var(--color-fg); }
+
+  #popular-posts {
+    margin-bottom: 2.5rem;
+  }
+
+  .popular-heading {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 0.75rem;
+  }
+
+  .popular-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 52rem) {
+    .popular-list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .popular-item {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: popular-enter 0.35s ease forwards;
+    animation-delay: var(--card-delay, 0s);
+  }
+
+  @keyframes popular-enter {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .popular-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.125rem;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+    background: color-mix(in srgb, var(--color-fg) 3%, transparent);
+    text-decoration: none;
+    transition: box-shadow 0.18s ease, transform 0.18s ease;
+  }
+
+  .popular-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--color-fg) 8%, transparent);
+  }
+
+  .popular-medal {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .popular-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .popular-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-fg);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .popular-views {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--color-muted);
+  }
+
+  .popular-arrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+  }
+
+  .popular-link:hover .popular-arrow {
+    color: var(--color-fg);
+  }
 
   .search-wrap {
     margin-bottom: 2rem;

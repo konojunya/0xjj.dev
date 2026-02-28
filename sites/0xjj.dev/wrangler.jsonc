@@ -1,7 +1,13 @@
 {
   "name": "0xjj",
   "compatibility_date": "2026-02-24",
+  "main": "worker/index.ts",
   "assets": {
-    "directory": "./dist"
-  }
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "kv_namespaces": [
+    { "binding": "BLOG_VIEWS", "id": "5e8d39c883614a3da788887ebbd19bfa" }
+  ]
 }

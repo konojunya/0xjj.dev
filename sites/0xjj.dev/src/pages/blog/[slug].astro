@@ -56,6 +56,8 @@ const description = excerpt(post.body ?? '');
           <time class="date">{dateStr}</time>
           <span class="sep">·</span>
           <span class="reading-time">{minutes} min read</span>
+          <span class="sep view-sep" style="display:none">·</span>
+          <span class="view-count" style="display:none"></span>
         </div>
       </header>
       {tocHeadings.length >= 2 && (
@@ -102,6 +104,28 @@ const description = excerpt(post.body ?? '');
     </div>
   </div>
 </Layout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const slug = location.pathname.replace(/^\/blog\//, '').replace(/\/$/, '');
+    if (!slug) return;
+    // Track view (fire-and-forget)
+    fetch(`/api/views/${slug}`, { method: 'POST' }).catch(() => {});
+    // Fetch and display view count
+    fetch(`/api/views/${slug}`)
+      .then(r => r.json())
+      .then((data: { views: number }) => {
+        const sep = document.querySelector('.view-sep');
+        const el = document.querySelector('.view-count');
+        if (el && data.views > 0) {
+          el.textContent = `${data.views.toLocaleString()} views`;
+          (el as HTMLElement).style.display = '';
+          if (sep) (sep as HTMLElement).style.display = '';
+        }
+      })
+      .catch(() => {});
+  });
+</script>
 
 <style>
   .container {
