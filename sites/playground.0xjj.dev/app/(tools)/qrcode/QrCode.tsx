@@ -44,7 +44,7 @@ export default function QrCode() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: '2rem 1rem' }}>
+    <div style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-fg)', marginBottom: '0.25rem' }}>
         QR Code Generator
       </h1>

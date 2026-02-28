@@ -107,7 +107,7 @@ export default function HttpStatus() {
   });
 
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '2rem 1rem' }}>
+    <div style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-fg)', marginBottom: '0.25rem' }}>
         HTTP Status Codes
       </h1>

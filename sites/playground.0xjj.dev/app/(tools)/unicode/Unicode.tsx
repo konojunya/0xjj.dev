@@ -338,7 +338,7 @@ export default function Unicode() {
   };
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '2rem 1rem' }}>
+    <div style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-fg)', marginBottom: '0.25rem' }}>
         Unicode Character Search
       </h1>
