@@ -250,7 +250,7 @@ const sorted = posts
     margin: 0 0 0.75rem;
   }
 
-  .popular-list {
+  #popular-posts :global(.popular-list) {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -260,12 +260,12 @@ const sorted = posts
   }
 
   @media (min-width: 52rem) {
-    .popular-list {
+    #popular-posts :global(.popular-list) {
       grid-template-columns: repeat(3, 1fr);
     }
   }
 
-  .popular-item {
+  #popular-posts :global(.popular-item) {
     opacity: 0;
     transform: translateY(8px);
     animation: popular-enter 0.35s ease forwards;
@@ -279,7 +279,7 @@ const sorted = posts
     }
   }
 
-  .popular-link {
+  #popular-posts :global(.popular-link) {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -291,17 +291,17 @@ const sorted = posts
     transition: box-shadow 0.18s ease, transform 0.18s ease;
   }
 
-  .popular-link:hover {
+  #popular-posts :global(.popular-link:hover) {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px color-mix(in srgb, var(--color-fg) 8%, transparent);
   }
 
-  .popular-medal {
+  #popular-posts :global(.popular-medal) {
     font-size: 1.25rem;
     flex-shrink: 0;
   }
 
-  .popular-info {
+  #popular-posts :global(.popular-info) {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
@@ -309,7 +309,7 @@ const sorted = posts
     flex: 1;
   }
 
-  .popular-title {
+  #popular-posts :global(.popular-title) {
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--color-fg);
@@ -319,13 +319,13 @@ const sorted = posts
     white-space: nowrap;
   }
 
-  .popular-views {
+  #popular-posts :global(.popular-views) {
     font-family: var(--font-mono);
     font-size: 0.65rem;
     color: var(--color-muted);
   }
 
-  .popular-arrow {
+  #popular-posts :global(.popular-arrow) {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--color-muted);
@@ -333,7 +333,7 @@ const sorted = posts
     transition: color 0.15s ease;
   }
 
-  .popular-link:hover .popular-arrow {
+  #popular-posts :global(.popular-link:hover .popular-arrow) {
     color: var(--color-fg);
   }
 
