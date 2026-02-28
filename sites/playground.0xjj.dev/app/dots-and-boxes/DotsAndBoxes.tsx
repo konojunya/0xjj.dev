@@ -174,8 +174,8 @@ export default function DotsAndBoxes() {
     setError(null);
     try {
       const res = await fetch(`${API_BASE}/rooms?game=dots-and-boxes`, { method: 'POST' });
-      const data = await res.json();
-      const room = data.roomId as string;
+      const data: { roomId: string } = await res.json();
+      const room = data.roomId;
       setRoomId(room);
       roomIdRef.current = room;
       window.history.replaceState(null, '', `?room=${room}`);

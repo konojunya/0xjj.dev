@@ -218,11 +218,11 @@ export default function OgpChecker() {
     startTransition(async () => {
       try {
         const res = await fetch(`/api/meta?url=${encodeURIComponent(url.trim())}`);
-        const json = await res.json();
+        const json: MetaResult & { error?: string } = await res.json();
         if (!res.ok || json.error) {
           setError(json.error ?? 'Something went wrong');
         } else {
-          setResult(json as MetaResult);
+          setResult(json);
         }
       } catch {
         setError('Network error — could not reach the server');

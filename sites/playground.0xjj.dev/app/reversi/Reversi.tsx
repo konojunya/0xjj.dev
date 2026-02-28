@@ -179,8 +179,8 @@ export default function Reversi() {
     setError(null);
     try {
       const res = await fetch(`${API_BASE}/rooms?game=reversi`, { method: 'POST' });
-      const data = await res.json();
-      const room = data.roomId as string;
+      const data: { roomId: string } = await res.json();
+      const room = data.roomId;
       setRoomId(room);
       roomIdRef.current = room;
       window.history.replaceState(null, '', `?room=${room}`);
