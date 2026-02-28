@@ -74,11 +74,11 @@ function validateUrl(raw: string): { url: URL; error?: never } | { url?: never; 
 
 // ─── CF proxy header filtering ────────────────────────────────────────────────
 
-function isCfProxyHeader(key: string, value?: string): boolean {
+function isCfProxyHeader(key: string): boolean {
   if (key.startsWith('cf-')) return true;
-  // CF Worker fetch() always overwrites 'server' with 'cloudflare'
-  if (key === 'server' && value?.toLowerCase() === 'cloudflare') return true;
-  const CF_HEADERS = new Set(['nel', 'report-to', 'alt-svc']);
+  // CF Worker fetch() always overwrites 'server' with 'cloudflare',
+  // so the original value is lost — hide it to avoid confusion.
+  const CF_HEADERS = new Set(['server', 'nel', 'report-to', 'alt-svc']);
   return CF_HEADERS.has(key);
 }
 
@@ -120,19 +120,9 @@ function detectTechnologies(
       if (v.includes('jekyll')) add('Jekyll', 'framework');
     }
 
-    if (k === 'server') {
-      if (v.includes('nginx')) add('nginx', 'server');
-      if (v.includes('apache')) add('Apache', 'server');
-      if (v.includes('vercel')) add('Vercel', 'platform');
-      // Skip 'cloudflare' — always present due to CF Worker proxy
-      if (v.includes('litespeed')) add('LiteSpeed', 'server');
-      if (v.includes('deno')) add('Deno', 'server');
-      if (v.includes('amazons3')) add('Amazon S3', 'platform');
-      if (v.includes('google frontend')) add('Google Cloud', 'platform');
-      if (v.includes('gws')) add('Google Web Server', 'server');
-      if (v.includes('openresty')) add('OpenResty', 'server');
-      if (v.includes('caddy')) add('Caddy', 'server');
-    }
+    // NOTE: `server` header is always overwritten to `cloudflare` by
+    // CF Worker's fetch proxy, so it's useless for detection.
+    // Rely on custom vendor headers instead.
 
     if (k === 'x-vercel-id') add('Vercel', 'platform');
     if (k === 'x-amz-cf-id' || k === 'x-amz-cf-pop') add('AWS CloudFront', 'platform');
@@ -144,6 +134,8 @@ function detectTechnologies(
     if (k === 'fly-request-id') add('Fly.io', 'platform');
     if (k === 'x-firebase-hosting') add('Firebase Hosting', 'platform');
     if (k === 'x-cloud-trace-context') add('Google Cloud', 'platform');
+    if (k === 'x-netlify-request-id') add('Netlify', 'platform');
+    if (k === 'x-render-origin-server') add('Render', 'platform');
   }
 
   // ── body-based detection (HTML) ──
@@ -326,7 +318,7 @@ async function fetchHttp(url: URL): Promise<{
   res.headers.forEach((value, key) => {
     allHeaders.push({ key, value });
   });
-  const headers = allHeaders.filter((h) => !isCfProxyHeader(h.key, h.value));
+  const headers = allHeaders.filter((h) => !isCfProxyHeader(h.key));
 
   const resolvedUrl =
     res.status >= 300 && res.status < 400
