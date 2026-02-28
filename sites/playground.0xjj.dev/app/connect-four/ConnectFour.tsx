@@ -173,8 +173,8 @@ export default function ConnectFour() {
     setError(null);
     try {
       const res = await fetch(`${API_BASE}/rooms?game=connect-four`, { method: 'POST' });
-      const data = await res.json();
-      const room = data.roomId as string;
+      const data: { roomId: string } = await res.json();
+      const room = data.roomId;
       setRoomId(room);
       roomIdRef.current = room;
       window.history.replaceState(null, '', `?room=${room}`);
