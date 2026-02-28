@@ -94,6 +94,13 @@ export const tools: Tool[] = [
     category: 'tool',
   },
   {
+    slug: 'grpc-status',
+    name: 'gRPC Status Codes',
+    description: 'Browse all gRPC status codes with HTTP equivalents and descriptions.',
+    href: '/grpc-status',
+    category: 'tool',
+  },
+  {
     slug: 'httpinspector',
     name: 'HTTP Inspector',
     description: 'Inspect HTTP response headers, body preview, and DNS records for any URL.',
