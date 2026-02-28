@@ -6,6 +6,12 @@ import remarkGfm from "remark-gfm";
 import rehypePrettyCode from "rehype-pretty-code";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "react-server-dom-webpack/client.edge":
+        "react-server-dom-webpack/cjs/react-server-dom-webpack-client.edge.production.js",
+    },
+  },
   plugins: [
     {
       enforce: "pre",
