@@ -12,7 +12,7 @@ export default function Page() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: createToolJsonLd('liquid-glass') }} />
-      <div className="mx-auto max-w-5xl px-4 py-14">
+      <div className="py-6">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Liquid Glass</h1>
         <p className="mt-1 text-sm text-muted">
           Drag the capsule to bend the page. SVG displacement filter refracts whatever sits beneath it.

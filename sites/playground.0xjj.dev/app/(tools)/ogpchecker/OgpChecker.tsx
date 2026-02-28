@@ -244,7 +244,7 @@ export default function OgpChecker() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
+    <main className=" py-10">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">OGP Checker</h1>
         <p className="mt-1 text-sm text-muted">

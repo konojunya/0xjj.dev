@@ -666,7 +666,7 @@ export default function ColorConverter() {
   const isInvalid = colorInput !== '' && !parsed;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
+    <main className=" py-10">
       {/* header */}
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Color Converter</h1>

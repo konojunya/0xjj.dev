@@ -15,7 +15,7 @@ export default function Page() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: createToolJsonLd('tilt-card') }} />
-      <div className="mx-auto max-w-5xl px-4 py-14">
+      <div className="py-6">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">
           {tool.name}
         </h1>

@@ -254,7 +254,7 @@ export default function Game2048() {
   const border = 'color-mix(in srgb, var(--color-fg) 12%, transparent)';
 
   return (
-    <main className="mx-auto max-w-md px-4 py-10">
+    <main className=" py-10">
       <div className="mb-8">
         <a
           href="/"

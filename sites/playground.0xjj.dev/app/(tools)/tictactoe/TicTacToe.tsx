@@ -248,7 +248,7 @@ export default function TicTacToe() {
   // ── Render ──
 
   return (
-    <main className="mx-auto max-w-md px-4 py-10">
+    <main className=" py-10">
       <div className="mb-8">
         <a
           href="/"

@@ -1,15 +1,17 @@
+import Link from 'next/link';
+
 export default function ToolLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <nav className="px-4 pt-8 sm:pt-10">
-        <a
+    <div className="mx-auto max-w-2xl px-4 pt-8 pb-10 sm:pt-10">
+      <nav className="mb-6">
+        <Link
           href="/"
           className="inline-block font-mono text-xs text-muted transition-colors hover:text-fg"
         >
           ← back
-        </a>
+        </Link>
       </nav>
       {children}
-    </>
+    </div>
   );
 }
