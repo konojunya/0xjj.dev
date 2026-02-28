@@ -158,7 +158,7 @@ function Section({ label, children }: { label: string; children: React.ReactNode
   return (
     <div>
       <h2 className="mb-2 font-mono text-xs font-medium uppercase tracking-widest text-muted">{label}</h2>
-      <div className="overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_3%,transparent)] shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_3%,transparent)] shadow-sm">
         {children}
       </div>
     </div>
@@ -218,7 +218,7 @@ export default function UrlInspector() {
       </div>
 
       <form onSubmit={handleSubmit} className="mb-8">
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input
             type="url"
             value={input}
@@ -230,7 +230,7 @@ export default function UrlInspector() {
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-fg px-5 py-2.5 font-mono text-sm font-medium text-bg shadow-sm transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="shrink-0 rounded-lg bg-fg px-5 py-2.5 font-mono text-sm font-medium text-bg shadow-sm transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isPending ? 'Inspecting…' : 'Inspect'}
           </button>

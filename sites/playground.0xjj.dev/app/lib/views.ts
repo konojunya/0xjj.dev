@@ -13,15 +13,28 @@ function aeUrl(accountId: string): string {
 }
 
 async function aeQuery(accountId: string, token: string, sql: string): Promise<unknown[] | null> {
-  if (!accountId || !token) return null;
+  if (!accountId || !token) {
+    console.error('[aeQuery] missing credentials', { hasAccountId: !!accountId, hasToken: !!token });
+    return null;
+  }
   const res = await fetch(aeUrl(accountId), {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'text/plain' },
     body: sql,
   });
-  if (!res.ok) return null;
-  const json = await res.json() as { data?: unknown[] };
-  return json.data ?? null;
+  const text = await res.text();
+  if (!res.ok) {
+    console.error('[aeQuery] API error', { status: res.status, body: text, sql });
+    return null;
+  }
+  try {
+    const json = JSON.parse(text) as { data?: unknown[] };
+    console.log('[aeQuery] success', { rows: json.data?.length ?? 0 });
+    return json.data ?? null;
+  } catch {
+    console.error('[aeQuery] failed to parse response', { text: text.slice(0, 500) });
+    return null;
+  }
 }
 
 export function trackView(slug: string): void {
