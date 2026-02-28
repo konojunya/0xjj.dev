@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
+import { useQueryState } from 'nuqs';
 import type { MetaEntry, MetaResult } from '../api/meta/route';
 
 // ─── grouping ────────────────────────────────────────────────────────────────
@@ -202,10 +203,12 @@ function MetaTable({ entries }: { entries: MetaEntry[] }) {
 // ─── main component ───────────────────────────────────────────────────────────
 
 export default function OgpChecker() {
-  const [input, setInput] = useState('');
+  const [urlParam, setUrlParam] = useQueryState('url', { defaultValue: '' });
+  const [input, setInput] = useState(urlParam);
   const [result, setResult] = useState<MetaResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const initialCheckDone = useRef(false);
 
   async function check(url: string) {
     if (!url.trim()) return;
@@ -227,8 +230,16 @@ export default function OgpChecker() {
     });
   }
 
+  useEffect(() => {
+    if (urlParam && !initialCheckDone.current) {
+      initialCheckDone.current = true;
+      check(urlParam);
+    }
+  }, []);
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setUrlParam(input || null);
     check(input);
   }
 
