@@ -133,7 +133,6 @@ function detectTechnologies(
     if (k === 'x-shopify-stage') add('Shopify', 'platform');
     if (k === 'fly-request-id') add('Fly.io', 'platform');
     if (k === 'x-firebase-hosting') add('Firebase Hosting', 'platform');
-    if (k === 'x-amz-apigw-id' || k === 'x-amzn-requestid') add('AWS Amplify', 'platform');
     if (k === 'x-cloud-trace-context') add('Google Cloud', 'platform');
     if (k === 'x-netlify-request-id') add('Netlify', 'platform');
     if (k === 'x-render-origin-server') add('Render', 'platform');
