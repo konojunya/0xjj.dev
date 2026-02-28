@@ -1,4 +1,5 @@
 import { createToolMetadata } from '../lib/metadata';
+import { trackView } from '../lib/views';
 import Article from '../lib/Article';
 import Demo from './Demo';
 import En from './en.mdx';
@@ -7,6 +8,7 @@ import Ja from './ja.mdx';
 export const metadata = createToolMetadata('liquid-glass');
 
 export default function Page() {
+  trackView('liquid-glass');
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
       <a

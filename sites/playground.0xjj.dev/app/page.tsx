@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { tools } from './lib/tools';
+import { getTopTools } from './lib/views';
+import PopularTools from './PopularTools';
 import ToolGrid from './ToolGrid';
 
 export const metadata: Metadata = {
@@ -12,7 +15,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const topTools = await getTopTools();
+  const popular = topTools
+    .map((t) => {
+      const tool = tools.find((x) => x.slug === t.slug);
+      return tool ? { ...tool, views: t.views } : null;
+    })
+    .filter((t) => t !== null);
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-14">
       <div className="mb-12">
@@ -20,6 +31,7 @@ export default function Home() {
         <p className="mt-2 text-sm text-muted">Tools, games & experiments.</p>
       </div>
 
+      <PopularTools items={popular} />
       <ToolGrid />
     </main>
   );

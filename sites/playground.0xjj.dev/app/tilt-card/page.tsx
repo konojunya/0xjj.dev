@@ -1,4 +1,5 @@
 import { createToolMetadata } from '../lib/metadata';
+import { trackView } from '../lib/views';
 import { tools } from '../lib/tools';
 import Article from '../lib/Article';
 import { TiltCard } from './TiltCard';
@@ -10,6 +11,7 @@ const tool = tools.find((t) => t.slug === 'tilt-card')!;
 export const metadata = createToolMetadata('tilt-card');
 
 export default function Page() {
+  trackView('tilt-card');
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
       <a
