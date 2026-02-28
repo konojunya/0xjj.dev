@@ -8,6 +8,7 @@ import { remarkCodeMeta } from './src/plugins/remark-code-meta.mjs';
 import { remarkZennMessage } from './src/plugins/remark-zenn-message.mjs';
 import { rehypeExternalLinks } from './src/plugins/rehype-external-links.mjs';
 import remarkDirective from 'remark-directive';
+import sitemap from '@astrojs/sitemap';
 
 /** @type {import('esbuild').Plugin} */
 const typrEsbuildPlugin = {
@@ -26,7 +27,7 @@ const typrEsbuildPlugin = {
 // https://astro.build/config
 export default defineConfig({
   site: 'https://0xjj.dev',
-  integrations: [react()],
+  integrations: [react(), sitemap()],
   markdown: {
     remarkPlugins: [remarkDirective, remarkZennMessage, remarkCodeMeta],
     rehypePlugins: [[rehypeShiftHeading, { shift: 1 }], rehypeExternalLinks],

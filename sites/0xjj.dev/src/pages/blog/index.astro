@@ -15,7 +15,13 @@ const sorted = posts
   }));
 ---
 
-<Layout title="Blog">
+<Layout title="Blog" description="JJ's blog posts on web development, blockchain, and more." jsonLd={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Blog",
+  "url": "https://0xjj.dev/blog",
+  "description": "JJ's blog posts on web development, blockchain, and more."
+})}>
   <div class="container">
     <a href="/" class="back">← Back</a>
 

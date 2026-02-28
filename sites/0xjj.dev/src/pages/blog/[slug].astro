@@ -46,7 +46,17 @@ function excerpt(body: string, maxLen = 150): string {
 const description = excerpt(post.body ?? '');
 ---
 
-<Layout title={post.data.title} description={description} ogImage={`https://0xjj.dev/og/${post.id}.png`}>
+<Layout title={post.data.title} description={description} ogImage={`https://0xjj.dev/og/${post.id}.png`} jsonLd={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": post.data.title,
+  "image": `https://0xjj.dev/og/${post.id}.png`,
+  "datePublished": post.data.date.toISOString(),
+  "author": { "@type": "Person", "name": "Junya Kono", "url": "https://0xjj.dev" },
+  "publisher": { "@type": "Person", "name": "Junya Kono", "url": "https://0xjj.dev" },
+  "description": description,
+  "mainEntityOfPage": `https://0xjj.dev/blog/${post.id}`
+})}>
   <div class="container">
     <a href="/blog" class="back">← Blog</a>
     <article>

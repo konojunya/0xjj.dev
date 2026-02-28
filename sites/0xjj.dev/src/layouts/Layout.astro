@@ -6,9 +6,10 @@ interface Props {
   title?: string;
   ogImage?: string;
   description?: string;
+  jsonLd?: string;
 }
 
-const { title = "JJ", ogImage = "https://0xjj.dev/og/ogp.png", description = "All of me" } = Astro.props;
+const { title = "JJ", ogImage = "https://0xjj.dev/og/ogp.png", description = "All of me", jsonLd } = Astro.props;
 const pageTitle = title === "JJ" ? "JJ" : `${title} | JJ`;
 ---
 
@@ -29,6 +30,8 @@ const pageTitle = title === "JJ" ? "JJ" : `${title} | JJ`;
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImage} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+    {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
     <slot name="head" />
     <ClientRouter />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

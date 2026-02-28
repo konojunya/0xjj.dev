@@ -5,7 +5,13 @@ import Skills from '../components/Skills.astro';
 import Timeline from '../components/Timeline.astro';
 ---
 
-<Layout>
+<Layout jsonLd={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "JJ",
+  "url": "https://0xjj.dev",
+  "author": { "@type": "Person", "name": "Junya Kono", "url": "https://0xjj.dev" }
+})}>
   <Hero />
   <Skills />
   <Timeline />

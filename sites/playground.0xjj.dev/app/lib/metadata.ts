@@ -6,6 +6,9 @@ export function createToolMetadata(slug: string): Metadata {
   return {
     title: tool.name,
     description: tool.description,
+    alternates: {
+      canonical: `/${slug}`,
+    },
     openGraph: {
       title: tool.name,
       description: tool.description,
@@ -16,4 +19,22 @@ export function createToolMetadata(slug: string): Metadata {
       description: tool.description,
     },
   };
+}
+
+export function createToolJsonLd(slug: string): string {
+  const tool = tools.find((t) => t.slug === slug)!;
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: tool.name,
+    url: `https://playground.0xjj.dev${tool.href}`,
+    description: tool.description,
+    applicationCategory:
+      tool.category === 'game' ? 'GameApplication' : 'UtilitiesApplication',
+    author: {
+      '@type': 'Person',
+      name: 'Junya Kono',
+      url: 'https://0xjj.dev',
+    },
+  });
 }
