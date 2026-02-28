@@ -109,31 +109,36 @@ async function readBodyLimited(res: Response): Promise<{ text: string; size: num
   return { text: text.slice(0, 2000), size: totalBytes, truncated };
 }
 
-const FETCH_INIT: RequestInit = {
-  method: 'GET',
-  headers: {
-    'User-Agent': 'Mozilla/5.0 (compatible; HTTPInspector/1.0; +https://playground.0xjj.dev/httpinspector)',
-    Accept: '*/*',
-    'Accept-Language': 'en-US,en;q=0.9,ja;q=0.8',
-  },
-  redirect: 'manual',
-  signal: AbortSignal.timeout(TIMEOUT_MS),
+const FETCH_HEADERS: HeadersInit = {
+  'User-Agent': 'Mozilla/5.0 (compatible; HTTPInspector/1.0; +https://playground.0xjj.dev/httpinspector)',
+  Accept: '*/*',
+  'Accept-Language': 'en-US,en;q=0.9,ja;q=0.8',
 };
+
+function createFetchInit(): RequestInit {
+  return {
+    method: 'GET',
+    headers: FETCH_HEADERS,
+    redirect: 'manual',
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  };
+}
 
 // Cloudflare Workers で同一オリジンへの fetch は 522 になるため、
 // WORKER_SELF_REFERENCE service binding を経由して内部呼び出しにする。
 async function fetchUrl(url: string): Promise<Response> {
+  const init = createFetchInit();
   try {
     const { env } = await getCloudflareContext();
     const binding = (env as Record<string, { fetch: typeof fetch } | undefined>)
       .WORKER_SELF_REFERENCE;
     if (binding && new URL(url).hostname === 'playground.0xjj.dev') {
-      return binding.fetch(new Request(url, FETCH_INIT));
+      return binding.fetch(new Request(url, init));
     }
   } catch {
     // dev 環境など Cloudflare context が存在しない場合は通常の fetch にフォールバック
   }
-  return fetch(url, FETCH_INIT);
+  return fetch(url, init);
 }
 
 async function fetchHttp(url: URL): Promise<{
