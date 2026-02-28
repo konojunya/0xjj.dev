@@ -1,7 +1,7 @@
 {
   "name": "playground-0xjj-dev",
   "main": "vinext/server/app-router-entry",
-  "compatibility_date": "2024-09-23",
+  "compatibility_date": "2025-04-01",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "not_found_handling": "none"
