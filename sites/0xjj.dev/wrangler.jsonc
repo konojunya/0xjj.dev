@@ -11,9 +11,7 @@
     { "binding": "BLOG_VIEWS", "id": "36bead2146f0459aa3a329d819d8b02c" }
   ],
   "observability": {
-    "logs": {
-      "enabled": false,
-      "invocation_logs": true
-    }
+    "enabled": true,
+    "head_sampling_rate": 1
   }
 }
