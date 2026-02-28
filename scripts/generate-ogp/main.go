@@ -4,36 +4,23 @@
 // For 0xjj.dev blog posts, it generates background-only PNGs (text is overlaid
 // separately by Astro's SSG pipeline).
 //
-// For playground.0xjj.dev, it generates complete OGP images with text overlay
-// (tool name + description on a pastel gradient background).
-//
 // Usage:
 //
-//	go run . --root ../..                     # generate all (blog + playground)
-//	go run . --root ../.. --site blog         # blog backgrounds only
-//	go run . --root ../.. --site playground   # playground OGP only
+//	go run . --root ../..
 package main
 
 import (
 	"bufio"
-	_ "embed"
 	"flag"
 	"fmt"
 	"image"
-	"image/color"
 	"image/png"
 	"math"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
-
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
-	"golang.org/x/image/math/fixed"
 )
 
 const (
@@ -49,41 +36,6 @@ type Post struct {
 	Slug  string
 	Title string
 	Date  time.Time
-}
-
-type Tool struct {
-	Slug        string
-	Name        string
-	Description string
-}
-
-// ── Font ──────────────────────────────────────────────────────────────────
-
-//go:embed fonts/NotoSans-Bold.ttf
-var notoSansTTF []byte
-
-var parsedFont *opentype.Font
-
-func initFont() {
-	var err error
-	parsedFont, err = opentype.Parse(notoSansTTF)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "font parse: %v\n", err)
-		os.Exit(1)
-	}
-}
-
-func loadFace(size float64) font.Face {
-	face, err := opentype.NewFace(parsedFont, &opentype.FaceOptions{
-		Size:    size,
-		DPI:     72,
-		Hinting: font.HintingFull,
-	})
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "font face: %v\n", err)
-		os.Exit(1)
-	}
-	return face
 }
 
 // ── Shader math ───────────────────────────────────────────────────────────
@@ -191,24 +143,6 @@ func shadePixel(x, y int, seed float64, blobs []colorBlob) (float64, float64, fl
 	col[0] += (n - 0.5) * 0.04
 	col[1] += (n - 0.5) * 0.03
 	col[2] += (n - 0.5) * 0.04
-
-	return col[0], col[1], col[2]
-}
-
-// shadePixelNoNoise is like shadePixel but without the noise pass.
-func shadePixelNoNoise(x, y int, blobs []colorBlob) (float64, float64, float64) {
-	col := [3]float64{0.96, 0.93, 0.95}
-
-	px, py := float64(x), float64(y)
-	for _, b := range blobs {
-		dx := px - b.px
-		dy := py - b.py
-		w := math.Exp(-(dx*dx + dy*dy) / (2 * b.radius * b.radius))
-		s := w * 0.55
-		col[0] = lerp(col[0], b.col[0], s)
-		col[1] = lerp(col[1], b.col[1], s)
-		col[2] = lerp(col[2], b.col[2], s)
-	}
 
 	return col[0], col[1], col[2]
 }
@@ -345,243 +279,6 @@ func renderBackground(seed float64) *image.RGBA {
 	return buf.toRGBA()
 }
 
-// ── Stage rendering (for blog article images) ────────────────────────
-
-func renderBlobLayers(blobs []colorBlob, n int) *floatBuf {
-	buf := newFloatBuf(imgW, imgH)
-	subset := blobs[:n]
-	var wg sync.WaitGroup
-	for row := range imgH {
-		wg.Add(1)
-		go func(y int) {
-			defer wg.Done()
-			for x := range imgW {
-				r, g, b := shadePixelNoNoise(x, y, subset)
-				buf.set(x, y, r, g, b)
-			}
-		}(row)
-	}
-	wg.Wait()
-	return buf
-}
-
-// shadePixelStrength is like shadePixelNoNoise but with configurable blend strength.
-func shadePixelStrength(x, y int, blobs []colorBlob, strength float64) (float64, float64, float64) {
-	col := [3]float64{0.96, 0.93, 0.95}
-	px, py := float64(x), float64(y)
-	for _, b := range blobs {
-		dx := px - b.px
-		dy := py - b.py
-		w := math.Exp(-(dx*dx + dy*dy) / (2 * b.radius * b.radius))
-		s := w * strength
-		col[0] = lerp(col[0], b.col[0], s)
-		col[1] = lerp(col[1], b.col[1], s)
-		col[2] = lerp(col[2], b.col[2], s)
-	}
-	return col[0], col[1], col[2]
-}
-
-func renderWithStrength(blobs []colorBlob, strength float64) *floatBuf {
-	buf := newFloatBuf(imgW, imgH)
-	var wg sync.WaitGroup
-	for row := range imgH {
-		wg.Add(1)
-		go func(y int) {
-			defer wg.Done()
-			for x := range imgW {
-				r, g, b := shadePixelStrength(x, y, blobs, strength)
-				buf.set(x, y, r, g, b)
-			}
-		}(row)
-	}
-	wg.Wait()
-	return buf
-}
-
-// shadePixelFlat renders hard-edged flat circles (step function) instead of gaussian falloff.
-// This makes blur effects dramatically visible.
-func shadePixelFlat(x, y int, blobs []colorBlob) (float64, float64, float64) {
-	col := [3]float64{0.96, 0.93, 0.95}
-	px, py := float64(x), float64(y)
-	for _, b := range blobs {
-		dx := px - b.px
-		dy := py - b.py
-		dist := math.Sqrt(dx*dx + dy*dy)
-		if dist < b.radius {
-			col[0] = lerp(col[0], b.col[0], 0.85)
-			col[1] = lerp(col[1], b.col[1], 0.85)
-			col[2] = lerp(col[2], b.col[2], 0.85)
-		}
-	}
-	return col[0], col[1], col[2]
-}
-
-func renderFlatCircles(blobs []colorBlob) *floatBuf {
-	buf := newFloatBuf(imgW, imgH)
-	var wg sync.WaitGroup
-	for row := range imgH {
-		wg.Add(1)
-		go func(y int) {
-			defer wg.Done()
-			for x := range imgW {
-				r, g, b := shadePixelFlat(x, y, blobs)
-				buf.set(x, y, r, g, b)
-			}
-		}(row)
-	}
-	wg.Wait()
-	return buf
-}
-
-func renderStages(root string) {
-	title := "GoでOGP背景画像を冪等に生成する"
-	seed := titleSeed(title)
-	blobs := generateBlobs(seed)
-
-	outputDir := filepath.Join(root, "sites", "0xjj.dev", "public", "images", "blog", "ogp-background-generator")
-	if err := os.MkdirAll(outputDir, 0o755); err != nil {
-		fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
-		os.Exit(1)
-	}
-
-	save := func(name string, img *image.RGBA) {
-		savePNG(filepath.Join(outputDir, name), img)
-	}
-
-	// ── Blob layer progression ──
-	fmt.Println("rendering step1 (1 blob) ...")
-	save("step1-1blob.png", renderBlobLayers(blobs, 1).toRGBA())
-
-	fmt.Println("rendering step2 (3 blobs) ...")
-	save("step2-3blobs.png", renderBlobLayers(blobs, 3).toRGBA())
-
-	fmt.Println("rendering step3 (7 blobs) ...")
-	save("step3-7blobs.png", renderBlobLayers(blobs, numBlobs).toRGBA())
-
-	fmt.Println("rendering step4 (blurred) ...")
-	buf := renderBlobLayers(blobs, numBlobs)
-	gaussianBlur(buf, blurR)
-	save("step4-blurred.png", buf.toRGBA())
-
-	// ── Strength comparison ──
-	fmt.Println("rendering strength-100 ...")
-	save("strength-100.png", renderWithStrength(blobs, 1.0).toRGBA())
-
-	// ── Blur comparison: use flat circles (hard edges) so blur effect is dramatic ──
-	fmt.Println("rendering blur-r5 (flat circles, r=5) ...")
-	br5 := renderFlatCircles(blobs)
-	gaussianBlur(br5, 5)
-	save("blur-r5.png", br5.toRGBA())
-
-	fmt.Println("rendering blur-r15 (flat circles, r=15) ...")
-	br15 := renderFlatCircles(blobs)
-	gaussianBlur(br15, 15)
-	save("blur-r15.png", br15.toRGBA())
-}
-
-// ── Text drawing ─────────────────────────────────────────────────────────
-
-func drawText(img *image.RGBA, face font.Face, x, y int, col color.RGBA, text string) {
-	d := &font.Drawer{
-		Dst:  img,
-		Src:  image.NewUniform(col),
-		Face: face,
-		Dot:  fixed.P(x, y),
-	}
-	d.DrawString(text)
-}
-
-// measureText returns the advance width of text in pixels.
-func measureText(face font.Face, text string) int {
-	d := &font.Drawer{Face: face}
-	return d.MeasureString(text).Ceil()
-}
-
-// wrapText splits text into lines that fit within maxWidth pixels.
-func wrapText(face font.Face, text string, maxWidth int) []string {
-	words := strings.Fields(text)
-	if len(words) == 0 {
-		return nil
-	}
-
-	var lines []string
-	current := words[0]
-	for _, w := range words[1:] {
-		test := current + " " + w
-		if measureText(face, test) <= maxWidth {
-			current = test
-		} else {
-			lines = append(lines, current)
-			current = w
-		}
-	}
-	lines = append(lines, current)
-	return lines
-}
-
-// truncateText truncates text to fit within maxWidth, adding "…" if needed.
-func truncateText(face font.Face, text string, maxWidth int) string {
-	if measureText(face, text) <= maxWidth {
-		return text
-	}
-	ellipsis := "…"
-	ellipsisW := measureText(face, ellipsis)
-	for len(text) > 0 {
-		_, size := utf8.DecodeLastRuneInString(text)
-		text = text[:len(text)-size]
-		if measureText(face, text)+ellipsisW <= maxWidth {
-			return text + ellipsis
-		}
-	}
-	return ellipsis
-}
-
-// ── Playground OGP rendering ──────────────────────────────────────────────
-
-func whiteBackground() *image.RGBA {
-	img := image.NewRGBA(image.Rect(0, 0, imgW, imgH))
-	for i := 0; i < len(img.Pix); i += 4 {
-		img.Pix[i] = 0xFA   // R
-		img.Pix[i+1] = 0xFA // G
-		img.Pix[i+2] = 0xFA // B
-		img.Pix[i+3] = 0xFF // A
-	}
-	return img
-}
-
-func renderPlaygroundOGP(tool Tool) *image.RGBA {
-	img := whiteBackground()
-
-	domainFace := loadFace(22)
-	titleFace := loadFace(64)
-	descFace := loadFace(28)
-
-	mutedColor := color.RGBA{R: 120, G: 120, B: 120, A: 255}
-	darkColor := color.RGBA{R: 15, G: 15, B: 15, A: 255}
-	descColor := color.RGBA{R: 82, G: 82, B: 82, A: 255}
-
-	padX := 80
-	maxTextW := imgW - padX*2
-
-	// Domain label at top
-	drawText(img, domainFace, padX, 100, mutedColor, "playground.0xjj.dev")
-
-	// Title — possibly truncated if very long
-	titleText := truncateText(titleFace, tool.Name, maxTextW)
-	drawText(img, titleFace, padX, imgH-200, darkColor, titleText)
-
-	// Description — word-wrapped, up to 2 lines
-	descLines := wrapText(descFace, tool.Description, maxTextW)
-	if len(descLines) > 2 {
-		descLines = descLines[:2]
-	}
-	for i, line := range descLines {
-		drawText(img, descFace, padX, imgH-140+i*40, descColor, line)
-	}
-
-	return img
-}
-
 // ── Seed ─────────────────────────────────────────────────────────────────
 
 func titleSeed(title string) float64 {
@@ -637,44 +334,7 @@ func parsePost(path, slug string) Post {
 	return Post{Slug: slug, Title: title, Date: date}
 }
 
-// ── Tools parser ──────────────────────────────────────────────────────────
-
-var (
-	reSlug = regexp.MustCompile(`slug:\s*'([^']+)'`)
-	reName = regexp.MustCompile(`name:\s*'([^']+)'`)
-	reDesc = regexp.MustCompile(`description:\s*'([^']+)'`)
-)
-
-func parseTools(path string) []Tool {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "read tools.ts: %v\n", err)
-		os.Exit(1)
-	}
-	content := string(data)
-
-	// Split by object boundaries: each tool starts with "{"
-	// We look for slug/name/description triples within each block
-	blocks := regexp.MustCompile(`\{[^}]+\}`).FindAllString(content, -1)
-
-	var tools []Tool
-	for _, block := range blocks {
-		slugMatch := reSlug.FindStringSubmatch(block)
-		nameMatch := reName.FindStringSubmatch(block)
-		descMatch := reDesc.FindStringSubmatch(block)
-		if slugMatch == nil || nameMatch == nil || descMatch == nil {
-			continue
-		}
-		tools = append(tools, Tool{
-			Slug:        slugMatch[1],
-			Name:        nameMatch[1],
-			Description: descMatch[1],
-		})
-	}
-	return tools
-}
-
-// ── Generators ────────────────────────────────────────────────────────────
+// ── Generator ─────────────────────────────────────────────────────────────
 
 func generateBlogOGP(root string) {
 	contentDir := filepath.Join(root, "sites", "0xjj.dev", "src", "content", "blog")
@@ -711,36 +371,6 @@ func generateBlogOGP(root string) {
 	}
 }
 
-func generatePlaygroundOGP(root string) {
-	initFont()
-
-	toolsPath := filepath.Join(root, "sites", "playground.0xjj.dev", "app", "lib", "tools.ts")
-	outputDir := filepath.Join(root, "sites", "playground.0xjj.dev", "public", "og")
-
-	if err := os.MkdirAll(outputDir, 0o755); err != nil {
-		fmt.Fprintf(os.Stderr, "mkdir: %v\n", err)
-		os.Exit(1)
-	}
-
-	tools := parseTools(toolsPath)
-
-	// Generate index.png for the root page
-	fmt.Println("generating playground/index ...")
-	indexImg := renderPlaygroundOGP(Tool{
-		Slug:        "index",
-		Name:        "Playground",
-		Description: "Tools, games & experiments.",
-	})
-	savePNG(filepath.Join(outputDir, "index.png"), indexImg)
-
-	// Generate per-tool images
-	for _, tool := range tools {
-		fmt.Printf("generating playground/%s ...\n", tool.Slug)
-		img := renderPlaygroundOGP(tool)
-		savePNG(filepath.Join(outputDir, tool.Slug+".png"), img)
-	}
-}
-
 func savePNG(path string, img *image.RGBA) {
 	out, err := os.Create(path)
 	if err != nil {
@@ -762,25 +392,7 @@ func savePNG(path string, img *image.RGBA) {
 
 func main() {
 	root := flag.String("root", ".", "path to repo root (default: current directory)")
-	site := flag.String("site", "all", "which site to generate for: blog, playground, or all")
-	stages := flag.Bool("stages", false, "generate intermediate stage images for the OGP blog article")
 	flag.Parse()
 
-	if *stages {
-		renderStages(*root)
-		return
-	}
-
-	switch *site {
-	case "blog":
-		generateBlogOGP(*root)
-	case "playground":
-		generatePlaygroundOGP(*root)
-	case "all":
-		generateBlogOGP(*root)
-		generatePlaygroundOGP(*root)
-	default:
-		fmt.Fprintf(os.Stderr, "unknown --site value: %s (expected: blog, playground, all)\n", *site)
-		os.Exit(1)
-	}
+	generateBlogOGP(*root)
 }
