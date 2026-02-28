@@ -74,9 +74,11 @@ function validateUrl(raw: string): { url: URL; error?: never } | { url?: never; 
 
 // ─── CF proxy header filtering ────────────────────────────────────────────────
 
-function isCfProxyHeader(key: string): boolean {
+function isCfProxyHeader(key: string, value?: string): boolean {
   if (key.startsWith('cf-')) return true;
-  const CF_HEADERS = new Set(['nel', 'report-to']);
+  // CF Worker fetch() always overwrites 'server' with 'cloudflare'
+  if (key === 'server' && value?.toLowerCase() === 'cloudflare') return true;
+  const CF_HEADERS = new Set(['nel', 'report-to', 'alt-svc']);
   return CF_HEADERS.has(key);
 }
 
@@ -122,13 +124,16 @@ function detectTechnologies(
       if (v.includes('nginx')) add('nginx', 'server');
       if (v.includes('apache')) add('Apache', 'server');
       if (v.includes('vercel')) add('Vercel', 'platform');
-      if (v.includes('cloudflare')) add('Cloudflare', 'platform');
+      // Skip 'cloudflare' — always present due to CF Worker proxy
       if (v.includes('litespeed')) add('LiteSpeed', 'server');
       if (v.includes('deno')) add('Deno', 'server');
+      if (v.includes('amazons3')) add('Amazon S3', 'platform');
     }
 
     if (k === 'x-vercel-id') add('Vercel', 'platform');
     if (k === 'x-amz-cf-id' || k === 'x-amz-cf-pop') add('AWS CloudFront', 'platform');
+    if (k === 'x-cache' && v.includes('cloudfront')) add('AWS CloudFront', 'platform');
+    if (k === 'via' && v.includes('cloudfront')) add('AWS CloudFront', 'platform');
     if (k === 'x-drupal-cache' || k === 'x-drupal-dynamic-cache') add('Drupal', 'cms');
     if (k === 'x-shopify-stage') add('Shopify', 'platform');
     if (k === 'fly-request-id') add('Fly.io', 'platform');
@@ -159,7 +164,7 @@ function detectTechnologies(
     if (body.includes('__NUXT__') || body.includes('/_nuxt/')) add('Nuxt', 'framework');
 
     // Astro
-    if (body.includes('astro-island') || /data-astro-cid/.test(body)) add('Astro', 'framework');
+    if (body.includes('astro-island') || /data-astro-cid/.test(body) || body.includes('/_astro/')) add('Astro', 'framework');
 
     // SvelteKit
     if (body.includes('__sveltekit') || body.includes('/_app/immutable/')) add('SvelteKit', 'framework');
@@ -216,9 +221,9 @@ function detectTechnologies(
 const MAX_BODY_BYTES = 256 * 1024; // 256KB
 const TIMEOUT_MS = 5000;
 
-async function readBodyLimited(res: Response): Promise<{ text: string; size: number; truncated: boolean }> {
+async function readBodyLimited(res: Response): Promise<{ preview: string; fullText: string; size: number; truncated: boolean }> {
   const reader = res.body?.getReader();
-  if (!reader) return { text: '', size: 0, truncated: false };
+  if (!reader) return { preview: '', fullText: '', size: 0, truncated: false };
 
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
@@ -250,8 +255,8 @@ async function readBodyLimited(res: Response): Promise<{ text: string; size: num
     offset += chunk.byteLength;
   }
 
-  const text = new TextDecoder('utf-8', { fatal: false }).decode(merged);
-  return { text: text.slice(0, 2000), size: totalBytes, truncated };
+  const fullText = new TextDecoder('utf-8', { fatal: false }).decode(merged);
+  return { preview: fullText.slice(0, 2000), fullText, size: totalBytes, truncated };
 }
 
 const FETCH_HEADERS: HeadersInit = {
@@ -292,6 +297,7 @@ async function fetchHttp(url: URL): Promise<{
   headers: Array<{ key: string; value: string }>;
   allHeaders: Array<{ key: string; value: string }>;
   bodyPreview: string;
+  bodyFull: string;
   bodySize: number;
   contentType: string;
   truncated: boolean;
@@ -303,7 +309,7 @@ async function fetchHttp(url: URL): Promise<{
   res.headers.forEach((value, key) => {
     allHeaders.push({ key, value });
   });
-  const headers = allHeaders.filter((h) => !isCfProxyHeader(h.key));
+  const headers = allHeaders.filter((h) => !isCfProxyHeader(h.key, h.value));
 
   const resolvedUrl =
     res.status >= 300 && res.status < 400
@@ -320,6 +326,7 @@ async function fetchHttp(url: URL): Promise<{
         headers,
         allHeaders,
         bodyPreview: '',
+        bodyFull: '',
         bodySize: 0,
         contentType: res.headers.get('content-type') ?? '',
         truncated: false,
@@ -328,14 +335,15 @@ async function fetchHttp(url: URL): Promise<{
     }
   }
 
-  const { text, size, truncated } = await readBodyLimited(res);
+  const { preview, fullText, size, truncated } = await readBodyLimited(res);
 
   return {
     status: res.status,
     statusText: res.statusText,
     headers,
     allHeaders,
-    bodyPreview: text,
+    bodyPreview: preview,
+    bodyFull: fullText,
     bodySize: size,
     contentType: res.headers.get('content-type') ?? '',
     truncated,
@@ -442,6 +450,7 @@ export async function GET(request: Request) {
             headers: [] as Array<{ key: string; value: string }>,
             allHeaders: [] as Array<{ key: string; value: string }>,
             bodyPreview: '',
+            bodyFull: '',
             bodySize: 0,
             contentType: '',
             truncated: false,
@@ -457,8 +466,8 @@ export async function GET(request: Request) {
           : 'Unknown error'
         : undefined;
 
-    // Use allHeaders (including CF headers) for tech detection
-    const technologies = detectTechnologies(http.allHeaders, http.bodyPreview);
+    // Use allHeaders (including CF headers) and full body for tech detection
+    const technologies = detectTechnologies(http.allHeaders, http.bodyFull);
 
     const result: InspectResult & { httpError?: string } = {
       url: raw,
