@@ -8,6 +8,6 @@
     "run_worker_first": ["/api/*"]
   },
   "kv_namespaces": [
-    { "binding": "BLOG_VIEWS", "id": "5e8d39c883614a3da788887ebbd19bfa" }
+    { "binding": "BLOG_VIEWS", "id": "36bead2146f0459aa3a329d819d8b02c" }
   ]
 }
