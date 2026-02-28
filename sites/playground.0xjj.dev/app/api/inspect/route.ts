@@ -128,16 +128,22 @@ function detectTechnologies(
       if (v.includes('litespeed')) add('LiteSpeed', 'server');
       if (v.includes('deno')) add('Deno', 'server');
       if (v.includes('amazons3')) add('Amazon S3', 'platform');
+      if (v.includes('google frontend')) add('Google Cloud', 'platform');
+      if (v.includes('gws')) add('Google Web Server', 'server');
+      if (v.includes('openresty')) add('OpenResty', 'server');
+      if (v.includes('caddy')) add('Caddy', 'server');
     }
 
     if (k === 'x-vercel-id') add('Vercel', 'platform');
     if (k === 'x-amz-cf-id' || k === 'x-amz-cf-pop') add('AWS CloudFront', 'platform');
     if (k === 'x-cache' && v.includes('cloudfront')) add('AWS CloudFront', 'platform');
     if (k === 'via' && v.includes('cloudfront')) add('AWS CloudFront', 'platform');
+    if (k === 'via' && v.includes('google')) add('Google Cloud', 'platform');
     if (k === 'x-drupal-cache' || k === 'x-drupal-dynamic-cache') add('Drupal', 'cms');
     if (k === 'x-shopify-stage') add('Shopify', 'platform');
     if (k === 'fly-request-id') add('Fly.io', 'platform');
     if (k === 'x-firebase-hosting') add('Firebase Hosting', 'platform');
+    if (k === 'x-cloud-trace-context') add('Google Cloud', 'platform');
   }
 
   // ── body-based detection (HTML) ──
@@ -169,8 +175,13 @@ function detectTechnologies(
     // SvelteKit
     if (body.includes('__sveltekit') || body.includes('/_app/immutable/')) add('SvelteKit', 'framework');
 
-    // Remix
-    if (body.includes('__remixContext') || body.includes('data-remix')) add('Remix', 'framework');
+    // React Router v7 (includes former Remix v2+)
+    if (body.includes('__reactRouter') || body.includes('window.__reactRouterVersion')) add('React Router', 'framework');
+
+    // Remix (v1-v2, before merge into React Router v7)
+    if (body.includes('__remixContext') || body.includes('__remixManifest')) {
+      if (!seen.has('React Router')) add('Remix', 'framework');
+    }
 
     // Gatsby
     if (body.includes('___gatsby') || body.includes('gatsby-')) add('Gatsby', 'framework');
@@ -181,9 +192,15 @@ function detectTechnologies(
     // Angular
     if (body.includes('ng-version') || body.includes('ng-app')) add('Angular', 'framework');
 
+    // Solid.js
+    if (body.includes('_$HY') || body.includes('solid-js')) add('Solid.js', 'framework');
+
+    // Qwik
+    if (body.includes('qwik/') || body.includes('q:container')) add('Qwik', 'framework');
+
     // React (generic, low priority)
     if (body.includes('data-reactroot') || body.includes('__reactFiber')) {
-      if (!seen.has('Next.js') && !seen.has('Gatsby') && !seen.has('Remix')) add('React', 'framework');
+      if (!seen.has('Next.js') && !seen.has('Gatsby') && !seen.has('React Router') && !seen.has('Remix')) add('React', 'framework');
     }
 
     // WordPress
