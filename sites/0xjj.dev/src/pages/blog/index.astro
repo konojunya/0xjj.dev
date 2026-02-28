@@ -29,9 +29,13 @@ const sorted = posts
       </a>
     </header>
 
-    <section id="popular-posts" hidden>
+    <section id="popular-posts">
       <h2 class="popular-heading">Popular</h2>
-      <ul class="popular-list" id="popular-list"></ul>
+      <ul class="popular-list" id="popular-list">
+        <li class="popular-item popular-skeleton"><div class="popular-link skeleton-link"><span class="skeleton-bar skeleton-bar--medal"></span><span class="popular-info"><span class="skeleton-bar skeleton-bar--title"></span><span class="skeleton-bar skeleton-bar--views"></span></span></div></li>
+        <li class="popular-item popular-skeleton"><div class="popular-link skeleton-link"><span class="skeleton-bar skeleton-bar--medal"></span><span class="popular-info"><span class="skeleton-bar skeleton-bar--title"></span><span class="skeleton-bar skeleton-bar--views"></span></span></div></li>
+        <li class="popular-item popular-skeleton"><div class="popular-link skeleton-link"><span class="skeleton-bar skeleton-bar--medal"></span><span class="popular-info"><span class="skeleton-bar skeleton-bar--title"></span><span class="skeleton-bar skeleton-bar--views"></span></span></div></li>
+      </ul>
     </section>
 
     <div class="search-wrap">
@@ -124,18 +128,22 @@ const sorted = posts
     }
   }
 
+  function hidePopular() {
+    const section = document.getElementById('popular-posts');
+    if (section) section.hidden = true;
+  }
+
   function loadPopular() {
     const medals = ['\u{1F947}', '\u{1F948}', '\u{1F949}'];
     const metaEl = document.getElementById('posts-meta');
-    if (!metaEl) return;
+    if (!metaEl) { hidePopular(); return; }
     const postsMeta: Record<string, { title: string; date: string; externalUrl?: string }> =
       JSON.parse(metaEl.textContent!);
 
     fetch('/api/views/top')
       .then(r => r.json())
       .then((top: { slug: string; views: number }[]) => {
-        if (!top.length) return;
-        const section = document.getElementById('popular-posts')!;
+        if (!top.length) { hidePopular(); return; }
         const list = document.getElementById('popular-list')!;
         list.replaceChildren();
 
@@ -178,10 +186,8 @@ const sorted = posts
           li.appendChild(a);
           list.appendChild(li);
         }
-
-        section.hidden = false;
       })
-      .catch(() => {});
+      .catch(() => { hidePopular(); });
   }
 
   document.addEventListener('astro:page-load', () => {
@@ -336,6 +342,46 @@ const sorted = posts
 
   #popular-posts :global(.popular-link:hover .popular-arrow) {
     color: var(--color-fg);
+  }
+
+  .popular-skeleton .skeleton-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.125rem;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+    background: color-mix(in srgb, var(--color-fg) 3%, transparent);
+  }
+
+  .skeleton-bar {
+    display: block;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--color-fg) 8%, transparent);
+    animation: skeleton-pulse 1.2s ease-in-out infinite;
+  }
+
+  .skeleton-bar--medal {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .skeleton-bar--title {
+    width: 75%;
+    height: 0.82rem;
+  }
+
+  .skeleton-bar--views {
+    width: 4rem;
+    height: 0.6rem;
+    margin-top: 0.2rem;
+  }
+
+  @keyframes skeleton-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
   }
 
   .search-wrap {
