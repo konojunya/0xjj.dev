@@ -4,6 +4,11 @@ import { identifyProvider } from './providers';
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
+export interface TechDetection {
+  name: string;
+  category: 'framework' | 'language' | 'server' | 'platform' | 'cms';
+}
+
 export interface InspectResult {
   url: string;
   resolvedUrl: string;
@@ -15,6 +20,7 @@ export interface InspectResult {
   contentType: string;
   truncated: boolean;
   dns: DnsRecord[];
+  technologies: TechDetection[];
 }
 
 export interface DnsRecord {
@@ -64,6 +70,145 @@ function validateUrl(raw: string): { url: URL; error?: never } | { url?: never; 
   }
 
   return { url: parsed };
+}
+
+// ─── CF proxy header filtering ────────────────────────────────────────────────
+
+function isCfProxyHeader(key: string): boolean {
+  if (key.startsWith('cf-')) return true;
+  const CF_HEADERS = new Set(['nel', 'report-to']);
+  return CF_HEADERS.has(key);
+}
+
+// ─── Technology detection ────────────────────────────────────────────────────
+
+function detectTechnologies(
+  headers: Array<{ key: string; value: string }>,
+  body: string,
+): TechDetection[] {
+  const techs: TechDetection[] = [];
+  const seen = new Set<string>();
+
+  function add(name: string, category: TechDetection['category']) {
+    if (!seen.has(name)) {
+      seen.add(name);
+      techs.push({ name, category });
+    }
+  }
+
+  // ── header-based detection ──
+  for (const { key, value } of headers) {
+    const k = key.toLowerCase();
+    const v = value.toLowerCase();
+
+    if (k === 'x-powered-by') {
+      if (v.includes('next.js')) add('Next.js', 'framework');
+      if (v.includes('express')) add('Express', 'framework');
+      if (v.includes('nuxt')) add('Nuxt', 'framework');
+      if (v.includes('php')) add('PHP', 'language');
+      if (v.includes('asp.net')) add('ASP.NET', 'framework');
+    }
+
+    if (k === 'x-generator' || k === 'generator') {
+      if (v.includes('astro')) add('Astro', 'framework');
+      if (v.includes('hugo')) add('Hugo', 'framework');
+      if (v.includes('gatsby')) add('Gatsby', 'framework');
+      if (v.includes('wordpress')) add('WordPress', 'cms');
+      if (v.includes('drupal')) add('Drupal', 'cms');
+      if (v.includes('jekyll')) add('Jekyll', 'framework');
+    }
+
+    if (k === 'server') {
+      if (v.includes('nginx')) add('nginx', 'server');
+      if (v.includes('apache')) add('Apache', 'server');
+      if (v.includes('vercel')) add('Vercel', 'platform');
+      if (v.includes('cloudflare')) add('Cloudflare', 'platform');
+      if (v.includes('litespeed')) add('LiteSpeed', 'server');
+      if (v.includes('deno')) add('Deno', 'server');
+    }
+
+    if (k === 'x-vercel-id') add('Vercel', 'platform');
+    if (k === 'x-amz-cf-id' || k === 'x-amz-cf-pop') add('AWS CloudFront', 'platform');
+    if (k === 'x-drupal-cache' || k === 'x-drupal-dynamic-cache') add('Drupal', 'cms');
+    if (k === 'x-shopify-stage') add('Shopify', 'platform');
+    if (k === 'fly-request-id') add('Fly.io', 'platform');
+    if (k === 'x-firebase-hosting') add('Firebase Hosting', 'platform');
+  }
+
+  // ── body-based detection (HTML) ──
+  if (body) {
+    // Meta generator tag
+    const genMatch = body.match(/<meta[^>]+name=["']generator["'][^>]+content=["']([^"']+)["']/i)
+      ?? body.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']generator["']/i);
+    if (genMatch) {
+      const gen = genMatch[1].toLowerCase();
+      if (gen.includes('wordpress')) add('WordPress', 'cms');
+      if (gen.includes('drupal')) add('Drupal', 'cms');
+      if (gen.includes('joomla')) add('Joomla', 'cms');
+      if (gen.includes('hugo')) add('Hugo', 'framework');
+      if (gen.includes('jekyll')) add('Jekyll', 'framework');
+      if (gen.includes('astro')) add('Astro', 'framework');
+      if (gen.includes('gatsby')) add('Gatsby', 'framework');
+      if (gen.includes('ghost')) add('Ghost', 'cms');
+    }
+
+    // Next.js
+    if (body.includes('__NEXT_DATA__') || body.includes('/_next/static')) add('Next.js', 'framework');
+
+    // Nuxt
+    if (body.includes('__NUXT__') || body.includes('/_nuxt/')) add('Nuxt', 'framework');
+
+    // Astro
+    if (body.includes('astro-island') || /data-astro-cid/.test(body)) add('Astro', 'framework');
+
+    // SvelteKit
+    if (body.includes('__sveltekit') || body.includes('/_app/immutable/')) add('SvelteKit', 'framework');
+
+    // Remix
+    if (body.includes('__remixContext') || body.includes('data-remix')) add('Remix', 'framework');
+
+    // Gatsby
+    if (body.includes('___gatsby') || body.includes('gatsby-')) add('Gatsby', 'framework');
+
+    // Vue.js (generic)
+    if (/data-v-[a-f0-9]/.test(body) && !seen.has('Nuxt')) add('Vue.js', 'framework');
+
+    // Angular
+    if (body.includes('ng-version') || body.includes('ng-app')) add('Angular', 'framework');
+
+    // React (generic, low priority)
+    if (body.includes('data-reactroot') || body.includes('__reactFiber')) {
+      if (!seen.has('Next.js') && !seen.has('Gatsby') && !seen.has('Remix')) add('React', 'framework');
+    }
+
+    // WordPress
+    if (body.includes('wp-content') || body.includes('wp-includes')) add('WordPress', 'cms');
+
+    // Shopify
+    if (body.includes('cdn.shopify.com') || body.includes('Shopify.theme')) add('Shopify', 'platform');
+
+    // Wix
+    if (body.includes('wix.com') || body.includes('_wixCIDX')) add('Wix', 'platform');
+
+    // Squarespace
+    if (body.includes('squarespace.com') || body.includes('Static.SQUARESPACE')) add('Squarespace', 'platform');
+
+    // Laravel
+    if (body.includes('laravel') || body.includes('csrf-token')) {
+      // csrf-token alone is too generic, combine with other signals
+      if (body.includes('laravel')) add('Laravel', 'framework');
+    }
+
+    // Ruby on Rails
+    if (body.includes('csrf-param') && body.includes('csrf-token') && body.includes('authenticity_token')) {
+      add('Ruby on Rails', 'framework');
+    }
+
+    // Django
+    if (body.includes('csrfmiddlewaretoken') || body.includes('__django')) add('Django', 'framework');
+  }
+
+  return techs;
 }
 
 // ─── HTTP fetch with safety limits ───────────────────────────────────────────
@@ -145,6 +290,7 @@ async function fetchHttp(url: URL): Promise<{
   status: number;
   statusText: string;
   headers: Array<{ key: string; value: string }>;
+  allHeaders: Array<{ key: string; value: string }>;
   bodyPreview: string;
   bodySize: number;
   contentType: string;
@@ -153,10 +299,11 @@ async function fetchHttp(url: URL): Promise<{
 }> {
   const res = await fetchUrl(url.href);
 
-  const headers: Array<{ key: string; value: string }> = [];
+  const allHeaders: Array<{ key: string; value: string }> = [];
   res.headers.forEach((value, key) => {
-    headers.push({ key, value });
+    allHeaders.push({ key, value });
   });
+  const headers = allHeaders.filter((h) => !isCfProxyHeader(h.key));
 
   const resolvedUrl =
     res.status >= 300 && res.status < 400
@@ -171,6 +318,7 @@ async function fetchHttp(url: URL): Promise<{
         status: res.status,
         statusText: res.statusText,
         headers,
+        allHeaders,
         bodyPreview: '',
         bodySize: 0,
         contentType: res.headers.get('content-type') ?? '',
@@ -186,6 +334,7 @@ async function fetchHttp(url: URL): Promise<{
     status: res.status,
     statusText: res.statusText,
     headers,
+    allHeaders,
     bodyPreview: text,
     bodySize: size,
     contentType: res.headers.get('content-type') ?? '',
@@ -291,6 +440,7 @@ export async function GET(request: Request) {
             status: 0,
             statusText: 'Failed',
             headers: [] as Array<{ key: string; value: string }>,
+            allHeaders: [] as Array<{ key: string; value: string }>,
             bodyPreview: '',
             bodySize: 0,
             contentType: '',
@@ -307,6 +457,9 @@ export async function GET(request: Request) {
           : 'Unknown error'
         : undefined;
 
+    // Use allHeaders (including CF headers) for tech detection
+    const technologies = detectTechnologies(http.allHeaders, http.bodyPreview);
+
     const result: InspectResult & { httpError?: string } = {
       url: raw,
       resolvedUrl: http.resolvedUrl,
@@ -318,6 +471,7 @@ export async function GET(request: Request) {
       contentType: http.contentType,
       truncated: http.truncated,
       dns,
+      technologies,
       httpError,
     };
 

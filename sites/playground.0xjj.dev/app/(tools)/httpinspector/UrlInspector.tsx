@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useQueryState } from 'nuqs';
-import type { InspectResult, DnsRecord } from '../../api/inspect/route';
+import type { InspectResult, DnsRecord, TechDetection } from '../../api/inspect/route';
 
 type Result = InspectResult & { httpError?: string };
 
@@ -50,6 +50,35 @@ function RequestInfo({ result }: { result: Result }) {
             <span className="font-mono text-xs text-fg">{result.contentType}</span>
           </div>
         )}
+      </div>
+    </Section>
+  );
+}
+
+const CATEGORY_LABEL: Record<TechDetection['category'], string> = {
+  framework: 'Framework',
+  language: 'Language',
+  server: 'Server',
+  platform: 'Platform',
+  cms: 'CMS',
+};
+
+function Technologies({ technologies }: { technologies: TechDetection[] }) {
+  if (technologies.length === 0) return null;
+  return (
+    <Section label="Detected Technologies">
+      <div className="flex flex-wrap gap-2 px-4 py-3">
+        {technologies.map((t) => (
+          <span
+            key={t.name}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent"
+          >
+            {t.name}
+            <span className="rounded bg-accent/15 px-1.5 py-0.5 text-[10px] text-accent/70">
+              {CATEGORY_LABEL[t.category]}
+            </span>
+          </span>
+        ))}
       </div>
     </Section>
   );
@@ -286,6 +315,7 @@ export default function UrlInspector() {
       {result && !isPending && (
         <div className="space-y-6">
           <RequestInfo result={result} />
+          <Technologies technologies={result.technologies} />
           {result.httpError && (
             <div className="rounded-xl border border-yellow-400/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-600 dark:text-yellow-400">
               HTTP fetch failed: {result.httpError}
