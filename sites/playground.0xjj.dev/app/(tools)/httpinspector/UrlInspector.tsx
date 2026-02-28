@@ -87,7 +87,7 @@ function Technologies({ technologies }: { technologies: TechDetection[] }) {
 // ─── Categorized response headers ─────────────────────────────────────────────
 
 const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string; description: string }> }> = [
-  // ── ほぼ必ず存在 ──
+
   {
     category: 'Content',
     headers: [
@@ -108,7 +108,7 @@ const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string;
       { key: 'expires', description: 'Expiration date for the resource' },
     ],
   },
-  // ── つけておくべきもの ──
+
   {
     category: 'Security',
     headers: [
@@ -142,7 +142,7 @@ const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string;
       { key: 'access-control-max-age', description: 'Preflight cache duration' },
     ],
   },
-  // ── 存在したら表示 ──
+
   {
     category: 'Redirect',
     headers: [
@@ -382,20 +382,27 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 
 export default function UrlInspector() {
   const [urlParam, setUrlParam] = useQueryState('url', { defaultValue: '' });
-  const [input, setInput] = useState(urlParam);
+  const [input, setInput] = useState(() => urlParam.replace(/^https?:\/\//i, ''));
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const initialCheckDone = useRef(false);
 
-  async function inspect(url: string) {
-    if (!url.trim()) return;
+  function normalizeUrl(raw: string): string {
+    const v = raw.trim();
+    if (/^https?:\/\//i.test(v)) return v;
+    return `https://${v}`;
+  }
+
+  async function inspect(raw: string) {
+    if (!raw.trim()) return;
+    const url = normalizeUrl(raw);
     setError(null);
     setResult(null);
 
     startTransition(async () => {
       try {
-        const res = await fetch(`/api/inspect?url=${encodeURIComponent(url.trim())}`);
+        const res = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
         const json: Result & { error?: string } = await res.json();
         if (!res.ok || json.error) {
           setError(json.error ?? 'Something went wrong');
@@ -417,7 +424,8 @@ export default function UrlInspector() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setUrlParam(input || null);
+    const url = normalizeUrl(input);
+    setUrlParam(input.trim() ? url : null);
     inspect(input);
   }
 
@@ -432,14 +440,17 @@ export default function UrlInspector() {
 
       <form onSubmit={handleSubmit} className="mb-8">
         <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            type="url"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="https://example.com"
-            required
-            className="flex-1 rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)] px-4 py-2.5 font-mono text-base text-fg shadow-sm outline-none placeholder:text-muted focus:border-[color-mix(in_srgb,var(--color-fg)_35%,transparent)] transition-colors"
-          />
+          <div className="flex flex-1 items-center rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)] shadow-sm transition-colors focus-within:border-[color-mix(in_srgb,var(--color-fg)_35%,transparent)]">
+            <span className="select-none pl-4 font-mono text-base text-muted">https://</span>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value.replace(/^https?:\/\//i, ''))}
+              placeholder="example.com"
+              required
+              className="flex-1 bg-transparent py-2.5 pr-4 pl-0 font-mono text-base text-fg outline-none placeholder:text-muted"
+            />
+          </div>
           <button
             type="submit"
             disabled={isPending}
