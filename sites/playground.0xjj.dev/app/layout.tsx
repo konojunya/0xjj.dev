@@ -76,8 +76,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Created by{' '}
             <a
               href="https://0xjj.dev"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-fg underline underline-offset-2 transition-opacity hover:opacity-60"
             >
               JJ
