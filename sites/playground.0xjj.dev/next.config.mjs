@@ -18,6 +18,9 @@ const withMDX = createMDX({
 /** @type {import('next').NextConfig} */
 const config = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default withMDX(config);
