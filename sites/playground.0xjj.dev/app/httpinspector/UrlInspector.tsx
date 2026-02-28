@@ -137,6 +137,11 @@ function DnsTable({ records }: { records: DnsRecord[] }) {
               </td>
               <td className="px-4 py-3 align-top">
                 <span className="text-xs text-fg break-all">{r.value}</span>
+                {r.provider && (
+                  <span className="ml-2 inline-block rounded-md border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-accent">
+                    {r.provider}
+                  </span>
+                )}
               </td>
               <td className="w-20 px-4 py-3 text-right align-top">
                 <span className="font-mono text-xs text-muted">{r.ttl}</span>

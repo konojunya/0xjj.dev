@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { identifyProvider } from './providers';
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
@@ -21,6 +22,7 @@ export interface DnsRecord {
   name: string;
   value: string;
   ttl: number;
+  provider?: string;
 }
 
 // ─── security: SSRF prevention ───────────────────────────────────────────────
@@ -239,6 +241,13 @@ async function lookupDns(hostname: string): Promise<DnsRecord[]> {
           records.push(rec);
         }
       }
+    }
+  }
+
+  // Identify providers for A/AAAA records
+  for (const rec of records) {
+    if (rec.type === 'A' || rec.type === 'AAAA') {
+      rec.provider = identifyProvider(rec.value);
     }
   }
 
