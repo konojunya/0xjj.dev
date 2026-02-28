@@ -9,13 +9,11 @@ export function createToolMetadata(slug: string): Metadata {
     openGraph: {
       title: tool.name,
       description: tool.description,
-      images: [{ url: `/og/${slug}.png`, width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
       title: tool.name,
       description: tool.description,
-      images: [`/og/${slug}.png`],
     },
   };
 }
