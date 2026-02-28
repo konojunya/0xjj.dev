@@ -44,12 +44,12 @@ const sorted = posts
       />
     </div>
 
-    <script type="application/json" id="posts-meta">{JSON.stringify(
+    <script type="application/json" id="posts-meta" is:inline set:html={JSON.stringify(
       sorted.reduce((acc, post) => {
         acc[post.id] = { title: post.title, date: post.date, externalUrl: post.externalUrl };
         return acc;
       }, {} as Record<string, { title: string; date: string; externalUrl?: string }>)
-    )}</script>
+    )}></script>
 
     <ul class="post-list" id="post-list">
       {sorted.map(post => (
