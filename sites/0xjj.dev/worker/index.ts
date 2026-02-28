@@ -1,33 +1,30 @@
 interface Env {
   ASSETS: Fetcher;
-  BLOG_VIEWS: KVNamespace;
+  AE_BLOG: AnalyticsEngineDataset;
+  CF_ACCOUNT_ID: string;
+  CF_AE_TOKEN: string;
 }
 
-interface TopPost {
-  slug: string;
-  views: number;
-}
-
-const TOP_KEY = '_top';
+const AE_DATASET = 'blog_views';
 const TOP_COUNT = 3;
 
-async function incrementView(kv: KVNamespace, slug: string): Promise<void> {
-  const current = Number((await kv.get(slug)) ?? 0);
-  const next = current + 1;
-  await kv.put(slug, String(next));
+function aeUrl(accountId: string): string {
+  return `https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`;
+}
 
-  const raw = await kv.get(TOP_KEY);
-  const top: TopPost[] = raw ? JSON.parse(raw) : [];
-
-  const idx = top.findIndex((t) => t.slug === slug);
-  if (idx >= 0) {
-    top[idx].views = next;
-  } else {
-    top.push({ slug, views: next });
-  }
-
-  top.sort((a, b) => b.views - a.views);
-  await kv.put(TOP_KEY, JSON.stringify(top.slice(0, TOP_COUNT)));
+async function aeQuery(accountId: string, token: string, sql: string): Promise<unknown[] | null> {
+  if (!accountId || !token) return null;
+  const res = await fetch(aeUrl(accountId), {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'text/plain',
+    },
+    body: sql,
+  });
+  if (!res.ok) return null;
+  const json = await res.json() as { data?: unknown[] };
+  return json.data ?? null;
 }
 
 const headers = {
@@ -36,7 +33,7 @@ const headers = {
 };
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
 
@@ -45,14 +42,19 @@ export default {
       const match = path.match(/^\/api\/views\/(.+)$/);
       if (!match) return new Response('Not Found', { status: 404 });
       const slug = decodeURIComponent(match[1]);
-      ctx.waitUntil(incrementView(env.BLOG_VIEWS, slug));
+      if (env.AE_BLOG) {
+        env.AE_BLOG.writeDataPoint({ blobs: [slug], doubles: [1], indexes: [slug] });
+      }
       return new Response(JSON.stringify({ ok: true }), { status: 202, headers });
     }
 
     // GET /api/views/top — get top 3 posts
     if (request.method === 'GET' && path === '/api/views/top') {
-      const raw = await env.BLOG_VIEWS.get(TOP_KEY);
-      const top: TopPost[] = raw ? JSON.parse(raw) : [];
+      const sql = `SELECT blob1 AS slug, SUM(double1) AS views FROM ${AE_DATASET} GROUP BY blob1 ORDER BY views DESC LIMIT ${TOP_COUNT}`;
+      const rows = await aeQuery(env.CF_ACCOUNT_ID, env.CF_AE_TOKEN, sql);
+      if (!rows) return new Response(JSON.stringify([]), { headers });
+      const top = (rows as Array<{ slug: string; views: number }>)
+        .map(r => ({ slug: r.slug, views: Number(r.views) }));
       return new Response(JSON.stringify(top), { headers });
     }
 
@@ -60,8 +62,10 @@ export default {
     if (request.method === 'GET') {
       const match = path.match(/^\/api\/views\/(.+)$/);
       if (!match) return new Response('Not Found', { status: 404 });
-      const slug = decodeURIComponent(match[1]);
-      const views = Number((await env.BLOG_VIEWS.get(slug)) ?? 0);
+      const slug = decodeURIComponent(match[1]).replace(/'/g, "''");
+      const sql = `SELECT SUM(double1) AS views FROM ${AE_DATASET} WHERE blob1 = '${slug}'`;
+      const rows = await aeQuery(env.CF_ACCOUNT_ID, env.CF_AE_TOKEN, sql);
+      const views = rows?.length ? Number((rows[0] as { views: number }).views) : 0;
       return new Response(JSON.stringify({ views }), { headers });
     }
 

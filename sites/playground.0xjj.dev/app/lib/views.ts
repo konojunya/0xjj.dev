@@ -5,50 +5,51 @@ export interface TopTool {
   views: number;
 }
 
-const TOP_KEY = '_top';
+const AE_DATASET = 'tool_views';
 const TOP_COUNT = 3;
 
+function aeUrl(accountId: string): string {
+  return `https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`;
+}
+
+async function aeQuery(accountId: string, token: string, sql: string): Promise<unknown[] | null> {
+  if (!accountId || !token) return null;
+  const res = await fetch(aeUrl(accountId), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'text/plain' },
+    body: sql,
+  });
+  if (!res.ok) return null;
+  const json = await res.json() as { data?: unknown[] };
+  return json.data ?? null;
+}
+
 export function trackView(slug: string): void {
-  const work = (async () => {
-    const { env, ctx } = await getCloudflareContext();
-    const kv = (env as Record<string, unknown>).VIEWS as KVNamespace | undefined;
-    if (!kv) return;
-
-    const task = (async () => {
-      const current = Number((await kv.get(slug)) ?? 0);
-      const next = current + 1;
-      await kv.put(slug, String(next));
-
-      const raw = await kv.get(TOP_KEY);
-      const top: TopTool[] = raw ? JSON.parse(raw) : [];
-
-      const idx = top.findIndex((t) => t.slug === slug);
-      if (idx >= 0) {
-        top[idx].views = next;
-      } else {
-        top.push({ slug, views: next });
-      }
-
-      top.sort((a, b) => b.views - a.views);
-      await kv.put(TOP_KEY, JSON.stringify(top.slice(0, TOP_COUNT)));
-    })();
-
-    ctx.waitUntil(task);
+  (async () => {
+    try {
+      const { env } = await getCloudflareContext();
+      const ae = (env as Record<string, unknown>).AE_VIEWS as AnalyticsEngineDataset | undefined;
+      if (!ae) return; // ローカル dev: binding なし → スキップ
+      ae.writeDataPoint({ blobs: [slug], doubles: [1], indexes: [slug] });
+    } catch {
+      // trackView はページレンダリングに影響させない
+    }
   })();
-
-  work.catch(() => {});
 }
 
 export async function getTopTools(): Promise<TopTool[]> {
   try {
     const { env } = await getCloudflareContext();
-    const kv = (env as Record<string, unknown>).VIEWS as KVNamespace | undefined;
-    if (!kv) return [];
-
-    const raw = await kv.get(TOP_KEY);
-    if (!raw) return [];
-
-    return JSON.parse(raw) as TopTool[];
+    const e = env as Record<string, unknown>;
+    const accountId = e.CF_ACCOUNT_ID as string | undefined;
+    const token = e.CF_AE_TOKEN as string | undefined;
+    const sql = `SELECT blob1 AS slug, SUM(double1) AS views FROM ${AE_DATASET} GROUP BY blob1 ORDER BY views DESC LIMIT ${TOP_COUNT}`;
+    const rows = await aeQuery(accountId ?? '', token ?? '', sql);
+    if (!rows) return [];
+    return (rows as Array<{ slug: string; views: number }>).map(r => ({
+      slug: r.slug,
+      views: Number(r.views),
+    }));
   } catch {
     return [];
   }
