@@ -27,25 +27,28 @@ const orderedCategories = [
   <header class="skills-header">
     <span class="skills-title">skills</span>
   </header>
-  <div class="categories">
-    {orderedCategories.map(cat => (
-      <div class="category">
-        <p class="category-name">{cat}</p>
-        <ul class="skill-list">
-          {byCategory[cat].map(s => (
-            <li class="skill-item" data-animate>
-              <span class="skill-name">{s.data.id}</span>
-              <span class="skill-rate" aria-label={`${s.data.rate} out of 5`}>
-                {Array.from({ length: s.data.rate }, (_, i) => (
-                  <span class="dot dot--filled" style={`--delay: ${i * 30}ms`} />
-                ))}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ))}
+  <div class="categories-wrap">
+    <div class="categories">
+      {orderedCategories.map(cat => (
+        <div class="category">
+          <p class="category-name">{cat}</p>
+          <ul class="skill-list">
+            {byCategory[cat].map(s => (
+              <li class="skill-item" data-animate>
+                <span class="skill-name">{s.data.id}</span>
+                <span class="skill-rate" aria-label={`${s.data.rate} out of 5`}>
+                  {Array.from({ length: s.data.rate }, (_, i) => (
+                    <span class="dot dot--filled" style={`--delay: ${i * 30}ms`} />
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
   </div>
+  <button class="skills-toggle" id="skills-toggle">Show all ↓</button>
 </div>
 
 <style>
@@ -76,10 +79,48 @@ const orderedCategories = [
     border-radius: 999px;
   }
 
+  .categories-wrap {
+    max-height: 14rem;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    transition: max-height 0.4s ease;
+  }
+
+  .categories-wrap.is-expanded {
+    max-height: none;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
   .categories {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+  }
+
+  .skills-toggle {
+    display: block;
+    margin: 1.5rem auto 0;
+    background: none;
+    border: 1px solid color-mix(in srgb, var(--color-fg) 15%, transparent);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .skills-toggle:hover {
+    color: var(--color-fg);
+    border-color: color-mix(in srgb, var(--color-fg) 30%, transparent);
+  }
+
+  .skills-toggle.is-hidden {
+    display: none;
   }
 
   .category-name {
@@ -148,17 +189,28 @@ const orderedCategories = [
 </style>
 
 <script>
-  const items = document.querySelectorAll('.skill-item[data-animate]');
-  const observer = new IntersectionObserver(
-    (observed) => {
-      for (const e of observed) {
-        if (e.isIntersecting) {
-          e.target.classList.add('is-visible');
-          observer.unobserve(e.target);
+  document.addEventListener('astro:page-load', () => {
+    const wrap = document.querySelector('.categories-wrap');
+    const btn = document.getElementById('skills-toggle');
+    if (wrap && btn) {
+      btn.addEventListener('click', () => {
+        wrap.classList.add('is-expanded');
+        btn.classList.add('is-hidden');
+      });
+    }
+
+    const items = document.querySelectorAll('.skill-item[data-animate]');
+    const observer = new IntersectionObserver(
+      (observed) => {
+        for (const e of observed) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible');
+            observer.unobserve(e.target);
+          }
         }
-      }
-    },
-    { threshold: 0.15 }
-  );
-  for (const el of items) observer.observe(el);
+      },
+      { threshold: 0.15 }
+    );
+    for (const el of items) observer.observe(el);
+  });
 </script>
