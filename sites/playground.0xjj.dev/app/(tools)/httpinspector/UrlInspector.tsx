@@ -87,42 +87,42 @@ function Technologies({ technologies }: { technologies: TechDetection[] }) {
 // ─── Categorized response headers ─────────────────────────────────────────────
 
 const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string; description: string }> }> = [
+  // ── ほぼ必ず存在 ──
   {
-    category: 'Security',
+    category: 'Content',
     headers: [
-      { key: 'strict-transport-security', description: 'HSTS — force HTTPS connections' },
-      { key: 'content-security-policy', description: 'CSP — control allowed resource origins' },
-      { key: 'content-security-policy-report-only', description: 'CSP report-only mode' },
-      { key: 'x-frame-options', description: 'Controls iframe embedding' },
-      { key: 'x-content-type-options', description: 'Prevent MIME-type sniffing' },
-      { key: 'x-xss-protection', description: 'Legacy XSS filter (deprecated)' },
-      { key: 'referrer-policy', description: 'Controls Referer header behavior' },
-      { key: 'permissions-policy', description: 'Controls browser feature access' },
-      { key: 'cross-origin-embedder-policy', description: 'COEP — cross-origin isolation' },
-      { key: 'cross-origin-opener-policy', description: 'COOP — window isolation' },
-      { key: 'cross-origin-resource-policy', description: 'CORP — resource sharing control' },
+      { key: 'content-type', description: 'MIME type of the response' },
+      { key: 'content-language', description: 'Language of the content' },
+      { key: 'content-encoding', description: 'Compression encoding' },
+      { key: 'content-disposition', description: 'Download/inline behavior' },
     ],
   },
   {
     category: 'Caching',
     headers: [
       { key: 'cache-control', description: 'Caching directives' },
+      { key: 'vary', description: 'Headers that affect caching' },
       { key: 'etag', description: 'Resource version identifier' },
       { key: 'last-modified', description: 'Last modification timestamp' },
-      { key: 'expires', description: 'Expiration date for the resource' },
       { key: 'age', description: 'Time in cache (seconds)' },
-      { key: 'vary', description: 'Headers that affect caching' },
+      { key: 'expires', description: 'Expiration date for the resource' },
     ],
   },
+  // ── つけておくべきもの ──
   {
-    category: 'CORS',
+    category: 'Security',
     headers: [
-      { key: 'access-control-allow-origin', description: 'Allowed request origins' },
-      { key: 'access-control-allow-methods', description: 'Allowed HTTP methods' },
-      { key: 'access-control-allow-headers', description: 'Allowed request headers' },
-      { key: 'access-control-allow-credentials', description: 'Allow credentials' },
-      { key: 'access-control-max-age', description: 'Preflight cache duration' },
-      { key: 'access-control-expose-headers', description: 'Headers exposed to JS' },
+      { key: 'x-content-type-options', description: 'Prevent MIME-type sniffing' },
+      { key: 'x-frame-options', description: 'Controls iframe embedding' },
+      { key: 'strict-transport-security', description: 'HSTS — force HTTPS connections' },
+      { key: 'referrer-policy', description: 'Controls Referer header behavior' },
+      { key: 'content-security-policy', description: 'CSP — control allowed resource origins' },
+      { key: 'content-security-policy-report-only', description: 'CSP report-only mode' },
+      { key: 'permissions-policy', description: 'Controls browser feature access' },
+      { key: 'cross-origin-opener-policy', description: 'COOP — window isolation' },
+      { key: 'cross-origin-embedder-policy', description: 'COEP — cross-origin isolation' },
+      { key: 'cross-origin-resource-policy', description: 'CORP — resource sharing control' },
+      { key: 'x-xss-protection', description: 'Legacy XSS filter (deprecated)' },
     ],
   },
   {
@@ -132,16 +132,19 @@ const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string;
     ],
   },
   {
-    category: 'Content',
+    category: 'CORS',
     headers: [
-      { key: 'content-type', description: 'MIME type of the response' },
-      { key: 'content-language', description: 'Language of the content' },
-      { key: 'content-disposition', description: 'Download/inline behavior' },
-      { key: 'content-encoding', description: 'Compression encoding' },
+      { key: 'access-control-allow-origin', description: 'Allowed request origins' },
+      { key: 'access-control-allow-methods', description: 'Allowed HTTP methods' },
+      { key: 'access-control-allow-headers', description: 'Allowed request headers' },
+      { key: 'access-control-expose-headers', description: 'Headers exposed to JS' },
+      { key: 'access-control-allow-credentials', description: 'Allow credentials' },
+      { key: 'access-control-max-age', description: 'Preflight cache duration' },
     ],
   },
+  // ── 存在したら表示 ──
   {
-    category: 'Redirect & Location',
+    category: 'Redirect',
     headers: [
       { key: 'location', description: 'Redirect target URL' },
       { key: 'x-redirect-by', description: 'Redirect origin hint' },
@@ -152,8 +155,8 @@ const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string;
     headers: [
       { key: 'link', description: 'Preload / preconnect hints' },
       { key: 'x-dns-prefetch-control', description: 'DNS prefetch toggle' },
-      { key: 'origin-trial', description: 'Chrome Origin Trial tokens' },
       { key: 'timing-allow-origin', description: 'Resource Timing API access' },
+      { key: 'origin-trial', description: 'Chrome Origin Trial tokens' },
     ],
   },
   {
@@ -163,7 +166,7 @@ const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string;
     ],
   },
   {
-    category: 'SEO & Crawling',
+    category: 'SEO',
     headers: [
       { key: 'x-robots-tag', description: 'Search engine directives' },
     ],
