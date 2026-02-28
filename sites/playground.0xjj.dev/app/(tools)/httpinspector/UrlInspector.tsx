@@ -59,7 +59,17 @@ function HeadersTable({ headers }: { headers: Array<{ key: string; value: string
   if (headers.length === 0) return null;
   return (
     <Section label={`Response Headers (${headers.length})`}>
-      <table className="w-full text-sm">
+      {/* Mobile: stacked layout */}
+      <div className="divide-y divide-[color-mix(in_srgb,var(--color-fg)_6%,transparent)] sm:hidden">
+        {headers.map((h, i) => (
+          <div key={i} className="px-4 py-3 space-y-1">
+            <div className="font-mono text-xs text-muted break-all">{h.key}</div>
+            <div className="text-xs text-fg break-all">{h.value}</div>
+          </div>
+        ))}
+      </div>
+      {/* Desktop: table layout */}
+      <table className="hidden w-full text-sm sm:table">
         <thead>
           <tr className="border-b border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]">
             <th className="w-56 px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">header</th>
@@ -112,7 +122,30 @@ function DnsTable({ records }: { records: DnsRecord[] }) {
   if (records.length === 0) return null;
   return (
     <Section label={`DNS Records (${records.length})`}>
-      <table className="w-full text-sm">
+      {/* Mobile: card layout */}
+      <div className="divide-y divide-[color-mix(in_srgb,var(--color-fg)_6%,transparent)] sm:hidden">
+        {records.map((r, i) => (
+          <div key={i} className="px-4 py-3 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="inline-block rounded bg-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] px-1.5 py-0.5 font-mono text-xs font-medium text-fg">
+                {r.type}
+              </span>
+              <span className="font-mono text-xs text-muted">TTL {r.ttl}</span>
+            </div>
+            <div className="font-mono text-xs text-muted break-all">{r.name}</div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-fg break-all">{r.value}</span>
+              {r.provider && (
+                <span className="inline-block rounded-md border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-accent">
+                  {r.provider}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Desktop: table layout */}
+      <table className="hidden w-full text-sm sm:table">
         <thead>
           <tr className="border-b border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]">
             <th className="w-20 px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">type</th>
