@@ -5,11 +5,13 @@ import { TextFlip } from './TextFlip';
 <section class="hero">
   <img src="/animate-icon.svg" alt="" class="icon" aria-hidden="true" />
   <h1 class="name">Hello, I'm JJ.</h1>
-  <TextFlip client:load as="span" className="text-flip" interval={2.5}>
-    <span>Developer</span>
-    <span>Designer</span>
-    <span>Creator</span>
-  </TextFlip>
+  <div class="text-flip-wrap">
+    <TextFlip client:only="react" interval={2.5}>
+      <span>Developer</span>
+      <span>Designer</span>
+      <span>Creator</span>
+    </TextFlip>
+  </div>
   <nav class="socials" aria-label="Social links">
     <a href="https://x.com/0xjj_official" target="_blank" rel="noopener noreferrer">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -67,12 +69,13 @@ import { TextFlip } from './TextFlip';
     color: var(--color-fg);
   }
 
-  .text-flip {
+  .text-flip-wrap {
     font-family: var(--font-mono);
     font-size: 0.85rem;
     letter-spacing: 0.06em;
     color: var(--color-muted);
     margin-top: calc(-1.25rem + 8px);
+    min-height: 1.5em;
   }
 
   .socials {

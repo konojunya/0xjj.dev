@@ -10,7 +10,7 @@ const TOP_COUNT = 3;
 
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' data:",
+  "script-src 'self' 'unsafe-inline' data: https://static.cloudflareinsights.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' https:",
