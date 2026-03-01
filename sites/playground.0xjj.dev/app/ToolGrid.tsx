@@ -1,14 +1,16 @@
 'use client';
 
 import type { CSSProperties } from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useQueryState, parseAsStringLiteral } from 'nuqs';
 import Link from 'next/link';
-import type { Category } from './lib/tools';
 import { categories, tools } from './lib/tools';
 
+const categoryValues = ['tool', 'game', 'ui'] as const;
+
 export default function ToolGrid() {
-  const [query, setQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+  const [query, setQuery] = useQueryState('q', { defaultValue: '' });
+  const [activeCategory, setActiveCategory] = useQueryState('category', parseAsStringLiteral(categoryValues).withDefault(null));
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();

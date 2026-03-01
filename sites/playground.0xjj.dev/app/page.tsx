@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { tools } from './lib/tools';
 import { getTopTools } from './lib/views';
 import PopularTools from './PopularTools';
@@ -32,7 +33,9 @@ export default async function Home() {
       </div>
 
       <PopularTools items={popular} />
-      <ToolGrid />
+      <Suspense>
+        <ToolGrid />
+      </Suspense>
     </main>
   );
 }
