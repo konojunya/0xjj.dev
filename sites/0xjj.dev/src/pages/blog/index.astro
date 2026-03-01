@@ -19,7 +19,7 @@ const sorted = posts
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   "name": "Blog",
-  "url": "https://0xjj.dev/blog",
+  "url": "https://0xjj.dev/blog/",
   "description": "JJ's blog posts on web development, blockchain, and more."
 })}>
   <div class="container">
@@ -65,7 +65,7 @@ const sorted = posts
       {sorted.map(post => (
         <li class="post-item" data-title={post.title.toLowerCase()}>
           <a
-            href={post.externalUrl ?? `/blog/${post.id}`}
+            href={post.externalUrl ?? `/blog/${post.id}/`}
             class="post-link"
             data-animate
           >
@@ -157,7 +157,7 @@ const sorted = posts
           const { slug, views } = top[i];
           const meta = postsMeta[slug];
           if (!meta) continue;
-          const href = meta.externalUrl ?? `/blog/${slug}`;
+          const href = meta.externalUrl ?? `/blog/${slug}/`;
 
           const li = document.createElement('li');
           li.className = 'popular-item';

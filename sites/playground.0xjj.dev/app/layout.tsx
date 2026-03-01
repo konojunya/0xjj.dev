@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: '{"@context":"https://schema.org","@type":"WebSite","name":"Playground","url":"https://playground.0xjj.dev","author":{"@type":"Person","name":"Junya Kono","url":"https://0xjj.dev"}}' }}
+          dangerouslySetInnerHTML={{ __html: '{"@context":"https://schema.org","@type":"WebSite","name":"Playground","url":"https://playground.0xjj.dev/","author":{"@type":"Person","name":"Junya Kono","url":"https://0xjj.dev/"}}' }}
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

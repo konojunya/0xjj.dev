@@ -7,7 +7,7 @@ export function createToolMetadata(slug: string): Metadata {
     title: tool.name,
     description: tool.description,
     alternates: {
-      canonical: `/${slug}`,
+      canonical: `/${slug}/`,
     },
     openGraph: {
       title: tool.name,
@@ -34,7 +34,7 @@ export function createToolJsonLd(slug: string): string {
     author: {
       '@type': 'Person',
       name: 'Junya Kono',
-      url: 'https://0xjj.dev',
+      url: 'https://0xjj.dev/',
     },
   });
 }

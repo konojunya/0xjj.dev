@@ -13,7 +13,7 @@ export async function GET(context: APIContext) {
     items: sorted.map(post => ({
       title: post.data.title,
       pubDate: post.data.date,
-      link: post.data.externalUrl ?? `/blog/${post.id}`,
+      link: post.data.externalUrl ?? `/blog/${post.id}/`,
     })),
   });
 }

@@ -52,13 +52,13 @@ const description = excerpt(post.body ?? '');
   "headline": post.data.title,
   "image": `https://0xjj.dev/og/${post.id}.png`,
   "datePublished": post.data.date.toISOString(),
-  "author": { "@type": "Person", "name": "Junya Kono", "url": "https://0xjj.dev" },
-  "publisher": { "@type": "Person", "name": "Junya Kono", "url": "https://0xjj.dev" },
+  "author": { "@type": "Person", "name": "Junya Kono", "url": "https://0xjj.dev/" },
+  "publisher": { "@type": "Person", "name": "Junya Kono", "url": "https://0xjj.dev/" },
   "description": description,
-  "mainEntityOfPage": `https://0xjj.dev/blog/${post.id}`
+  "mainEntityOfPage": `https://0xjj.dev/blog/${post.id}/`
 })}>
   <div class="container">
-    <a href="/blog" class="back">← Blog</a>
+    <a href="/blog/" class="back">← Blog</a>
     <article>
       <header style={`--hero-bg: url('/og/bg/${post.id}.png')`} transition:name={`blog-thumb-${post.id}`}>
         <h1 transition:name={`blog-title-${post.id}`}>{post.data.title}</h1>
@@ -107,7 +107,7 @@ const description = excerpt(post.body ?? '');
     <nav class="post-nav">
       <div class="post-nav-item post-nav-prev">
         {prev && (
-          <a href={`/blog/${prev.id}`}>
+          <a href={`/blog/${prev.id}/`}>
             <span class="post-nav-label">← Older</span>
             <span class="post-nav-title">{prev.data.title}</span>
           </a>
@@ -115,7 +115,7 @@ const description = excerpt(post.body ?? '');
       </div>
       <div class="post-nav-item post-nav-next">
         {next && (
-          <a href={`/blog/${next.id}`}>
+          <a href={`/blog/${next.id}/`}>
             <span class="post-nav-label">Newer →</span>
             <span class="post-nav-title">{next.data.title}</span>
           </a>

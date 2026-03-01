@@ -35,7 +35,7 @@ const badge =
   <p class="text">
     {entry.current && <span class="now-dot" aria-label="currently active" />}
     {entry.type === 'blog' ? (
-      <a href={entry.externalUrl ?? `/blog/${entry.id}`}>{entry.title}</a>
+      <a href={entry.externalUrl ?? `/blog/${entry.id}/`}>{entry.title}</a>
     ) : entry.type === 'project' ? (
       entry.render ? (
         <>
