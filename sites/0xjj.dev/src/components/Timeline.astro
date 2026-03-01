@@ -84,6 +84,8 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
 </div>
 
 <script>
+  import { haptic } from '../lib/haptic';
+
   function applyFilter(filter: string) {
     const entries = document.querySelectorAll<HTMLElement>('[data-animate]');
     const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
@@ -131,6 +133,7 @@ const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
 
     document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        haptic();
         const filter = btn.dataset.filter!;
         history.replaceState(null, '', `#${filter}`);
         applyFilter(filter);

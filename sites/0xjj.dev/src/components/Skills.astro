@@ -189,11 +189,14 @@ const orderedCategories = [
 </style>
 
 <script>
+  import { haptic } from '../lib/haptic';
+
   document.addEventListener('astro:page-load', () => {
     const container = document.querySelector('.skills-container');
     const btn = document.getElementById('skills-toggle');
     if (container && btn) {
       btn.addEventListener('click', () => {
+        haptic();
         container.dataset.expanded = 'true';
       });
     }

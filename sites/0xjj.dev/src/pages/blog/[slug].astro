@@ -133,6 +133,8 @@ const description = excerpt(post.body ?? '');
 </Layout>
 
 <script>
+  import { haptic } from '../../lib/haptic';
+
   document.addEventListener('astro:page-load', () => {
     // Guard: only run on /blog/<slug> pages
     const match = location.pathname.match(/^\/blog\/([^/]+)\/?$/);
@@ -140,11 +142,13 @@ const description = excerpt(post.body ?? '');
     const slug = match[1];
 
     document.querySelector('.ai-badge')?.addEventListener('click', () => {
+      haptic();
       document.querySelector('.ai-badge-tooltip')?.classList.toggle('is-open');
     });
 
     const tocNav = document.querySelector<HTMLElement>('.toc');
     document.querySelector('.toc-toggle')?.addEventListener('click', () => {
+      haptic();
       if (tocNav) tocNav.dataset.tocExpanded = 'true';
     });
 
