@@ -1,6 +1,7 @@
 ---
 title: "@opennextjs/cloudflare から\nvinext に移行した"
 date: 2026-02-28
+isAIGen: true
 ---
 
 playground.0xjj.dev を `@opennextjs/cloudflare` から [vinext](https://vinext.io/) に移行しました。vinext は Next.js の App Router を Vite 上で再実装したフレームワークで、`@cloudflare/vite-plugin` と組み合わせることで Cloudflare Workers へのデプロイがシンプルになります。
