@@ -27,6 +27,7 @@ const typrEsbuildPlugin = {
 // https://astro.build/config
 export default defineConfig({
   site: 'https://0xjj.dev',
+  trailingSlash: 'never',
   integrations: [react(), sitemap()],
   markdown: {
     remarkPlugins: [remarkDirective, remarkZennMessage, remarkCodeMeta],

@@ -134,36 +134,32 @@ const description = excerpt(post.body ?? '');
 
 <script>
   document.addEventListener('astro:page-load', () => {
-    const aiBadge = document.querySelector('.ai-badge');
-    const tooltip = document.querySelector('.ai-badge-tooltip');
-    if (aiBadge && tooltip) {
-      aiBadge.addEventListener('click', () => {
-        tooltip.classList.toggle('is-open');
-      });
-    }
+    // Guard: only run on /blog/<slug> pages
+    const match = location.pathname.match(/^\/blog\/([^/]+)\/?$/);
+    if (!match) return;
+    const slug = match[1];
 
-    const tocNav = document.querySelector('.toc');
-    const tocToggle = document.querySelector('.toc-toggle');
-    if (tocNav && tocToggle) {
-      tocToggle.addEventListener('click', () => {
-        tocNav.dataset.tocExpanded = 'true';
-      });
-    }
+    document.querySelector('.ai-badge')?.addEventListener('click', () => {
+      document.querySelector('.ai-badge-tooltip')?.classList.toggle('is-open');
+    });
 
-    const slug = location.pathname.replace(/^\/blog\//, '').replace(/\/$/, '');
-    if (!slug) return;
+    const tocNav = document.querySelector<HTMLElement>('.toc');
+    document.querySelector('.toc-toggle')?.addEventListener('click', () => {
+      if (tocNav) tocNav.dataset.tocExpanded = 'true';
+    });
+
     // Track view (fire-and-forget)
     fetch(`/api/views/${slug}`, { method: 'POST' }).catch(() => {});
     // Fetch and display view count
     fetch(`/api/views/${slug}`)
       .then(r => r.json())
       .then((data: { views: number }) => {
-        const sep = document.querySelector('.view-sep');
-        const el = document.querySelector('.view-count');
+        const sep = document.querySelector<HTMLElement>('.view-sep');
+        const el = document.querySelector<HTMLElement>('.view-count');
         if (el && data.views > 0) {
           el.textContent = `${data.views.toLocaleString()} views`;
-          (el as HTMLElement).style.display = '';
-          if (sep) (sep as HTMLElement).style.display = '';
+          el.style.display = '';
+          if (sep) sep.style.display = '';
         }
       })
       .catch(() => {});
