@@ -85,15 +85,18 @@ const description = excerpt(post.body ?? '');
         </div>
       )}
       {tocHeadings.length >= 2 && (
-        <nav class="toc" aria-label="Table of contents">
+        <nav class="toc" aria-label="Table of contents" data-toc-expanded="false">
           <span class="toc-label">contents</span>
-          <ol class="toc-list">
-            {tocHeadings.map(h => (
-              <li class={`toc-item toc-item--h${h.depth}`}>
-                <a href={`#${h.slug}`}>{h.text}</a>
-              </li>
-            ))}
-          </ol>
+          <div class="toc-list-wrap">
+            <ol class="toc-list">
+              {tocHeadings.map(h => (
+                <li class={`toc-item toc-item--h${h.depth}`}>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <button class="toc-toggle" type="button">Show all ↓</button>
         </nav>
       )}
       <div class="prose">
@@ -136,6 +139,14 @@ const description = excerpt(post.body ?? '');
     if (aiBadge && tooltip) {
       aiBadge.addEventListener('click', () => {
         tooltip.classList.toggle('is-open');
+      });
+    }
+
+    const tocNav = document.querySelector('.toc');
+    const tocToggle = document.querySelector('.toc-toggle');
+    if (tocNav && tocToggle) {
+      tocToggle.addEventListener('click', () => {
+        tocNav.dataset.tocExpanded = 'true';
       });
     }
 
@@ -275,6 +286,44 @@ const description = excerpt(post.body ?? '');
     text-transform: uppercase;
     color: var(--color-muted);
     margin-bottom: 0.625rem;
+  }
+
+  .toc-list-wrap {
+    max-height: 5rem;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    transition: max-height 0.4s ease;
+  }
+
+  .toc[data-toc-expanded="true"] .toc-list-wrap {
+    max-height: none;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .toc-toggle {
+    display: block;
+    margin: 0.75rem auto 0;
+    background: none;
+    border: 1px solid color-mix(in srgb, var(--color-fg) 15%, transparent);
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .toc-toggle:hover {
+    color: var(--color-fg);
+    border-color: color-mix(in srgb, var(--color-fg) 30%, transparent);
+  }
+
+  .toc[data-toc-expanded="true"] .toc-toggle {
+    display: none;
   }
 
   .toc-list {
