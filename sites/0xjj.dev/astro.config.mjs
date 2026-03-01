@@ -28,7 +28,6 @@ const typrEsbuildPlugin = {
 export default defineConfig({
   site: 'https://0xjj.dev',
   trailingSlash: 'always',
-  prefetch: false,
   integrations: [react(), sitemap()],
   markdown: {
     remarkPlugins: [remarkDirective, remarkZennMessage, remarkCodeMeta],
