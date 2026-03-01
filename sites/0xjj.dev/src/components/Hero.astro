@@ -6,11 +6,7 @@ import { TextFlip } from './TextFlip';
   <img src="/animate-icon.svg" alt="" class="icon" aria-hidden="true" />
   <h1 class="name">Hello, I'm JJ.</h1>
   <div class="text-flip-wrap">
-    <TextFlip client:only="react" interval={2.5}>
-      <span>Developer</span>
-      <span>Designer</span>
-      <span>Creator</span>
-    </TextFlip>
+    <TextFlip client:only="react" items={["Developer", "Designer", "Creator"]} interval={2.5} />
   </div>
   <nav class="socials" aria-label="Social links">
     <a href="https://x.com/0xjj_official" target="_blank" rel="noopener noreferrer">
@@ -74,7 +70,7 @@ import { TextFlip } from './TextFlip';
     font-size: 0.85rem;
     letter-spacing: 0.06em;
     color: var(--color-muted);
-    margin-top: calc(-1.25rem + 8px);
+    margin-top: calc(-1.25rem + 24px);
     min-height: 1.5em;
   }
 
