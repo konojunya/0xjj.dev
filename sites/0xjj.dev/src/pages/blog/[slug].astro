@@ -141,6 +141,8 @@ const description = excerpt(post.body ?? '');
     if (!match) return;
     const slug = match[1];
 
+    document.querySelector('.back')?.addEventListener('click', () => haptic());
+
     document.querySelector('.ai-badge')?.addEventListener('click', () => {
       haptic();
       document.querySelector('.ai-badge-tooltip')?.classList.toggle('is-open');

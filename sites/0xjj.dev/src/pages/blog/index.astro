@@ -96,7 +96,10 @@ const sorted = posts
 </Layout>
 
 <script>
+  import { haptic } from '../../lib/haptic';
+
   function init() {
+    document.querySelector('.back')?.addEventListener('click', () => haptic());
     const input = document.getElementById('search') as HTMLInputElement;
     const items = document.querySelectorAll<HTMLElement>('.post-item');
     const noResults = document.getElementById('no-results')!;

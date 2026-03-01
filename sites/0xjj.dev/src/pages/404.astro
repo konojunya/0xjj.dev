@@ -12,6 +12,11 @@ import Layout from "../layouts/Layout.astro";
   </main>
 </Layout>
 
+<script>
+  import { haptic } from '../lib/haptic';
+  document.querySelector('.back')?.addEventListener('click', () => haptic());
+</script>
+
 <style>
   .not-found {
     position: fixed;
