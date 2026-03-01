@@ -253,19 +253,25 @@ export default function OgpChecker() {
       </div>
 
       <form onSubmit={handleSubmit} className="mb-8">
-        <div className="flex gap-2">
-          <input
-            type="url"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="https://example.com"
-            required
-            className="flex-1 rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)] px-4 py-2.5 font-mono text-base text-fg shadow-sm outline-none placeholder:text-muted focus:border-[color-mix(in_srgb,var(--color-fg)_35%,transparent)] transition-colors"
-          />
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <div
+            className="flex flex-1 cursor-text items-center rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)] shadow-sm transition-colors focus-within:border-[color-mix(in_srgb,var(--color-fg)_35%,transparent)]"
+            onClick={(e) => { if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'SPAN') (e.currentTarget.querySelector('input') as HTMLInputElement)?.focus(); }}
+          >
+            <span className="select-none pl-4 font-mono text-base text-muted">https://</span>
+            <input
+              type="text"
+              value={input.replace(/^https?:\/\//i, '')}
+              onChange={(e) => setInput(`https://${e.target.value.replace(/^https?:\/\//i, '')}`)}
+              placeholder="example.com"
+              required
+              className="flex-1 bg-transparent py-2.5 pr-4 pl-0 font-mono text-base text-fg outline-none placeholder:text-muted"
+            />
+          </div>
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-fg px-5 py-2.5 font-mono text-sm font-medium text-bg shadow-sm transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="shrink-0 rounded-lg bg-fg px-5 py-2.5 font-mono text-sm font-medium text-bg shadow-sm transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isPending ? 'Checking…' : 'Check'}
           </button>

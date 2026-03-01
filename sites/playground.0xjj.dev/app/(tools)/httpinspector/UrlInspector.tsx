@@ -440,7 +440,10 @@ export default function UrlInspector() {
 
       <form onSubmit={handleSubmit} className="mb-8">
         <div className="flex flex-col gap-2 sm:flex-row">
-          <div className="flex flex-1 items-center rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)] shadow-sm transition-colors focus-within:border-[color-mix(in_srgb,var(--color-fg)_35%,transparent)]">
+          <div
+            className="flex flex-1 cursor-text items-center rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)] shadow-sm transition-colors focus-within:border-[color-mix(in_srgb,var(--color-fg)_35%,transparent)]"
+            onClick={(e) => { if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'SPAN') (e.currentTarget.querySelector('input') as HTMLInputElement)?.focus(); }}
+          >
             <span className="select-none pl-4 font-mono text-base text-muted">https://</span>
             <input
               type="text"
