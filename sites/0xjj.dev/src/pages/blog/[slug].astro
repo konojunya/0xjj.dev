@@ -72,6 +72,17 @@ const description = excerpt(post.body ?? '');
           </span>
         </div>
       </header>
+      {post.data.isAIGen && (
+        <div class="ai-badge-wrap">
+          <span class="ai-badge">
+            Written by AI
+            <button class="ai-badge-help" type="button" aria-label="Why AI?">?</button>
+          </span>
+          <div class="ai-badge-tooltip" role="tooltip">
+            この記事は AI によって作成されました。記事を大量生産する目的ではなく、備忘録として情報を整理・記録するために AI を活用しています。
+          </div>
+        </div>
+      )}
       {tocHeadings.length >= 2 && (
         <nav class="toc" aria-label="Table of contents">
           <span class="toc-label">contents</span>
@@ -119,6 +130,14 @@ const description = excerpt(post.body ?? '');
 
 <script>
   document.addEventListener('astro:page-load', () => {
+    const helpBtn = document.querySelector('.ai-badge-help');
+    const tooltip = document.querySelector('.ai-badge-tooltip');
+    if (helpBtn && tooltip) {
+      helpBtn.addEventListener('click', () => {
+        tooltip.classList.toggle('is-open');
+      });
+    }
+
     const slug = location.pathname.replace(/^\/blog\//, '').replace(/\/$/, '');
     if (!slug) return;
     // Track view (fire-and-forget)
@@ -540,5 +559,63 @@ const description = excerpt(post.body ?? '');
 
   .edit-on-github a:hover {
     color: var(--color-fg);
+  }
+
+  .ai-badge-wrap {
+    margin-bottom: 1.5rem;
+  }
+
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    color: var(--color-muted);
+    background: color-mix(in srgb, var(--color-fg) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .ai-badge-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-muted);
+    background: color-mix(in srgb, var(--color-fg) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-fg) 15%, transparent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    padding: 0;
+  }
+
+  .ai-badge-help:hover {
+    color: var(--color-fg);
+    border-color: color-mix(in srgb, var(--color-fg) 30%, transparent);
+  }
+
+  .ai-badge-tooltip {
+    display: none;
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    background: color-mix(in srgb, var(--color-fg) 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-fg) 10%, transparent);
+    border-radius: 8px;
+  }
+
+  .ai-badge-tooltip.is-open {
+    display: block;
   }
 </style>

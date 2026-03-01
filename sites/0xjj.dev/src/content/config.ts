@@ -7,6 +7,7 @@ const blog = defineCollection({
     title: z.string(),
     date: z.coerce.date(),
     externalUrl: z.string().url().optional(),
+    isAIGen: z.boolean().optional(),
   }),
 });
 
