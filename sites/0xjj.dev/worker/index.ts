@@ -8,6 +8,36 @@ interface Env {
 const AE_DATASET = 'blog_views';
 const TOP_COUNT = 3;
 
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  "img-src 'self' https:",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join('; ');
+
+function securityHeaders(): Record<string, string> {
+  return {
+    'Content-Security-Policy': CSP,
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+  };
+}
+
+function withSecurityHeaders(response: Response): Response {
+  const newResponse = new Response(response.body, response);
+  for (const [key, value] of Object.entries(securityHeaders())) {
+    newResponse.headers.set(key, value);
+  }
+  return newResponse;
+}
+
 function aeUrl(accountId: string): string {
   return `https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`;
 }
@@ -43,12 +73,19 @@ async function aeQuery(accountId: string, token: string, sql: string): Promise<u
 const headers = {
   'Content-Type': 'application/json',
   'Cache-Control': 'no-store',
+  ...securityHeaders(),
 };
 
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
+
+    // Non-API routes: serve static assets with security headers
+    if (!path.startsWith('/api/')) {
+      const response = await env.ASSETS.fetch(request);
+      return withSecurityHeaders(response);
+    }
 
     // POST /api/views/:slug — increment view count
     if (request.method === 'POST') {
