@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { haptic } from '../lib/haptic';
 
 export default function ToolLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -6,6 +9,7 @@ export default function ToolLayout({ children }: { children: React.ReactNode }) 
       <nav className="mb-6">
         <Link
           href="/"
+          onClick={() => haptic()}
           className="inline-block font-mono text-xs text-muted transition-colors hover:text-fg"
         >
           ← back
