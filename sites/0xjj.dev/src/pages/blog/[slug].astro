@@ -44,6 +44,8 @@ function excerpt(body: string, maxLen = 150): string {
 }
 
 const description = excerpt(post.body ?? '');
+
+const isOld = Date.now() - post.data.date.getTime() > 365 * 24 * 60 * 60 * 1000;
 ---
 
 <Layout title={post.data.title} description={description} ogImage={`https://0xjj.dev/og/${post.id}.png`} jsonLd={JSON.stringify({
@@ -72,6 +74,15 @@ const description = excerpt(post.body ?? '');
           </span>
         </div>
       </header>
+      {isOld && (
+        <div class="outdated-notice" role="note">
+          <svg class="outdated-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div>
+            <p>This article was published over a year ago. The information may be outdated.</p>
+            <p>この記事は公開から1年以上経過しています。情報が古くなっている可能性があります。</p>
+          </div>
+        </div>
+      )}
       {post.data.isAIGen && (
         <div class="ai-badge-wrap">
           <button class="ai-badge" type="button">
@@ -611,6 +622,34 @@ const description = excerpt(post.body ?? '');
 
   .edit-on-github a:hover {
     color: var(--color-fg);
+  }
+
+  .outdated-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0.875rem 1.125rem;
+    border-radius: 8px;
+    border-left: 3px solid #f59e0b;
+    background: color-mix(in srgb, #f59e0b 6%, transparent);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .outdated-icon {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    color: #f59e0b;
+  }
+
+  .outdated-notice p {
+    margin: 0;
+  }
+
+  .outdated-notice p + p {
+    margin-top: 0.25rem;
   }
 
   .ai-badge-wrap {
