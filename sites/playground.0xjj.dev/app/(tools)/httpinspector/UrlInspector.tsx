@@ -6,6 +6,375 @@ import type { InspectResult, DnsRecord, TechDetection } from '../../api/inspect/
 
 type Result = InspectResult & { httpError?: string };
 
+// ─── Security Audit Scoring ──────────────────────────────────────────────────
+
+type AuditItem = {
+  category: string;
+  score: number;
+  maxScore: number;
+  severity: 'critical' | 'warning' | 'info' | 'pass';
+  findings: string[];
+};
+
+type AuditResult = {
+  score: number;
+  grade: 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+  items: AuditItem[];
+};
+
+function computeSecurityAudit(headers: Array<{ key: string; value: string }>): AuditResult {
+  const map = new Map<string, string[]>();
+  for (const h of headers) {
+    const k = h.key.toLowerCase();
+    const existing = map.get(k);
+    if (existing) existing.push(h.value);
+    else map.set(k, [h.value]);
+  }
+  const get = (k: string) => map.get(k)?.[0] ?? null;
+  const has = (k: string) => map.has(k);
+
+  const items: AuditItem[] = [];
+
+  // 1. HSTS (25 pts)
+  {
+    const val = get('strict-transport-security');
+    let score = 0;
+    const findings: string[] = [];
+    if (!val) {
+      findings.push('Missing Strict-Transport-Security header');
+    } else {
+      score = 10;
+      findings.push('Strict-Transport-Security is present');
+      const maxAge = val.match(/max-age=(\d+)/i);
+      if (maxAge && parseInt(maxAge[1], 10) >= 31536000) {
+        score += 5;
+      } else {
+        findings.push('max-age should be at least 31536000 (1 year)');
+      }
+      if (/includeSubDomains/i.test(val)) {
+        score += 5;
+      } else {
+        findings.push('Missing includeSubDomains directive');
+      }
+      if (/preload/i.test(val)) {
+        score += 5;
+      } else {
+        findings.push('Missing preload directive');
+      }
+    }
+    items.push({
+      category: 'HSTS',
+      score,
+      maxScore: 25,
+      severity: score === 0 ? 'critical' : score < 20 ? 'warning' : 'pass',
+      findings,
+    });
+  }
+
+  // 2. CSP (25 pts)
+  {
+    const val = get('content-security-policy');
+    let score = 0;
+    const findings: string[] = [];
+    if (!val) {
+      findings.push('Missing Content-Security-Policy header');
+    } else {
+      score = 10;
+      findings.push('Content-Security-Policy is present');
+      if (/default-src/i.test(val)) {
+        score += 5;
+        findings.push('default-src directive found');
+      } else {
+        findings.push('Missing default-src directive');
+      }
+      if (/script-src/i.test(val)) {
+        score += 5;
+        findings.push('script-src directive found');
+      } else {
+        findings.push('Missing script-src directive');
+      }
+      if (!/unsafe-inline/i.test(val) && !/unsafe-eval/i.test(val)) {
+        score += 5;
+      } else {
+        findings.push("Uses 'unsafe-inline' or 'unsafe-eval'");
+      }
+    }
+    items.push({
+      category: 'CSP',
+      score,
+      maxScore: 25,
+      severity: score === 0 ? 'critical' : score < 20 ? 'warning' : 'pass',
+      findings,
+    });
+  }
+
+  // 3. X-Content-Type-Options (5 pts)
+  {
+    const val = get('x-content-type-options');
+    let score = 0;
+    const findings: string[] = [];
+    if (!val) {
+      findings.push('Missing X-Content-Type-Options header');
+    } else if (/nosniff/i.test(val)) {
+      score = 5;
+      findings.push('X-Content-Type-Options: nosniff');
+    } else {
+      score = 2;
+      findings.push(`Unexpected value: ${val}`);
+    }
+    items.push({
+      category: 'X-Content-Type-Options',
+      score,
+      maxScore: 5,
+      severity: score === 5 ? 'pass' : score > 0 ? 'warning' : 'warning',
+      findings,
+    });
+  }
+
+  // 4. X-Frame-Options / frame-ancestors (10 pts)
+  {
+    const xfo = get('x-frame-options');
+    const csp = get('content-security-policy');
+    const hasFrameAncestors = csp ? /frame-ancestors/i.test(csp) : false;
+    let score = 0;
+    const findings: string[] = [];
+    if (hasFrameAncestors) {
+      score = 10;
+      findings.push('CSP frame-ancestors directive found');
+    } else if (xfo) {
+      score = 7;
+      findings.push(`X-Frame-Options: ${xfo}`);
+      findings.push('Consider using CSP frame-ancestors instead');
+    } else {
+      findings.push('Missing X-Frame-Options and CSP frame-ancestors');
+    }
+    items.push({
+      category: 'X-Frame-Options',
+      score,
+      maxScore: 10,
+      severity: score === 0 ? 'warning' : score < 10 ? 'info' : 'pass',
+      findings,
+    });
+  }
+
+  // 5. Referrer-Policy (5 pts)
+  {
+    const val = get('referrer-policy');
+    let score = 0;
+    const findings: string[] = [];
+    if (!val) {
+      findings.push('Missing Referrer-Policy header');
+    } else {
+      const safe = ['no-referrer', 'same-origin', 'strict-origin', 'strict-origin-when-cross-origin'];
+      if (safe.some((s) => val.toLowerCase().includes(s))) {
+        score = 5;
+        findings.push(`Referrer-Policy: ${val}`);
+      } else {
+        score = 3;
+        findings.push(`Referrer-Policy: ${val} (consider a stricter policy)`);
+      }
+    }
+    items.push({
+      category: 'Referrer-Policy',
+      score,
+      maxScore: 5,
+      severity: score === 5 ? 'pass' : score > 0 ? 'info' : 'warning',
+      findings,
+    });
+  }
+
+  // 6. Permissions-Policy (5 pts)
+  {
+    const val = get('permissions-policy');
+    let score = 0;
+    const findings: string[] = [];
+    if (!val) {
+      findings.push('Missing Permissions-Policy header');
+    } else {
+      score = 5;
+      findings.push('Permissions-Policy is present');
+    }
+    items.push({
+      category: 'Permissions-Policy',
+      score,
+      maxScore: 5,
+      severity: score === 5 ? 'pass' : 'warning',
+      findings,
+    });
+  }
+
+  // 7. Cross-Origin (COOP/COEP/CORP) (10 pts)
+  {
+    let score = 0;
+    const findings: string[] = [];
+    const coop = get('cross-origin-opener-policy');
+    const coep = get('cross-origin-embedder-policy');
+    const corp = get('cross-origin-resource-policy');
+    if (coop) { score += 4; findings.push(`COOP: ${coop}`); } else { findings.push('Missing Cross-Origin-Opener-Policy'); }
+    if (coep) { score += 3; findings.push(`COEP: ${coep}`); } else { findings.push('Missing Cross-Origin-Embedder-Policy'); }
+    if (corp) { score += 3; findings.push(`CORP: ${corp}`); } else { findings.push('Missing Cross-Origin-Resource-Policy'); }
+    items.push({
+      category: 'Cross-Origin',
+      score,
+      maxScore: 10,
+      severity: score === 0 ? 'warning' : score < 10 ? 'info' : 'pass',
+      findings,
+    });
+  }
+
+  // 8. Cookies (15 pts)
+  {
+    const cookies = map.get('set-cookie');
+    if (!cookies) {
+      items.push({
+        category: 'Cookies',
+        score: 15,
+        maxScore: 15,
+        severity: 'pass',
+        findings: ['No cookies set (N/A — full score)'],
+      });
+    } else {
+      let score = 5; // base for having cookies
+      const findings: string[] = [`${cookies.length} cookie(s) found`];
+      const allSecure = cookies.every((c) => /;\s*Secure/i.test(c));
+      const allHttpOnly = cookies.every((c) => /;\s*HttpOnly/i.test(c));
+      const allSameSite = cookies.every((c) => /;\s*SameSite=(Strict|Lax|None)/i.test(c));
+      if (allSecure) { score += 4; findings.push('All cookies have Secure flag'); } else { findings.push('Some cookies missing Secure flag'); }
+      if (allHttpOnly) { score += 3; findings.push('All cookies have HttpOnly flag'); } else { findings.push('Some cookies missing HttpOnly flag'); }
+      if (allSameSite) { score += 3; findings.push('All cookies have SameSite attribute'); } else { findings.push('Some cookies missing SameSite attribute'); }
+      items.push({
+        category: 'Cookies',
+        score,
+        maxScore: 15,
+        severity: score >= 13 ? 'pass' : score >= 8 ? 'warning' : 'critical',
+        findings,
+      });
+    }
+  }
+
+  // Penalty deductions
+  let penalty = 0;
+  const penaltyFindings: string[] = [];
+  const server = get('server');
+  if (server && /\/\d/.test(server)) {
+    penalty += 1;
+    penaltyFindings.push(`Server header exposes version info: ${server}`);
+  }
+  if (has('x-powered-by')) {
+    penalty += 2;
+    penaltyFindings.push(`X-Powered-By header present: ${get('x-powered-by')}`);
+  }
+  if (penaltyFindings.length > 0) {
+    items.push({
+      category: 'Info Leakage',
+      score: -penalty,
+      maxScore: 0,
+      severity: 'warning',
+      findings: penaltyFindings,
+    });
+  }
+
+  const raw = items.reduce((sum, i) => sum + i.score, 0);
+  const score = Math.max(0, Math.min(100, raw));
+  const grade: AuditResult['grade'] =
+    score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : score >= 50 ? 'E' : 'F';
+
+  return { score, grade, items };
+}
+
+// ─── Security Audit UI ───────────────────────────────────────────────────────
+
+const GRADE_COLORS: Record<AuditResult['grade'], string> = {
+  A: 'text-green-500 border-green-500/40 bg-green-500/10',
+  B: 'text-lime-500 border-lime-500/40 bg-lime-500/10',
+  C: 'text-yellow-500 border-yellow-500/40 bg-yellow-500/10',
+  D: 'text-orange-500 border-orange-500/40 bg-orange-500/10',
+  E: 'text-red-400 border-red-400/40 bg-red-400/10',
+  F: 'text-red-600 border-red-600/40 bg-red-600/10',
+};
+
+const SEVERITY_BAR: Record<AuditItem['severity'], string> = {
+  critical: 'bg-red-500',
+  warning: 'bg-amber-500',
+  info: 'bg-gray-400',
+  pass: 'bg-green-500',
+};
+
+function SecurityAudit({ headers }: { headers: Array<{ key: string; value: string }> }) {
+  const audit = computeSecurityAudit(headers);
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+
+  return (
+    <Section label="Header Security Audit">
+      <div className="px-4 py-4">
+        {/* Grade + Score */}
+        <div className="flex items-center gap-4 mb-4">
+          <div className={`flex h-16 w-16 items-center justify-center rounded-xl border-2 text-2xl font-bold ${GRADE_COLORS[audit.grade]}`}>
+            {audit.grade}
+          </div>
+          <div>
+            <div className="text-lg font-semibold text-fg">
+              {audit.score} <span className="text-sm font-normal text-muted">/ 100</span>
+            </div>
+            <p className="text-xs text-muted">This audit evaluates HTTP response headers only.</p>
+          </div>
+        </div>
+
+        {/* Items */}
+        <div className="space-y-2">
+          {audit.items.map((item, i) => {
+            const pct = item.maxScore > 0 ? Math.max(0, (item.score / item.maxScore) * 100) : 0;
+            const isExpanded = expandedIdx === i;
+            const isPenalty = item.maxScore === 0;
+            return (
+              <div key={item.category}>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--color-fg)_6%,transparent)]"
+                  onClick={() => setExpandedIdx(isExpanded ? null : i)}
+                >
+                  <span className="w-40 shrink-0 font-mono text-xs text-fg">{item.category}</span>
+                  {isPenalty ? (
+                    <span className="flex-1 text-xs text-amber-500 font-medium">{item.score} pts</span>
+                  ) : (
+                    <div className="flex flex-1 items-center gap-2">
+                      <div className="h-1.5 flex-1 rounded-full bg-[color-mix(in_srgb,var(--color-fg)_10%,transparent)]">
+                        <div
+                          className={`h-full rounded-full transition-all ${SEVERITY_BAR[item.severity]}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="w-12 text-right font-mono text-[11px] text-muted">
+                        {item.score}/{item.maxScore}
+                      </span>
+                    </div>
+                  )}
+                  <svg
+                    className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isExpanded && (
+                  <div className="ml-2 mt-1 space-y-0.5 border-l-2 border-[color-mix(in_srgb,var(--color-fg)_10%,transparent)] pl-4 pb-1">
+                    {item.findings.map((f, j) => (
+                      <p key={j} className="text-xs text-muted">{f}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 // ─── sub components ───────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: number }) {
@@ -486,6 +855,7 @@ export default function UrlInspector() {
               HTTP fetch failed: {result.httpError}
             </div>
           )}
+          <SecurityAudit headers={result.headers} />
           <ResponseHeaders headers={result.headers} />
           <BodyPreview preview={result.bodyPreview} truncated={result.truncated} bodySize={result.bodySize} />
           <DnsTable records={result.dns} />
