@@ -280,12 +280,13 @@ function gaussianBlur(buf: Float64Array, w: number, h: number, radius: number) {
 
 // ─── OGP background generation ──────────────────────────────────────────────
 
-interface BlobDef { px: number; py: number; radius: number; col: [number, number, number] }
+interface BlobDef { px: number; py: number; radius: number; col: [number, number, number]; weight: number }
 
 function generateOgpBackground(
   colors: ExtractedColor[],
   canvas: HTMLCanvasElement,
   params: GenerationParams,
+  weights: number[],
 ) {
   canvas.width = OGP_W;
   canvas.height = OGP_H;
@@ -297,6 +298,8 @@ function generateOgpBackground(
   const seed = ((avgR * 256 + avgG) * 256 + avgB) >>> 0;
 
   const blobs: BlobDef[] = colors.map((c, i) => {
+    const w = weights[i] ?? 1;
+    if (w === 0) return null;
     const [, C, H] = rgbToOklch(c.color[0], c.color[1], c.color[2]);
     const pastelC = Math.min(C * params.chroma, 0.4);
     const [pr, pg, pb] = oklchToRgb(params.lightness, pastelC, H);
@@ -304,9 +307,10 @@ function generateOgpBackground(
       px: prand(seed, i * 7) * OGP_W,
       py: prand(seed, i * 7 + 1) * OGP_H,
       radius: (180 + prand(seed, i * 7 + 2) * 350) * params.blobSize,
-      col: [pr / 255, pg / 255, pb / 255],
+      col: [pr / 255, pg / 255, pb / 255] as [number, number, number],
+      weight: w,
     };
-  });
+  }).filter((b): b is BlobDef => b !== null);
 
   // Base color
   const [, avgC, avgH] = rgbToOklch(Math.round(avgR), Math.round(avgG), Math.round(avgB));
@@ -324,7 +328,7 @@ function generateOgpBackground(
       for (const blob of blobs) {
         const dx = x - blob.px, dy = y - blob.py;
         const w = Math.exp(-(dx * dx + dy * dy) / (2 * blob.radius * blob.radius));
-        const s = w * params.intensity;
+        const s = w * params.intensity * blob.weight;
         r += (blob.col[0] - r) * s;
         g += (blob.col[1] - g) * s;
         b += (blob.col[2] - b) * s;
@@ -381,6 +385,7 @@ export default function OgpBgGenerator() {
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [imgSize, setImgSize] = useState<{ w: number; h: number } | null>(null);
   const [colors, setColors] = useState<ExtractedColor[] | null>(null);
+  const [weights, setWeights] = useState<number[]>([]);
   const [params, setParams] = useState<GenerationParams>(DEFAULT_PARAMS);
 
   const resultCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -389,6 +394,7 @@ export default function OgpBgGenerator() {
   const processImage = useCallback((file: File) => {
     setIsProcessing(true);
     setColors(null);
+    setWeights([]);
     setSourceUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
     setImgSize(null);
 
@@ -400,18 +406,19 @@ export default function OgpBgGenerator() {
       setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
       setSourceUrl(url);
       setColors(extracted);
+      setWeights(new Array(extracted.length).fill(1));
       setIsProcessing(false);
     };
     img.onerror = () => { URL.revokeObjectURL(url); setIsProcessing(false); };
     img.src = url;
   }, []);
 
-  // Re-generate when colors or params change
+  // Re-generate when colors, params, or weights change
   useEffect(() => {
-    if (!colors) return;
+    if (!colors || weights.length === 0) return;
     const resultCanvas = resultCanvasRef.current;
-    if (resultCanvas) generateOgpBackground(colors, resultCanvas, params);
-  }, [colors, params]);
+    if (resultCanvas) generateOgpBackground(colors, resultCanvas, params, weights);
+  }, [colors, params, weights]);
 
   const updateParam = useCallback(<K extends keyof GenerationParams>(key: K, value: GenerationParams[K]) => {
     setParams((prev) => ({ ...prev, [key]: value }));
@@ -525,21 +532,44 @@ export default function OgpBgGenerator() {
             </div>
           </div>
 
-          {/* Extracted colors */}
+          {/* Extracted colors with per-color weight */}
           <div>
-            <h2 className="mb-3 font-mono text-xs font-medium uppercase tracking-widest text-muted">Extracted Colors</h2>
-            <div className="flex flex-wrap gap-3">
-              {colors.map((c, i) => (
-                <div key={i} className="flex flex-col items-center gap-1.5">
-                  <div
-                    className="h-12 w-12 rounded-full border-2 border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] shadow-sm"
-                    style={{ backgroundColor: `rgb(${c.color[0]},${c.color[1]},${c.color[2]})` }}
-                  />
-                  <span className="font-mono text-[10px] text-muted">
-                    {c.color.map((v) => v.toString(16).padStart(2, '0')).join('')}
-                  </span>
-                </div>
-              ))}
+            <h2 className="mb-1 font-mono text-xs font-medium uppercase tracking-widest text-muted">Extracted Colors</h2>
+            <p className="mb-3 text-[11px] text-muted opacity-70">Adjust each color&apos;s weight. 0 = exclude, 1 = normal, 2 = boost.</p>
+            <div className="flex flex-wrap gap-4">
+              {colors.map((c, i) => {
+                const w = weights[i] ?? 1;
+                return (
+                  <div key={i} className="flex flex-col items-center gap-1.5">
+                    <div
+                      className={[
+                        'h-12 w-12 rounded-full border-2 shadow-sm transition-opacity',
+                        w === 0 ? 'opacity-25 border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)]' : 'border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)]',
+                      ].join(' ')}
+                      style={{ backgroundColor: `rgb(${c.color[0]},${c.color[1]},${c.color[2]})` }}
+                    />
+                    <span className="font-mono text-[10px] text-muted">
+                      {c.color.map((v) => v.toString(16).padStart(2, '0')).join('')}
+                    </span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={2}
+                      step={0.1}
+                      value={w}
+                      onChange={(e) => {
+                        const next = [...weights];
+                        next[i] = Number(e.target.value);
+                        setWeights(next);
+                      }}
+                      className="h-1 w-14 cursor-pointer appearance-none rounded-full bg-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] accent-fg [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-fg"
+                    />
+                    <span className="font-mono text-[9px] text-muted opacity-60">
+                      {w === 0 ? 'OFF' : `×${w.toFixed(1)}`}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -554,7 +584,7 @@ export default function OgpBgGenerator() {
               <ParamSlider label="Blur" value={params.blur} min={0} max={80} step={1} onChange={(v) => updateParam('blur', v)} />
               <button
                 type="button"
-                onClick={() => setParams(DEFAULT_PARAMS)}
+                onClick={() => { setParams(DEFAULT_PARAMS); setWeights((prev) => prev.map(() => 1)); }}
                 className="font-mono text-xs text-muted underline underline-offset-2 transition-colors hover:text-fg"
               >
                 Reset to defaults
