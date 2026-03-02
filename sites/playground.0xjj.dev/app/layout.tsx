@@ -44,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-bg text-fg antialiased">
+      <body className="min-h-screen bg-bg text-fg antialiased" spellCheck={false}>
         <NuqsAdapter>
         {children}
         <footer className="border-t border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] px-4 py-10">
