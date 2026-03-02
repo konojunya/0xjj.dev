@@ -536,20 +536,25 @@ export default function OgpBgGenerator() {
           <div>
             <h2 className="mb-1 font-mono text-xs font-medium uppercase tracking-widest text-muted">Extracted Colors</h2>
             <p className="mb-3 text-[11px] text-muted opacity-70">Adjust each color&apos;s weight. 0 = exclude, 1 = normal, 2 = boost.</p>
-            <div className="flex flex-wrap gap-4">
+            <div className="space-y-2">
               {colors.map((c, i) => {
                 const w = weights[i] ?? 1;
                 return (
-                  <div key={i} className="flex flex-col items-center gap-1.5">
+                  <div
+                    key={i}
+                    className={[
+                      'flex items-center gap-3 rounded-lg border px-3 py-2 transition-opacity',
+                      w === 0
+                        ? 'opacity-40 border-[color-mix(in_srgb,var(--color-fg)_6%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_1%,transparent)]'
+                        : 'border-[color-mix(in_srgb,var(--color-fg)_10%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_2%,transparent)]',
+                    ].join(' ')}
+                  >
                     <div
-                      className={[
-                        'h-12 w-12 rounded-full border-2 shadow-sm transition-opacity',
-                        w === 0 ? 'opacity-25 border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)]' : 'border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)]',
-                      ].join(' ')}
+                      className="h-8 w-8 shrink-0 rounded-full border-2 border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] shadow-sm"
                       style={{ backgroundColor: `rgb(${c.color[0]},${c.color[1]},${c.color[2]})` }}
                     />
-                    <span className="font-mono text-[10px] text-muted">
-                      {c.color.map((v) => v.toString(16).padStart(2, '0')).join('')}
+                    <span className="w-16 shrink-0 font-mono text-[11px] text-muted">
+                      #{c.color.map((v) => v.toString(16).padStart(2, '0')).join('')}
                     </span>
                     <input
                       type="range"
@@ -562,9 +567,9 @@ export default function OgpBgGenerator() {
                         next[i] = Number(e.target.value);
                         setWeights(next);
                       }}
-                      className="h-1 w-14 cursor-pointer appearance-none rounded-full bg-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] accent-fg [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-fg"
+                      className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] accent-fg [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-fg"
                     />
-                    <span className="font-mono text-[9px] text-muted opacity-60">
+                    <span className="w-10 shrink-0 text-right font-mono text-xs text-muted">
                       {w === 0 ? 'OFF' : `×${w.toFixed(1)}`}
                     </span>
                   </div>
