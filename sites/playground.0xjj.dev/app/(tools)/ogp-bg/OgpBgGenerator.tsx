@@ -413,11 +413,14 @@ export default function OgpBgGenerator() {
     img.src = url;
   }, []);
 
-  // Re-generate when colors, params, or weights change
+  // Re-generate when colors, params, or weights change (debounced)
   useEffect(() => {
     if (!colors || weights.length === 0) return;
-    const resultCanvas = resultCanvasRef.current;
-    if (resultCanvas) generateOgpBackground(colors, resultCanvas, params, weights);
+    const id = setTimeout(() => {
+      const resultCanvas = resultCanvasRef.current;
+      if (resultCanvas) generateOgpBackground(colors, resultCanvas, params, weights);
+    }, 150);
+    return () => clearTimeout(id);
   }, [colors, params, weights]);
 
   const updateParam = useCallback(<K extends keyof GenerationParams>(key: K, value: GenerationParams[K]) => {
