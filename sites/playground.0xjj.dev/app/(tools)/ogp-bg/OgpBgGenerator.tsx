@@ -19,7 +19,7 @@ interface ExtractedColor {
 
 interface GenerationParams {
   lightness: number;   // OKLCH L for pastel blobs (0.6 – 0.95)
-  chroma: number;      // chroma multiplier (0.5 – 2.0)
+  chroma: number;      // chroma multiplier (0.5 – 4.0)
   intensity: number;   // blob lerp weight (0.3 – 0.9)
   blobSize: number;    // blob radius scale (0.5 – 2.0)
   blur: number;        // blur radius in px (0 – 80)
@@ -298,7 +298,7 @@ function generateOgpBackground(
 
   const blobs: BlobDef[] = colors.map((c, i) => {
     const [, C, H] = rgbToOklch(c.color[0], c.color[1], c.color[2]);
-    const pastelC = Math.min(C * params.chroma, 0.2);
+    const pastelC = Math.min(C * params.chroma, 0.4);
     const [pr, pg, pb] = oklchToRgb(params.lightness, pastelC, H);
     return {
       px: prand(seed, i * 7) * OGP_W,
@@ -548,7 +548,7 @@ export default function OgpBgGenerator() {
             <h2 className="mb-3 font-mono text-xs font-medium uppercase tracking-widest text-muted">Adjustments</h2>
             <div className="space-y-3 rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_3%,transparent)] px-4 py-4">
               <ParamSlider label="Lightness" value={params.lightness} min={0.6} max={0.95} step={0.01} onChange={(v) => updateParam('lightness', v)} />
-              <ParamSlider label="Chroma" value={params.chroma} min={0.5} max={2.0} step={0.05} onChange={(v) => updateParam('chroma', v)} />
+              <ParamSlider label="Chroma" value={params.chroma} min={0.5} max={4.0} step={0.05} onChange={(v) => updateParam('chroma', v)} />
               <ParamSlider label="Intensity" value={params.intensity} min={0.3} max={0.9} step={0.05} onChange={(v) => updateParam('intensity', v)} />
               <ParamSlider label="Blob Size" value={params.blobSize} min={0.5} max={2.0} step={0.1} onChange={(v) => updateParam('blobSize', v)} />
               <ParamSlider label="Blur" value={params.blur} min={0} max={80} step={1} onChange={(v) => updateParam('blur', v)} />
