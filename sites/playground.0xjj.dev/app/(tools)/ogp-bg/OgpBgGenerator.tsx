@@ -370,7 +370,7 @@ function ParamSlider({ label, value, min, max, step, onChange }: {
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] accent-fg [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-fg"
+        className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] accent-fg [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-fg"
       />
       <span className="w-12 shrink-0 text-right font-mono text-xs text-muted">{value}</span>
     </div>
@@ -570,7 +570,7 @@ export default function OgpBgGenerator() {
                         next[i] = Number(e.target.value);
                         setWeights(next);
                       }}
-                      className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] accent-fg [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-fg"
+                      className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] accent-fg [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-fg"
                     />
                     <span className="w-10 shrink-0 text-right font-mono text-xs text-muted">
                       {w === 0 ? 'OFF' : `×${w.toFixed(1)}`}
