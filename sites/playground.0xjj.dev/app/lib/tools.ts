@@ -136,6 +136,13 @@ export const tools: Tool[] = [
     category: 'tool',
   },
   {
+    slug: 'ogp-bg',
+    name: 'OGP Background Generator',
+    description: 'Extract colors from an image and generate a 1200×630 OGP background — fully in-browser.',
+    href: '/ogp-bg/',
+    category: 'tool',
+  },
+  {
     slug: 'ogpchecker',
     name: 'OGP Checker',
     description: 'Inspect Open Graph, Twitter Card, and all meta tags for any URL.',
