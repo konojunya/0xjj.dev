@@ -17,6 +17,7 @@ const withMDX = createMDX({
 
 /** @type {import('next').NextConfig} */
 const config = {
+  poweredByHeader: false,
   pageExtensions: ['ts', 'tsx', 'mdx'],
   trailingSlash: true,
   typescript: {
