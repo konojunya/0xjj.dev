@@ -4,14 +4,15 @@ import type { CSSProperties } from 'react';
 import { useMemo } from 'react';
 import { useQueryState, parseAsStringLiteral } from 'nuqs';
 import Link from 'next/link';
+import { useWebHaptics } from 'web-haptics/react';
 import { categories, tools } from './lib/tools';
-import { haptic } from './lib/haptic';
 
 const categoryValues = ['tool', 'game', 'ui'] as const;
 
 export default function ToolGrid() {
   const [query, setQuery] = useQueryState('q', { defaultValue: '' });
   const [activeCategory, setActiveCategory] = useQueryState('category', parseAsStringLiteral(categoryValues).withDefault(null));
+  const { trigger } = useWebHaptics();
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
@@ -38,7 +39,7 @@ export default function ToolGrid() {
         />
         <div className="flex gap-2">
           <button
-            onClick={() => { haptic(); setActiveCategory(null); }}
+            onClick={() => { trigger('light'); setActiveCategory(null); }}
             className="rounded-full border px-3 py-1 font-mono text-xs transition-colors"
             style={{
               borderColor: !activeCategory ? 'var(--color-fg)' : border,
@@ -53,7 +54,7 @@ export default function ToolGrid() {
             return (
               <button
                 key={cat.value}
-                onClick={() => { haptic(); setActiveCategory(isActive ? null : cat.value); }}
+                onClick={() => { trigger('light'); setActiveCategory(isActive ? null : cat.value); }}
                 className="rounded-full border px-3 py-1 font-mono text-xs transition-colors"
                 style={{
                   borderColor: isActive ? 'var(--color-fg)' : border,

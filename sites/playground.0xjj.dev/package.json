@@ -32,7 +32,8 @@
     "semver": "^7.7.4",
     "shiki": "^3.23.0",
     "sql-formatter": "^15.7.2",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "web-haptics": "^0.0.6"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",
