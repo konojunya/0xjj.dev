@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useQueryState } from 'nuqs';
 import type { InspectResult, DnsRecord, TechDetection } from '../../api/inspect/route';
+import CustomHeaders from '../../components/CustomHeaders';
 
 type Result = InspectResult & { httpError?: string };
 
@@ -756,6 +757,7 @@ export default function UrlInspector() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const initialCheckDone = useRef(false);
+  const customHeadersRef = useRef<Record<string, string>>({});
 
   function normalizeUrl(raw: string): string {
     const v = raw.trim();
@@ -769,9 +771,18 @@ export default function UrlInspector() {
     setError(null);
     setResult(null);
 
+    const headers = customHeadersRef.current;
+    const hasCustomHeaders = Object.keys(headers).length > 0;
+
     startTransition(async () => {
       try {
-        const res = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
+        const res = hasCustomHeaders
+          ? await fetch('/api/inspect', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url, headers }),
+            })
+          : await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
         const json: Result & { error?: string } = await res.json();
         if (!res.ok || json.error) {
           setError(json.error ?? 'Something went wrong');
@@ -832,6 +843,8 @@ export default function UrlInspector() {
           </button>
         </div>
       </form>
+
+      <CustomHeaders onChange={(h) => { customHeadersRef.current = h; }} />
 
       {isPending && (
         <div className="flex items-center gap-3 text-sm text-muted">

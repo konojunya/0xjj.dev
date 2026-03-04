@@ -270,16 +270,36 @@ async function readBodyLimited(res: Response): Promise<{ text: string; size: num
   return { text, size: totalBytes, truncated };
 }
 
-const FETCH_HEADERS: HeadersInit = {
+const DEFAULT_HEADERS: Record<string, string> = {
   'User-Agent': 'Mozilla/5.0 (compatible; HTTPInspector/1.0; +https://playground.0xjj.dev/httpinspector)',
   Accept: '*/*',
   'Accept-Language': 'en-US,en;q=0.9,ja;q=0.8',
 };
 
-function createFetchInit(): RequestInit {
+const BLOCKED_HEADERS = new Set([
+  'host',
+  'cookie',
+  'origin',
+  'referer',
+  'proxy-authorization',
+  'proxy-connection',
+]);
+
+function mergeHeaders(custom: Record<string, string> | undefined): Record<string, string> {
+  const merged = { ...DEFAULT_HEADERS };
+  if (!custom) return merged;
+  for (const [k, v] of Object.entries(custom)) {
+    if (!BLOCKED_HEADERS.has(k.toLowerCase())) {
+      merged[k] = v;
+    }
+  }
+  return merged;
+}
+
+function createFetchInit(customHeaders?: Record<string, string>): RequestInit {
   return {
     method: 'GET',
-    headers: FETCH_HEADERS,
+    headers: mergeHeaders(customHeaders),
     redirect: 'manual',
     signal: AbortSignal.timeout(TIMEOUT_MS),
   };
@@ -287,8 +307,8 @@ function createFetchInit(): RequestInit {
 
 // Cloudflare Workers で同一オリジンへの fetch は 522 になるため、
 // WORKER_SELF_REFERENCE service binding を経由して内部呼び出しにする。
-async function fetchUrl(url: string): Promise<Response> {
-  const init = createFetchInit();
+async function fetchUrl(url: string, customHeaders?: Record<string, string>): Promise<Response> {
+  const init = createFetchInit(customHeaders);
   try {
     const { env } = await getCloudflareContext();
     const binding = (env as Record<string, { fetch: typeof fetch } | undefined>)
@@ -302,7 +322,7 @@ async function fetchUrl(url: string): Promise<Response> {
   return fetch(url, init);
 }
 
-async function fetchHttp(url: URL): Promise<{
+async function fetchHttp(url: URL, customHeaders?: Record<string, string>): Promise<{
   status: number;
   statusText: string;
   headers: Array<{ key: string; value: string }>;
@@ -313,7 +333,7 @@ async function fetchHttp(url: URL): Promise<{
   truncated: boolean;
   resolvedUrl: string;
 }> {
-  const res = await fetchUrl(url.href);
+  const res = await fetchUrl(url.href, customHeaders);
 
   const allHeaders: Array<{ key: string; value: string }> = [];
   res.headers.forEach((value, key) => {
@@ -427,14 +447,9 @@ async function lookupDns(hostname: string): Promise<DnsRecord[]> {
   return records;
 }
 
-// ─── handler ─────────────────────────────────────────────────────────────────
+// ─── shared handler ──────────────────────────────────────────────────────────
 
-export async function GET(request: Request) {
-  const raw = new URL(request.url).searchParams.get('url');
-  if (!raw) {
-    return NextResponse.json({ error: 'url is required' }, { status: 400 });
-  }
-
+async function handle(raw: string, customHeaders?: Record<string, string>) {
   const validation = validateUrl(raw);
   if (validation.error) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
@@ -445,7 +460,7 @@ export async function GET(request: Request) {
   try {
     // Run HTTP fetch and DNS lookup in parallel
     const [httpResult, dnsResult] = await Promise.allSettled([
-      fetchHttp(url),
+      fetchHttp(url, customHeaders),
       lookupDns(url.hostname),
     ]);
 
@@ -495,4 +510,22 @@ export async function GET(request: Request) {
     const msg = e instanceof Error ? e.message : 'Unknown error';
     return NextResponse.json({ error: `Failed: ${msg}` }, { status: 500 });
   }
+}
+
+// ─── handlers ─────────────────────────────────────────────────────────────────
+
+export async function GET(request: Request) {
+  const raw = new URL(request.url).searchParams.get('url');
+  if (!raw) {
+    return NextResponse.json({ error: 'url is required' }, { status: 400 });
+  }
+  return handle(raw);
+}
+
+export async function POST(request: Request) {
+  const body: { url?: string; headers?: Record<string, string> } = await request.json();
+  if (!body.url) {
+    return NextResponse.json({ error: 'url is required' }, { status: 400 });
+  }
+  return handle(body.url, body.headers);
 }

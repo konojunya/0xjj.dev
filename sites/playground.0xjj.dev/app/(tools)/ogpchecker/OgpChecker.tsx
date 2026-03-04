@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useQueryState } from 'nuqs';
 import type { MetaEntry, MetaResult } from '../../api/meta/route';
+import CustomHeaders from '../../components/CustomHeaders';
 
 // ─── grouping ────────────────────────────────────────────────────────────────
 
@@ -209,15 +210,25 @@ export default function OgpChecker() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const initialCheckDone = useRef(false);
+  const customHeadersRef = useRef<Record<string, string>>({});
 
   async function check(url: string) {
     if (!url.trim()) return;
     setError(null);
     setResult(null);
 
+    const headers = customHeadersRef.current;
+    const hasCustomHeaders = Object.keys(headers).length > 0;
+
     startTransition(async () => {
       try {
-        const res = await fetch(`/api/meta?url=${encodeURIComponent(url.trim())}`);
+        const res = hasCustomHeaders
+          ? await fetch('/api/meta', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: url.trim(), headers }),
+            })
+          : await fetch(`/api/meta?url=${encodeURIComponent(url.trim())}`);
         const json: MetaResult & { error?: string } = await res.json();
         if (!res.ok || json.error) {
           setError(json.error ?? 'Something went wrong');
@@ -277,6 +288,8 @@ export default function OgpChecker() {
           </button>
         </div>
       </form>
+
+      <CustomHeaders onChange={(h) => { customHeadersRef.current = h; }} />
 
       {isPending && (
         <div className="flex items-center gap-3 text-sm text-muted">
