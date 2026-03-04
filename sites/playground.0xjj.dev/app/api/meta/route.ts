@@ -49,22 +49,15 @@ function validateUrl(raw: string): { url: URL; error?: never } | { url?: never; 
   return { url: parsed };
 }
 
-// ─── blocked headers (security) ──────────────────────────────────────────────
+// ─── allowed custom headers (security) ───────────────────────────────────────
 
-const BLOCKED_HEADERS = new Set([
-  'host',
-  'cookie',
-  'origin',
-  'referer',
-  'proxy-authorization',
-  'proxy-connection',
-]);
+const ALLOWED_HEADERS = new Set(['authorization']);
 
 function mergeHeaders(custom: Record<string, string> | undefined): Record<string, string> {
   const merged = { ...DEFAULT_HEADERS };
   if (!custom) return merged;
   for (const [k, v] of Object.entries(custom)) {
-    if (!BLOCKED_HEADERS.has(k.toLowerCase())) {
+    if (ALLOWED_HEADERS.has(k.toLowerCase())) {
       merged[k] = v;
     }
   }
