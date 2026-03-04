@@ -66,10 +66,11 @@ function mergeHeaders(custom: Record<string, string> | undefined): Record<string
 
 // ─── fetch ───────────────────────────────────────────────────────────────────
 
-// Cloudflare Workers で同一オリジンへの fetch は 522 になるため、
-// WORKER_SELF_REFERENCE service binding を経由して内部呼び出しにする。
-async function fetchUrl(url: string, headers: Record<string, string>): Promise<Response> {
-  const init: RequestInit = { headers, redirect: 'follow' };
+// redirect: 'follow' は Authorization ヘッダーをリダイレクト時に剥がすため、
+// カスタムヘッダーがある場合はリダイレクトを手動でフォローする。
+const MAX_REDIRECTS = 10;
+
+async function rawFetch(url: string, init: RequestInit): Promise<Response> {
   try {
     const { env } = await getCloudflareContext();
     const binding = (env as Record<string, { fetch: typeof fetch } | undefined>)
@@ -81,6 +82,28 @@ async function fetchUrl(url: string, headers: Record<string, string>): Promise<R
     // dev 環境など Cloudflare context が存在しない場合は通常の fetch にフォールバック
   }
   return fetch(url, init);
+}
+
+async function fetchUrl(url: string, headers: Record<string, string>): Promise<Response> {
+  const hasAuth = 'Authorization' in headers;
+
+  if (!hasAuth) {
+    return rawFetch(url, { headers, redirect: 'follow' });
+  }
+
+  // Authorization 付きの場合はリダイレクトを手動でフォローしてヘッダーを維持
+  let current = url;
+  for (let i = 0; i < MAX_REDIRECTS; i++) {
+    const res = await rawFetch(current, { headers, redirect: 'manual' });
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get('location');
+      if (!location) return res;
+      current = new URL(location, current).href;
+      continue;
+    }
+    return res;
+  }
+  throw new Error('Too many redirects');
 }
 
 // ─── HTML parsing ────────────────────────────────────────────────────────────
