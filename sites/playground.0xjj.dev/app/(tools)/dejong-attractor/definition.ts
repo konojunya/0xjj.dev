@@ -103,12 +103,6 @@ vec3 hsv2rgb(float h, float s, float v) {
   return v * mix(vec3(1.0), clamp(min(k, 4.0 - k), 0.0, 1.0), s);
 }
 
-float segDist(vec2 p, vec2 a, vec2 b) {
-  vec2 pa = p - a, ba = b - a;
-  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-  return length(pa - ba * h);
-}
-
 void main() {
   vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / min(u_resolution.x, u_resolution.y);
 
@@ -119,111 +113,106 @@ void main() {
   float thickN = clamp(u_bloom / 100.0, 0.0, 1.0);
   float speedN = clamp(u_motion / 100.0, 0.0, 1.0);
 
-  // De Jong parameters: x' = sin(a*y) - cos(b*x), y' = sin(c*x) - cos(d*y)
-  float a =  1.4;
-  float b = -2.3;
-  float c =  2.4;
-  float d = -2.1;
+  // De Jong parameters — base set produces a beautiful swirling pattern
+  float a = -2.24;
+  float b =  0.43;
+  float c = -0.65;
+  float d = -2.43;
 
   // Shape A perturbs a and d
-  float twistOff = (twistN - 0.5) * 0.6;
+  float twistOff = (twistN - 0.5) * 0.5;
   a += twistOff;
-  d += twistOff * 0.8;
+  d += twistOff * 0.7;
 
   // Shape B perturbs b and c
-  float symOff = (symN - 0.5) * 0.6;
-  b += symOff * 0.8;
+  float symOff = (symN - 0.5) * 0.5;
+  b += symOff * 0.7;
   c += symOff;
 
-  // Time-based parameter drift for animation
-  float speed = mix(0.03, 0.18, speedN);
+  // Time-based drift for gentle animation
+  float speed = mix(0.02, 0.12, speedN);
   float t = u_time * speed;
-  a += sin(t * 0.7) * 0.08;
-  b += cos(t * 0.5) * 0.06;
-  c += sin(t * 0.6) * 0.07;
-  d += cos(t * 0.8) * 0.05;
+  a += sin(t * 0.7) * 0.06;
+  b += cos(t * 0.5) * 0.04;
+  c += sin(t * 0.6) * 0.05;
+  d += cos(t * 0.8) * 0.04;
 
-  // View settings
-  float zoom = mix(0.16, 0.30, zoomN);
+  // View: the attractor lives in roughly [-2, 2] so scale to fit
+  float zoom = mix(0.18, 0.32, zoomN);
 
-  // Slow rotation of the view
-  float rotAngle = t * 0.3;
+  // Slow rotation
+  float rotAngle = t * 0.25;
   float cosR = cos(rotAngle), sinR = sin(rotAngle);
 
-  // Line rendering
-  float lineW = mix(0.0012, 0.0045, thickN);
-  float glowW = lineW * 3.5;
+  // Point rendering: radius for the Gaussian dot
+  float radius = mix(0.003, 0.010, thickN);
+  float invR2 = 1.0 / (radius * radius);
 
-  // Trail length (400 to 800 iterations)
-  int steps = int(mix(400.0, 800.0, trailN));
+  // Iteration count (1000 to 3000)
+  int steps = int(mix(1000.0, 3000.0, trailN));
   float fSteps = float(steps);
 
-  // Starting point
-  float x = 0.1;
-  float y = 0.1;
-
-  // Warmup — settle onto attractor
-  for (int i = 0; i < 48; i++) {
-    float nx = sin(a * y) - cos(b * x);
-    float ny = sin(c * x) - cos(d * y);
-    x = nx;
-    y = ny;
-  }
-
-  // Additional warmup for flowing animation
-  int flowWarmup = int(mod(u_time * mix(3.0, 12.0, speedN), 400.0));
-  for (int i = 0; i < 400; i++) {
-    if (i >= flowWarmup) break;
-    float nx = sin(a * y) - cos(b * x);
-    float ny = sin(c * x) - cos(d * y);
-    x = nx;
-    y = ny;
-  }
-
-  // Project first point (scale and rotate)
-  vec2 p = vec2(x, y) * zoom;
-  vec2 prev = vec2(cosR * p.x - sinR * p.y, sinR * p.x + cosR * p.y);
-
-  // Trace orbit and render
+  // Density and color accumulators
+  float density = 0.0;
   vec3 colorAcc = vec3(0.0);
 
-  for (int i = 0; i < 800; i++) {
-    if (i >= steps) break;
+  // Run multiple orbits from different starting points for more coverage
+  for (int orbit = 0; orbit < 3; orbit++) {
+    float ox = 0.1 + float(orbit) * 0.37;
+    float oy = 0.1 - float(orbit) * 0.29;
 
-    float nx = sin(a * y) - cos(b * x);
-    float ny = sin(c * x) - cos(d * y);
-    x = nx;
-    y = ny;
+    // Warmup: settle onto attractor
+    for (int i = 0; i < 64; i++) {
+      float nx = sin(a * oy) - cos(b * ox);
+      float ny = sin(c * ox) - cos(d * oy);
+      ox = nx;
+      oy = ny;
+    }
 
-    p = vec2(x, y) * zoom;
-    vec2 curr = vec2(cosR * p.x - sinR * p.y, sinR * p.x + cosR * p.y);
+    for (int i = 0; i < 3000; i++) {
+      if (i >= steps) break;
 
-    // Fade out long jumps between consecutive points
-    float segLen = length(curr - prev);
-    float fade = smoothstep(0.15, 0.02, segLen);
+      float nx = sin(a * oy) - cos(b * ox);
+      float ny = sin(c * ox) - cos(d * oy);
+      ox = nx;
+      oy = ny;
 
-    float dist = segDist(uv, prev, curr);
-    float phase = float(i) / fSteps;
+      // Project point
+      vec2 p = vec2(ox, oy) * zoom;
+      vec2 proj = vec2(cosR * p.x - sinR * p.y, sinR * p.x + cosR * p.y);
 
-    float line = smoothstep(lineW, lineW * 0.1, dist);
-    float glow = exp(-dist * dist / (glowW * glowW));
+      // Distance from this pixel to the projected point
+      float dist2 = dot(uv - proj, uv - proj);
 
-    // Rainbow coloring along the orbit
-    vec3 col = hsv2rgb(fract(phase * 2.0 + u_time * 0.05), 0.8, 1.0);
-    colorAcc += col * (line + glow * 0.12) * fade;
+      // Gaussian splat
+      float w = exp(-dist2 * invR2);
 
-    prev = curr;
+      // Color based on position in orbit
+      float phase = float(i) / fSteps + float(orbit) * 0.33;
+      vec3 col = hsv2rgb(fract(phase * 1.5 + t * 0.1), 0.75, 1.0);
+
+      density += w;
+      colorAcc += col * w;
+    }
   }
 
-  // Compose
+  // Log-density tonemapping for good dynamic range
   vec3 bg = vec3(0.012, 0.012, 0.02);
-  vec3 color = bg + colorAcc * 0.85;
 
-  // Filmic tonemapping
-  color = color / (1.0 + color * 0.4);
-  color = pow(color, vec3(0.92));
+  if (density > 0.001) {
+    vec3 avgCol = colorAcc / density;
+    float brightness = log(1.0 + density * 8.0) * 0.35;
+    brightness = min(brightness, 1.8);
+    vec3 color = avgCol * brightness;
 
-  outColor = vec4(color, 1.0);
+    // Filmic tonemap
+    color = color / (1.0 + color * 0.3);
+    color = pow(color, vec3(0.9));
+
+    outColor = vec4(color, 1.0);
+  } else {
+    outColor = vec4(bg, 1.0);
+  }
 }
 `,
 };
