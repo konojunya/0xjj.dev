@@ -9,7 +9,7 @@ const OPENCV_WORKER_PATH = '/opencv/opencv.worker.js';
 const OPENCV_LOAD_TIMEOUT_MS = 30_000;
 
 // Zoom parameters
-const ZOOM_PADDING = 2.5; // face fills ~40% of viewport
+const ZOOM_PADDING = 1.67; // face fills ~60% of viewport
 const LERP_SPEED = 0.06;
 const MIN_VIEWPORT = 0.05; // max 20x zoom
 const NO_FACE_ZOOM_OUT_FRAMES = 60; // ~1 sec at 60fps
