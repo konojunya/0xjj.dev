@@ -51,12 +51,14 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  const isFaceDetect = pathname === '/face-detect' || pathname.startsWith('/face-detect/');
+  const needsCamera =
+    pathname === '/face-detect' || pathname.startsWith('/face-detect/') ||
+    pathname === '/air-flow' || pathname.startsWith('/air-flow/');
 
-  response.headers.set('Content-Security-Policy', isFaceDetect ? faceDetectCsp : baseCsp);
+  response.headers.set('Content-Security-Policy', needsCamera ? faceDetectCsp : baseCsp);
   response.headers.set(
     'Permissions-Policy',
-    isFaceDetect
+    needsCamera
       ? 'camera=(self), microphone=(), geolocation=()'
       : 'camera=(), microphone=(), geolocation=()',
   );
