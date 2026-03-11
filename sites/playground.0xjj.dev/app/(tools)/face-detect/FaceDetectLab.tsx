@@ -118,21 +118,15 @@ export function FaceDetectLab() {
     const nFaceW = (maxX - minX) / cw;
     const nFaceH = (maxY - minY) / ch;
 
-    // Target viewport size with padding, maintaining aspect ratio
-    const aspectRatio = cw / ch;
-    let tw = Math.max(nFaceW * ZOOM_PADDING, nFaceH * ZOOM_PADDING * aspectRatio);
-    tw = Math.max(MIN_VIEWPORT, Math.min(1, tw));
-    let th = tw / aspectRatio;
-    if (th > 1) {
-      th = 1;
-      tw = th * aspectRatio;
-    }
+    // In normalized coords, w and h must be equal to preserve aspect ratio
+    // (the 0-1 mapping already accounts for different pixel dimensions)
+    let size = Math.max(nFaceW, nFaceH) * ZOOM_PADDING;
+    size = Math.max(MIN_VIEWPORT, Math.min(1, size));
 
-    // Center on faces, clamped to bounds
-    const tx = Math.max(0, Math.min(1 - tw, nCx - tw / 2));
-    const ty = Math.max(0, Math.min(1 - th, nCy - th / 2));
+    const tx = Math.max(0, Math.min(1 - size, nCx - size / 2));
+    const ty = Math.max(0, Math.min(1 - size, nCy - size / 2));
 
-    targetViewportRef.current = { x: tx, y: ty, w: tw, h: th };
+    targetViewportRef.current = { x: tx, y: ty, w: size, h: size };
   }, []);
 
   const drawLoop = useCallback(() => {
