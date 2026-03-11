@@ -166,7 +166,7 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
               リセット
             </button>
 
-            <Drawer direction="bottom" open={mobileControlsOpen} onOpenChange={setMobileControlsOpen} showOverlay>
+            <Drawer direction="bottom" open={mobileControlsOpen} onOpenChange={setMobileControlsOpen}>
               <DrawerTrigger asChild>
                 <button
                   type="button"
@@ -176,7 +176,7 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
                   コントロール
                 </button>
               </DrawerTrigger>
-              <DrawerContent showOverlay className="flex max-h-[70svh] flex-col">
+              <DrawerContent className="flex max-h-[70svh] flex-col">
                 <DrawerHeader className="shrink-0 border-b">
                   <DrawerTitle>コントロール</DrawerTitle>
                   <DrawerDescription>
@@ -207,8 +207,8 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
       </div>
 
       <div className="hidden md:block">
-        <Drawer direction="bottom" open={desktopControlsOpen} onOpenChange={setDesktopControlsOpen} showOverlay>
-          <DrawerContent showOverlay className="flex max-h-[70svh] flex-col">
+        <Drawer direction="bottom" open={desktopControlsOpen} onOpenChange={setDesktopControlsOpen}>
+          <DrawerContent className="flex max-h-[70svh] flex-col">
             <DrawerHeader className="shrink-0 border-b">
               <DrawerTitle>コントロール</DrawerTitle>
               <DrawerDescription>
