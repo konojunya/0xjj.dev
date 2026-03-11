@@ -207,6 +207,13 @@ export const tools: Tool[] = [
   },
   // ── UI Lab (A→Z) ──
   {
+    slug: 'air-flow',
+    name: 'Air Flow',
+    description: 'Webカメラの動きをオプティカルフローで検出し、パーティクルが空気のように流されるインタラクティブ可視化。',
+    href: '/air-flow/',
+    category: 'ui',
+  },
+  {
     slug: 'curl-noise',
     name: 'Curl Noise Flow Field',
     description: 'WebGPUコンピュートシェーダーで駆動する、カールノイズベクトル場を流れる数千のパーティクルによる流体的なビジュアル。',
