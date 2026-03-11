@@ -54,11 +54,6 @@ export function FaceDetectLab() {
   const [isStarting, setIsStarting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState('開始前です');
-  const [openCvStatus, setOpenCvStatus] = useState('未読み込み');
-  const [resolution, setResolution] = useState<string | null>(null);
-  const [faceCount, setFaceCount] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState('1.0x');
 
   const pausePreviewLoop = useCallback(() => {
     if (animationFrameRef.current !== null) {
@@ -79,9 +74,6 @@ export function FaceDetectLab() {
       targetViewportRef.current = { ...FULL_VIEW };
       noFaceFramesRef.current = 0;
       setIsRunning(false);
-      setFaceCount(0);
-      setZoomLevel('1.0x');
-      setStatus(reason === 'failed' ? '開始に失敗しました' : '停止しました');
 
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d');
@@ -100,7 +92,6 @@ export function FaceDetectLab() {
   }, []);
 
   const updateZoomTarget = useCallback((faces: FaceRect[], cw: number, ch: number) => {
-    // Bounding box of all faces
     let minX = Infinity;
     let minY = Infinity;
     let maxX = 0;
@@ -112,14 +103,11 @@ export function FaceDetectLab() {
       maxY = Math.max(maxY, f.y + f.h);
     }
 
-    // Normalize to 0-1
     const nCx = (minX + maxX) / 2 / cw;
     const nCy = (minY + maxY) / 2 / ch;
     const nFaceW = (maxX - minX) / cw;
     const nFaceH = (maxY - minY) / ch;
 
-    // In normalized coords, w and h must be equal to preserve aspect ratio
-    // (the 0-1 mapping already accounts for different pixel dimensions)
     let size = Math.max(nFaceW, nFaceH) * ZOOM_PADDING;
     size = Math.max(MIN_VIEWPORT, Math.min(1, size));
 
@@ -138,7 +126,6 @@ export function FaceDetectLab() {
     if (!video || !canvas || !ctx || !isRunningRef.current) return;
 
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-      // Lerp viewport towards target
       const vp = viewportRef.current;
       const target = targetViewportRef.current;
       vp.x = lerp(vp.x, target.x, LERP_SPEED);
@@ -146,7 +133,6 @@ export function FaceDetectLab() {
       vp.w = lerp(vp.w, target.w, LERP_SPEED);
       vp.h = lerp(vp.h, target.h, LERP_SPEED);
 
-      // Draw zoomed video to visible canvas
       const vw = video.videoWidth;
       const vh = video.videoHeight;
       ctx.drawImage(
@@ -155,7 +141,6 @@ export function FaceDetectLab() {
         0, 0, canvas.width, canvas.height,
       );
 
-      // Draw face rectangles (mapped from detection coords to zoomed canvas coords)
       const faces = facesRef.current;
       if (faces.length > 0 && detectCanvas) {
         ctx.strokeStyle = '#22c55e';
@@ -175,11 +160,6 @@ export function FaceDetectLab() {
         }
       }
 
-      // Update zoom level display (throttled to avoid excessive re-renders)
-      const currentZoom = 1 / vp.w;
-      setZoomLevel(`${currentZoom.toFixed(1)}x`);
-
-      // Send full frame to worker for detection
       const worker = workerRef.current;
       if (worker && workerReadyRef.current && !detectingRef.current && detectCanvas) {
         const detectCtx = detectCanvas.getContext('2d');
@@ -205,7 +185,6 @@ export function FaceDetectLab() {
 
   const loadOpenCv = useCallback((): Promise<Worker> => {
     return new Promise((resolve, reject) => {
-      setOpenCvStatus('読み込み中...');
       const worker = new Worker(OPENCV_WORKER_PATH);
       workerRef.current = worker;
 
@@ -219,15 +198,12 @@ export function FaceDetectLab() {
         if (msg.type === 'ready') {
           window.clearTimeout(timeout);
           workerReadyRef.current = true;
-          setOpenCvStatus('準備完了');
 
-          // Switch to detection message handler
           worker.onmessage = (ev: MessageEvent) => {
             if (ev.data.type === 'detect-result') {
               const faces: FaceRect[] = ev.data.faces;
               facesRef.current = faces;
               detectingRef.current = false;
-              setFaceCount(faces.length);
 
               const dc = detectCanvasRef.current;
               if (faces.length > 0 && dc) {
@@ -261,8 +237,6 @@ export function FaceDetectLab() {
       throw new Error('このブラウザは getUserMedia に対応していません。');
     }
 
-    setStatus('カメラ権限を確認しています...');
-
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
       audio: false,
@@ -294,10 +268,7 @@ export function FaceDetectLab() {
     canvas.width = previewWidth;
     canvas.height = previewHeight;
 
-    // Create off-screen canvas for detection (always full frame)
     detectCanvasRef.current = new OffscreenCanvas(previewWidth, previewHeight);
-
-    setResolution(`${video.videoWidth} × ${video.videoHeight}`);
   }, []);
 
   const handleStart = async () => {
@@ -309,7 +280,6 @@ export function FaceDetectLab() {
     try {
       await Promise.all([startCamera(), loadOpenCv()]);
 
-      setStatus('顔検出中');
       isRunningRef.current = true;
       setIsRunning(true);
       resumePreviewLoop();
@@ -320,8 +290,6 @@ export function FaceDetectLab() {
       workerRef.current = null;
       workerReadyRef.current = false;
       setError(formatError(err));
-      setStatus('開始に失敗しました');
-      setOpenCvStatus((prev) => (prev === '準備完了' ? prev : '読み込み失敗'));
       if (videoRef.current) videoRef.current.srcObject = null;
     } finally {
       setIsStarting(false);
@@ -334,102 +302,60 @@ export function FaceDetectLab() {
     workerRef.current = null;
     workerReadyRef.current = false;
     detectCanvasRef.current = null;
-    setOpenCvStatus('未読み込み');
   };
 
   return (
-    <section className="mt-8 space-y-6">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="rounded-xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
-          <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted">Status</div>
-          <div className="mt-2 text-sm text-fg">{status}</div>
-        </div>
-        <div className="rounded-xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
-          <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted">OpenCV</div>
-          <div className="mt-2 text-sm text-fg">{openCvStatus}</div>
-        </div>
-        <div className="rounded-xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
-          <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted">Resolution</div>
-          <div className="mt-2 text-sm text-fg">{resolution ?? '-'}</div>
-        </div>
-        <div className="rounded-xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
-          <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted">Faces</div>
-          <div className="mt-2 text-sm text-fg">{isRunning ? faceCount : '-'}</div>
-        </div>
-        <div className="rounded-xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
-          <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted">Zoom</div>
-          <div className="mt-2 text-sm text-fg">{isRunning ? zoomLevel : '-'}</div>
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03] sm:p-5">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 rounded-lg border border-black/10 bg-black/[0.03] p-2 dark:border-white/10 dark:bg-white/[0.04]">
-            <ScanFace className="size-4 text-fg" />
-          </div>
-          <div>
-            <h2 className="text-base font-medium text-fg">
-              リアルタイム顔検出 + オートズーム
-            </h2>
-            <p className="mt-1 text-sm leading-relaxed text-muted">
-              顔を検出すると自動でズームイン。顔が消えると約1秒後にズームアウトします。処理はすべてブラウザ内で完結します。
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-5 overflow-hidden rounded-xl border border-black/10 dark:border-white/10">
-          <div className="relative">
-            <canvas
-              ref={canvasRef}
-              className="aspect-video w-full bg-black/[0.04] object-cover dark:bg-white/[0.04]"
-            />
-            {!isRunning && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/85 backdrop-blur-sm dark:bg-black/65">
-                <div className="max-w-md px-6 text-center">
-                  <div className="mx-auto inline-flex size-14 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] dark:border-white/14 dark:bg-white/6">
-                    {isStarting ? <LoaderCircle className="size-6 animate-spin" /> : <Camera className="size-6" />}
-                  </div>
-                  <p className="mt-4 text-sm leading-relaxed text-muted">
-                    {isStarting
-                      ? 'カメラと OpenCV を読み込んでいます...'
-                      : '開始を押すと、カメラ権限を要求し顔検出を開始します。'}
-                  </p>
+    <section className="mt-8 space-y-4">
+      <div className="overflow-hidden rounded-xl border border-black/10 dark:border-white/10">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            className="aspect-video w-full bg-black/[0.04] object-cover dark:bg-white/[0.04]"
+          />
+          {!isRunning && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/85 backdrop-blur-sm dark:bg-black/65">
+              <div className="max-w-md px-6 text-center">
+                <div className="mx-auto inline-flex size-14 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] dark:border-white/14 dark:bg-white/6">
+                  {isStarting ? <LoaderCircle className="size-6 animate-spin" /> : <Camera className="size-6" />}
                 </div>
+                <p className="mt-4 text-sm leading-relaxed text-muted">
+                  {isStarting
+                    ? 'カメラと OpenCV を読み込んでいます...'
+                    : '開始を押すと、カメラ権限を要求し顔検出を開始します。'}
+                </p>
               </div>
-            )}
-          </div>
-
-          <div className="flex items-center justify-end gap-2 border-t border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.02]">
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                onClick={handleStart}
-                disabled={isStarting || isRunning}
-                className="font-mono text-xs"
-              >
-                {isStarting ? <LoaderCircle className="size-4 animate-spin" /> : <ScanFace className="size-4" />}
-                顔検出を開始
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleStop}
-                disabled={!isRunning && !isStarting}
-                className="font-mono text-xs"
-              >
-                <VideoOff className="size-4" />
-                停止
-              </Button>
             </div>
-          </div>
+          )}
         </div>
 
-        {error && (
-          <div className="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/8 px-4 py-3 text-sm text-rose-700 dark:text-rose-300">
-            {error}
-          </div>
-        )}
+        <div className="flex items-center justify-end gap-2 border-t border-black/10 bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.02]">
+          <Button
+            type="button"
+            onClick={handleStart}
+            disabled={isStarting || isRunning}
+            className="font-mono text-xs"
+          >
+            {isStarting ? <LoaderCircle className="size-4 animate-spin" /> : <ScanFace className="size-4" />}
+            開始
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleStop}
+            disabled={!isRunning && !isStarting}
+            className="font-mono text-xs"
+          >
+            <VideoOff className="size-4" />
+            停止
+          </Button>
+        </div>
       </div>
+
+      {error && (
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/8 px-4 py-3 text-sm text-rose-700 dark:text-rose-300">
+          {error}
+        </div>
+      )}
 
       <video ref={videoRef} className="hidden" playsInline muted />
     </section>
