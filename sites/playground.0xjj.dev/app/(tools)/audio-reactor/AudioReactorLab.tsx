@@ -325,8 +325,6 @@ export function AudioReactorLab() {
   const beatPulseRef = useRef(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const meterRef = useRef({ bass: 0, mid: 0, treble: 0, energy: 0, beat: 0 });
-  const meterElRef = useRef<HTMLDivElement>(null);
 
   const [isStarting, setIsStarting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -455,25 +453,6 @@ export function AudioReactorLab() {
     // Time
     const dt = 0.016;
     timeRef.current += dt;
-
-    // ── Update audio meter (direct DOM for perf) ──
-    meterRef.current.bass = smoothBassRef.current;
-    meterRef.current.mid = smoothMidRef.current;
-    meterRef.current.treble = smoothTrebleRef.current;
-    meterRef.current.energy = smoothEnergyRef.current;
-    meterRef.current.beat = beatPulseRef.current;
-    const meterEl = meterElRef.current;
-    if (meterEl) {
-      const bars = meterEl.children;
-      const vals = [smoothBassRef.current, smoothMidRef.current, smoothTrebleRef.current, smoothEnergyRef.current];
-      for (let i = 0; i < 4; i++) {
-        const bar = bars[i] as HTMLElement | undefined;
-        if (bar) {
-          const fill = bar.lastElementChild as HTMLElement | undefined;
-          if (fill) fill.style.width = `${Math.min(vals[i] * 100, 100)}%`;
-        }
-      }
-    }
 
     // ── Render ──
     const canvas = canvasRef.current!;
@@ -609,31 +588,6 @@ export function AudioReactorLab() {
             ref={canvasRef}
             className="aspect-[16/10] w-full bg-black object-cover"
           />
-
-          {/* Audio level meter */}
-          {isRunning && (
-            <div
-              ref={meterElRef}
-              className="absolute left-3 top-3 flex flex-col gap-1.5 rounded-md border border-white/10 bg-black/50 px-3 py-2 backdrop-blur-sm"
-            >
-              {[
-                { label: 'BASS', color: 'bg-rose-500' },
-                { label: 'MID', color: 'bg-amber-400' },
-                { label: 'TRE', color: 'bg-cyan-400' },
-                { label: 'ALL', color: 'bg-white' },
-              ].map(({ label, color }) => (
-                <div key={label} className="flex items-center gap-2">
-                  <span className="w-7 text-[9px] font-medium tracking-wider text-white/40">{label}</span>
-                  <div className="h-1.5 w-20 overflow-hidden rounded-full bg-white/10 sm:w-28">
-                    <div
-                      className={`h-full rounded-full ${color} transition-[width] duration-75`}
-                      style={{ width: '0%' }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
 
           {/* Start overlay */}
           {!isRunning && (
