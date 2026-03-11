@@ -214,6 +214,13 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'audio-reactor',
+    name: 'Audio Reactor',
+    description: 'マイクのFFTスペクトルをレイマーチングと万華鏡で描画するVJスタイルのリアルタイムビジュアライゼーション。',
+    href: '/audio-reactor/',
+    category: 'ui',
+  },
+  {
     slug: 'audio-terrain',
     name: 'Audio Terrain',
     description: 'マイクのFFTスペクトルを3D地形に変換し、音楽がリアルタイムで山脈を生成するビジュアライゼーション。',
