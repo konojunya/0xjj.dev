@@ -136,25 +136,7 @@ fn fs(in : VSOut) -> @location(0) vec4f {
   let ab = sampleGrid(in.uv);
   let v = clamp(ab.x - ab.y, 0.0, 1.0);
 
-  // Colour ramp: void -> deep violet -> magenta -> lavender -> white
-  let c1 = vec3f(0.02, 0.01, 0.05);
-  let c2 = vec3f(0.12, 0.04, 0.28);
-  let c3 = vec3f(0.45, 0.08, 0.52);
-  let c4 = vec3f(0.72, 0.42, 0.82);
-  let c5 = vec3f(0.94, 0.88, 1.0);
-
-  var col : vec3f;
-  if (v < 0.25) {
-    col = mix(c1, c2, v / 0.25);
-  } else if (v < 0.5) {
-    col = mix(c2, c3, (v - 0.25) / 0.25);
-  } else if (v < 0.75) {
-    col = mix(c3, c4, (v - 0.5) / 0.25);
-  } else {
-    col = mix(c4, c5, (v - 0.75) / 0.25);
-  }
-
-  return vec4f(col, 1.0);
+  return vec4f(vec3f(v), 1.0);
 }
 `;
 
@@ -325,7 +307,7 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
           view: tex.createView(),
           loadOp: 'clear' as GPULoadOp,
           storeOp: 'store' as GPUStoreOp,
-          clearValue: { r: 0.02, g: 0.01, b: 0.05, a: 1 },
+          clearValue: { r: 0, g: 0, b: 0, a: 1 },
         },
       ],
     });
@@ -347,7 +329,15 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
     renderUniBuf.destroy();
   }
 
-  return { render, dispose };
+  function reset() {
+    const fresh = buildInitData();
+    device.queue.writeBuffer(gridBufs[0], 0, fresh);
+    device.queue.writeBuffer(gridBufs[1], 0, fresh);
+    ping = 0;
+    currentPreset = 1;
+  }
+
+  return { render, dispose, reset };
 }
 
 export const reactionDiffusionDefinition: WebGPUDefinition = {

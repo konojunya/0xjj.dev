@@ -97,13 +97,20 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
   const [isRunning, setIsRunning] = useState(true);
   const [mobileControlsOpen, setMobileControlsOpen] = useState(false);
   const [desktopControlsOpen, setDesktopControlsOpen] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
 
   useEffect(() => {
     setValues(buildDefaultValues(definition));
     setIsRunning(true);
     setMobileControlsOpen(false);
     setDesktopControlsOpen(false);
+    setResetKey(0);
   }, [definition]);
+
+  const handleReset = () => {
+    setValues(buildDefaultValues(definition));
+    setResetKey((k) => k + 1);
+  };
 
   return (
     <section className="mt-6 space-y-4">
@@ -119,7 +126,7 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
           </button>
           <button
             type="button"
-            onClick={() => setValues(buildDefaultValues(definition))}
+            onClick={handleReset}
             className="rounded-full border border-white/12 bg-black/20 px-4 py-2 font-mono text-xs text-white/70 backdrop-blur-md transition-colors hover:bg-black/34"
           >
             Reset
@@ -136,7 +143,7 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
         {definition.kind === 'fragment' ? (
           <ShaderCanvas definition={definition} values={values} isRunning={isRunning} />
         ) : definition.kind === 'webgpu' ? (
-          <WebGPUCanvas definition={definition} values={values} isRunning={isRunning} />
+          <WebGPUCanvas definition={definition} values={values} isRunning={isRunning} resetKey={resetKey} />
         ) : (
           <OGLCanvas definition={definition} values={values} isRunning={isRunning} />
         )}
@@ -153,7 +160,7 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setValues(buildDefaultValues(definition))}
+              onClick={handleReset}
               className="rounded-full border border-white/12 bg-black/28 px-4 py-2 font-mono text-xs text-white/72 backdrop-blur-md"
             >
               Reset

@@ -7,22 +7,31 @@ interface WebGPUCanvasProps {
   definition: WebGPUDefinition;
   values: ShaderControlValues;
   isRunning: boolean;
+  resetKey: number;
 }
 
 function buildDefaultPointer(): { x: number; y: number } {
   return { x: 0.5, y: 0.5 };
 }
 
-export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProps) {
+export function WebGPUCanvas({ definition, values, isRunning, resetKey }: WebGPUCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const valuesRef = useRef(values);
   const runningRef = useRef(isRunning);
   const pointerRef = useRef(buildDefaultPointer());
+  const handleRef = useRef<{ render: (t: number, dt: number) => void; dispose: () => void; reset?: () => void } | null>(null);
   const [error, setError] = useState<string>('');
   const [fps, setFps] = useState<number>(0);
+  const prevResetKeyRef = useRef(resetKey);
 
   valuesRef.current = values;
   runningRef.current = isRunning;
+
+  // Call handle.reset() when resetKey changes
+  if (resetKey !== prevResetKeyRef.current) {
+    prevResetKeyRef.current = resetKey;
+    handleRef.current?.reset?.();
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -99,7 +108,7 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
       };
       document.addEventListener('visibilitychange', onVisibilityChange);
 
-      let handle: { render: (t: number, dt: number) => void; dispose: () => void };
+      let handle: { render: (t: number, dt: number) => void; dispose: () => void; reset?: () => void };
       try {
         handle = await definition.setup({
           canvas,
@@ -113,6 +122,7 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
         return;
       }
 
+      handleRef.current = handle;
       setError('');
       let prevTime = 0;
 

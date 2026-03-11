@@ -26,7 +26,7 @@ export interface FragmentShaderDefinition {
   notes?: string[];
 }
 
-// ── OGL scene definition (new: L-System, etc.) ──
+// ── OGL scene definition (L-System, etc.) ──
 
 export interface OGLSceneDefinition {
   kind: 'ogl';
@@ -51,9 +51,36 @@ export interface OGLSceneHandle {
   dispose: () => void;
 }
 
+// ── WebGPU definition (Reaction-Diffusion, etc.) ──
+
+export interface WebGPUDefinition {
+  kind: 'webgpu';
+  id: string;
+  name: string;
+  summary: string;
+  controls: ShaderSliderControl[];
+  canvasHeight?: number | string;
+  notes?: string[];
+  setup: (ctx: WebGPUSetupContext) => Promise<WebGPUSceneHandle>;
+}
+
+export interface WebGPUSetupContext {
+  canvas: HTMLCanvasElement;
+  device: GPUDevice;
+  format: GPUTextureFormat;
+  getValues: () => ShaderControlValues;
+  getPointer: () => { x: number; y: number };
+}
+
+export interface WebGPUSceneHandle {
+  render: (time: number, dt: number) => void;
+  dispose: () => void;
+  reset?: () => void;
+}
+
 // ── Union ──
 
-export type LabDefinition = FragmentShaderDefinition | OGLSceneDefinition;
+export type LabDefinition = FragmentShaderDefinition | OGLSceneDefinition | WebGPUDefinition;
 
-// Backward compat — old imports can still use ShaderDefinition
+// Backward compat
 export type ShaderDefinition = FragmentShaderDefinition;
