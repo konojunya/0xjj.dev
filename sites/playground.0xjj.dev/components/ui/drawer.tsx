@@ -120,7 +120,7 @@ function DrawerFooter({
   return (
     <div
       data-slot="drawer-footer"
-      className={cn("border-t bg-background/95 px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur supports-[backdrop-filter]:bg-background/80", className)}
+      className={cn("border-t bg-background/95 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/80", className)}
       {...props}
     />
   )
