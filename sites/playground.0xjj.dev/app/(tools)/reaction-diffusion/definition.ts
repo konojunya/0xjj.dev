@@ -1,16 +1,23 @@
 import type { WebGPUDefinition, WebGPUSetupContext, WebGPUSceneHandle } from '@/components/shader-lab/types';
 
 // ── Gray-Scott Reaction-Diffusion ──
+// Standard Pearson convention: dA≈0.21, dB≈0.105, dt=1.0
+// CFL stability: dt × dA × 4 = 0.84 < 1 ✓
 
 const COMPUTE_WGSL = /* wgsl */ `
 struct Params {
-  feed : f32,
-  kill : f32,
-  dA   : f32,
-  dB   : f32,
-  dt   : f32,
-  w    : u32,
-  h    : u32,
+  feed      : f32,
+  kill      : f32,
+  dA        : f32,
+  dB        : f32,
+  w         : u32,
+  h         : u32,
+  pointer_x : f32,
+  pointer_y : f32,
+  pointer_on: u32,
+  _pad0     : u32,
+  _pad1     : u32,
+  _pad2     : u32,
 };
 
 @group(0) @binding(0) var<uniform> params : Params;
@@ -36,13 +43,28 @@ fn main(@builtin(global_invocation_id) gid : vec3u) {
 
   let i = idx(gid.x, gid.y);
   let ab = src[i];
-  let a = ab.x;
-  let b = ab.y;
+  var a = ab.x;
+  var b = ab.y;
+
+  // Pointer seeding: inject chemical B near pointer
+  if (params.pointer_on == 1u) {
+    let px = params.pointer_x * f32(params.w);
+    let py = (1.0 - params.pointer_y) * f32(params.h);
+    let dx = f32(gid.x) - px;
+    let dy = f32(gid.y) - py;
+    let dist2 = dx * dx + dy * dy;
+    let radius = f32(max(params.w, params.h)) * 0.02;
+    if (dist2 < radius * radius) {
+      b = 1.0;
+      a = 0.0;
+    }
+  }
+
   let lap = laplacian(gid.x, gid.y);
   let abb = a * b * b;
 
-  let na = a + (params.dA * lap.x - abb + params.feed * (1.0 - a)) * params.dt;
-  let nb = b + (params.dB * lap.y + abb - (params.kill + params.feed) * b) * params.dt;
+  let na = a + params.dA * lap.x - abb + params.feed * (1.0 - a);
+  let nb = b + params.dB * lap.y + abb - (params.kill + params.feed) * b;
 
   dst[i] = vec2f(clamp(na, 0.0, 1.0), clamp(nb, 0.0, 1.0));
 }
@@ -64,7 +86,6 @@ struct VSOut {
 
 @vertex
 fn vs(@builtin(vertex_index) vi : u32) -> VSOut {
-  // full-screen triangle
   let x = f32((vi << 1u) & 2u);
   let y = f32(vi & 2u);
   var out : VSOut;
@@ -73,26 +94,46 @@ fn vs(@builtin(vertex_index) vi : u32) -> VSOut {
   return out;
 }
 
+fn gridIdx(x : u32, y : u32) -> u32 {
+  return (y % uni.h) * uni.w + (x % uni.w);
+}
+
+// Bilinear sampling for smooth visuals
+fn sampleGrid(uv : vec2f) -> vec2f {
+  let fuv = uv * vec2f(f32(uni.w), f32(uni.h)) - 0.5;
+  let ix = u32(max(floor(fuv.x), 0.0));
+  let iy = u32(max(floor(fuv.y), 0.0));
+  let f = fract(fuv);
+
+  let a = grid[gridIdx(ix, iy)];
+  let b = grid[gridIdx(ix + 1u, iy)];
+  let c = grid[gridIdx(ix, iy + 1u)];
+  let d = grid[gridIdx(ix + 1u, iy + 1u)];
+
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
 @fragment
 fn fs(in : VSOut) -> @location(0) vec4f {
-  let ix = u32(in.uv.x * f32(uni.w));
-  let iy = u32(in.uv.y * f32(uni.h));
-  let ab = grid[iy * uni.w + ix];
+  let ab = sampleGrid(in.uv);
   let v = clamp(ab.x - ab.y, 0.0, 1.0);
 
-  // Colour ramp: dark teal → cyan → white
-  let c1 = vec3f(0.02, 0.06, 0.12);   // background
-  let c2 = vec3f(0.05, 0.42, 0.58);   // mid
-  let c3 = vec3f(0.62, 0.92, 0.96);   // highlight
-  let c4 = vec3f(0.96, 0.98, 1.0);    // bright
+  // Colour ramp: deep navy → teal → aqua → bright white
+  let c1 = vec3f(0.01, 0.03, 0.08);
+  let c2 = vec3f(0.02, 0.20, 0.32);
+  let c3 = vec3f(0.10, 0.52, 0.62);
+  let c4 = vec3f(0.50, 0.88, 0.94);
+  let c5 = vec3f(0.92, 0.98, 1.0);
 
   var col : vec3f;
-  if (v < 0.33) {
-    col = mix(c1, c2, v / 0.33);
-  } else if (v < 0.66) {
-    col = mix(c2, c3, (v - 0.33) / 0.33);
+  if (v < 0.25) {
+    col = mix(c1, c2, v / 0.25);
+  } else if (v < 0.5) {
+    col = mix(c2, c3, (v - 0.25) / 0.25);
+  } else if (v < 0.75) {
+    col = mix(c3, c4, (v - 0.5) / 0.25);
   } else {
-    col = mix(c3, c4, (v - 0.66) / 0.34);
+    col = mix(c4, c5, (v - 0.75) / 0.25);
   }
 
   return vec4f(col, 1.0);
@@ -105,29 +146,28 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
   const SIM_W = isMobile ? 192 : 256;
   const SIM_H = isMobile ? 192 : 256;
-  const STEPS_PER_FRAME = isMobile ? 6 : 10;
   const CELL_COUNT = SIM_W * SIM_H;
 
-  // Initial state: A=1, B=0 everywhere, seed a few spots with B
+  // Initial state: A=1, B=0 everywhere, seed circles with B
   const init = new Float32Array(CELL_COUNT * 2);
   for (let i = 0; i < CELL_COUNT; i++) {
     init[i * 2] = 1.0;
     init[i * 2 + 1] = 0.0;
   }
   // Seed random circles
-  const seedCount = isMobile ? 8 : 14;
+  const seedCount = isMobile ? 10 : 18;
   for (let s = 0; s < seedCount; s++) {
     const cx = Math.floor(Math.random() * SIM_W);
     const cy = Math.floor(Math.random() * SIM_H);
-    const r = 3 + Math.floor(Math.random() * 5);
+    const r = 2 + Math.floor(Math.random() * 4);
     for (let dy = -r; dy <= r; dy++) {
       for (let dx = -r; dx <= r; dx++) {
         if (dx * dx + dy * dy > r * r) continue;
         const x = ((cx + dx) % SIM_W + SIM_W) % SIM_W;
         const y = ((cy + dy) % SIM_H + SIM_H) % SIM_H;
         const idx = (y * SIM_W + x) * 2;
-        init[idx] = 0.5 + Math.random() * 0.1;
-        init[idx + 1] = 0.25 + Math.random() * 0.1;
+        init[idx] = 0.5;
+        init[idx + 1] = 0.25;
       }
     }
   }
@@ -142,9 +182,10 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
   device.queue.writeBuffer(gridBufs[0], 0, init);
   device.queue.writeBuffer(gridBufs[1], 0, init);
 
-  // Params uniform: feed, kill, dA, dB, dt, w, h  (7 × f32 padded)
+  // Params uniform: 12 × 4 = 48 bytes
+  const PARAM_SIZE = 48;
   const paramBuf = device.createBuffer({
-    size: 32, // 7 floats + 1 pad = 32 bytes
+    size: PARAM_SIZE,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   });
 
@@ -198,26 +239,38 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
 
   let ping = 0;
   const context = canvas.getContext('webgpu')!;
+  let pointerDown = false;
+
+  const onPointerDown = () => { pointerDown = true; };
+  const onPointerUp = () => { pointerDown = false; };
+  canvas.addEventListener('pointerdown', onPointerDown);
+  canvas.addEventListener('pointerup', onPointerUp);
+  canvas.addEventListener('pointerleave', onPointerUp);
 
   function render() {
     const vals = ctx.getValues();
     const feed = vals.feed ?? 0.055;
     const kill = vals.kill ?? 0.062;
-    const dA = vals.dA ?? 1.0;
-    const dB = vals.dB ?? 0.5;
-    const dt = vals.dt ?? 1.0;
+    const dA = vals.dA ?? 0.21;
+    const dB = vals.dB ?? 0.105;
+    const speed = Math.round(vals.speed ?? 10);
+
+    const pointer = ctx.getPointer();
 
     // Upload params
-    const paramData = new ArrayBuffer(32);
+    const paramData = new ArrayBuffer(PARAM_SIZE);
     const f32 = new Float32Array(paramData);
     const u32 = new Uint32Array(paramData);
     f32[0] = feed;
     f32[1] = kill;
     f32[2] = dA;
     f32[3] = dB;
-    f32[4] = dt;
-    u32[5] = SIM_W;
-    u32[6] = SIM_H;
+    u32[4] = SIM_W;
+    u32[5] = SIM_H;
+    f32[6] = pointer.x;
+    f32[7] = pointer.y;
+    u32[8] = pointerDown ? 1 : 0;
+    // [9..11] = padding
     device.queue.writeBuffer(paramBuf, 0, paramData);
 
     const encoder = device.createCommandEncoder();
@@ -225,7 +278,7 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
     // Compute passes
     const wgX = Math.ceil(SIM_W / 8);
     const wgY = Math.ceil(SIM_H / 8);
-    for (let s = 0; s < STEPS_PER_FRAME; s++) {
+    for (let s = 0; s < speed; s++) {
       const pass = encoder.beginComputePass();
       pass.setPipeline(computePipeline);
       pass.setBindGroup(0, computeBindGroups[ping]);
@@ -242,7 +295,7 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
           view: tex.createView(),
           loadOp: 'clear' as GPULoadOp,
           storeOp: 'store' as GPUStoreOp,
-          clearValue: { r: 0.02, g: 0.06, b: 0.12, a: 1 },
+          clearValue: { r: 0.01, g: 0.03, b: 0.08, a: 1 },
         },
       ],
     });
@@ -255,6 +308,9 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
   }
 
   function dispose() {
+    canvas.removeEventListener('pointerdown', onPointerDown);
+    canvas.removeEventListener('pointerup', onPointerUp);
+    canvas.removeEventListener('pointerleave', onPointerUp);
     gridBufs[0].destroy();
     gridBufs[1].destroy();
     paramBuf.destroy();
@@ -275,7 +331,7 @@ export const reactionDiffusionDefinition: WebGPUDefinition = {
     {
       key: 'feed',
       label: 'Feed Rate',
-      description: 'How fast chemical A is replenished',
+      description: 'How fast chemical A is replenished — determines pattern type',
       min: 0.01,
       max: 0.1,
       step: 0.001,
@@ -284,7 +340,7 @@ export const reactionDiffusionDefinition: WebGPUDefinition = {
     {
       key: 'kill',
       label: 'Kill Rate',
-      description: 'How fast chemical B is removed',
+      description: 'How fast chemical B is removed — determines pattern type',
       min: 0.03,
       max: 0.08,
       step: 0.001,
@@ -294,33 +350,34 @@ export const reactionDiffusionDefinition: WebGPUDefinition = {
       key: 'dA',
       label: 'Diffusion A',
       description: 'Diffusion speed of chemical A',
-      min: 0.2,
-      max: 1.5,
-      step: 0.01,
-      defaultValue: 1.0,
+      min: 0.1,
+      max: 0.24,
+      step: 0.005,
+      defaultValue: 0.21,
     },
     {
       key: 'dB',
       label: 'Diffusion B',
       description: 'Diffusion speed of chemical B',
-      min: 0.1,
-      max: 0.8,
-      step: 0.01,
-      defaultValue: 0.5,
+      min: 0.04,
+      max: 0.14,
+      step: 0.005,
+      defaultValue: 0.105,
     },
     {
-      key: 'dt',
-      label: 'Time Step',
-      description: 'Simulation time step — higher = faster evolution',
-      min: 0.5,
-      max: 2.0,
-      step: 0.1,
-      defaultValue: 1.0,
+      key: 'speed',
+      label: 'Speed',
+      description: 'Simulation steps per frame — higher = faster evolution',
+      min: 2,
+      max: 20,
+      step: 1,
+      defaultValue: 10,
+      precision: 0,
     },
   ],
   notes: [
     'Gray-Scott model: two chemicals react and diffuse on a 2D grid.',
-    'Patterns emerge from the balance between feed/kill rates.',
+    'Click/touch the canvas to inject chemical B and seed new patterns.',
     'Requires a WebGPU-capable browser (Chrome 113+, Edge 113+).',
   ],
   setup,
