@@ -30,7 +30,6 @@ const faceDetectCsp = [
 const securityHeaders: Record<string, string> = {
   'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
   'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Embedder-Policy': 'credentialless',
   'Cross-Origin-Resource-Policy': 'same-origin',
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
@@ -41,8 +40,7 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const pathname = request.nextUrl.pathname;
 
-  // Worker scripts in /opencv/ need unsafe-eval for asm.js + COEP to satisfy
-  // the parent document's Cross-Origin-Embedder-Policy.
+  // Worker scripts in /opencv/ need unsafe-eval for asm.js compilation.
   if (pathname.startsWith('/opencv/')) {
     response.headers.set('Content-Security-Policy', faceDetectCsp);
     for (const [key, value] of Object.entries(securityHeaders)) {
