@@ -1,6 +1,8 @@
 import { createToolJsonLd, createToolMetadata } from '../../lib/metadata';
 import { trackView } from '../../lib/views';
+import '../../lib/prose.css';
 import { MandelbulbLab } from './MandelbulbLab';
+import Ja from './ja.mdx';
 
 export const metadata = createToolMetadata('mandelbulb');
 
@@ -25,6 +27,10 @@ export default function Page() {
         </div>
 
         <MandelbulbLab />
+
+        <article className="prose mt-12 max-w-3xl">
+          <Ja />
+        </article>
       </div>
     </>
   );

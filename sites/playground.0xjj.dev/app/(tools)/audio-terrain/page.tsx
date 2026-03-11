@@ -1,6 +1,8 @@
 import { createToolJsonLd, createToolMetadata } from '../../lib/metadata';
 import { trackView } from '../../lib/views';
+import '../../lib/prose.css';
 import { AudioTerrainLab } from './AudioTerrainLab';
+import Ja from './ja.mdx';
 
 export const metadata = createToolMetadata('audio-terrain');
 
@@ -26,6 +28,10 @@ export default function Page() {
         </div>
 
         <AudioTerrainLab />
+
+        <article className="prose mt-12 max-w-3xl">
+          <Ja />
+        </article>
       </div>
     </>
   );

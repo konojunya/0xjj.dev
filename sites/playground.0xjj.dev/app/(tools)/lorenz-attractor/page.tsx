@@ -1,7 +1,9 @@
 import { ShaderLab } from '@/components/shader-lab/ShaderLab';
 import { createToolJsonLd, createToolMetadata } from '../../lib/metadata';
 import { trackView } from '../../lib/views';
+import '../../lib/prose.css';
 import { lorenzAttractorDefinition } from './definition';
+import Ja from './ja.mdx';
 
 export const metadata = createToolMetadata('lorenz-attractor');
 
@@ -26,6 +28,10 @@ export default function Page() {
         </div>
 
         <ShaderLab definition={lorenzAttractorDefinition} />
+
+        <article className="prose mt-12 max-w-3xl">
+          <Ja />
+        </article>
       </div>
     </>
   );

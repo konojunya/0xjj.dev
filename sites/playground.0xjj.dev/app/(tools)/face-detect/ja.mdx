@@ -1,0 +1,47 @@
+## How it works
+
+Face Detect Camera は、Web カメラの映像に対して **OpenCV.js の Haar Cascade 分類器**を使い、ブラウザ内だけでリアルタイム顔検出を行うデモです。検出結果に応じてカメラが自動的にズーム・パンし、顔を追跡します。
+
+### OpenCV.js と Web Worker
+
+OpenCV.js（約 10.8 MB）は重量級のライブラリです。メインスレッドをブロックしないよう、顔検出の処理はすべて **Web Worker** 上で実行しています。
+
+```ts
+// メインスレッド → Worker へフレームを転送
+worker.postMessage(
+  { type: 'frame', buffer: imageData.data.buffer, width, height },
+  [imageData.data.buffer]  // Transferable でゼロコピー転送
+);
+```
+
+Worker 内では Haar Cascade 分類器 (`haarcascade_frontalface_default.xml`) を使って顔の矩形座標 `{x, y, w, h}` を返します。
+
+### スムーズズーム
+
+検出された顔の矩形を元にビューポートを計算し、**線形補間（LERP）** で現在のビューポートからターゲットへなめらかに遷移します。
+
+```ts
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
+// 毎フレーム、現在のビューポートをターゲットに近づける
+viewport.x = lerp(viewport.x, target.x, LERP_SPEED);
+viewport.y = lerp(viewport.y, target.y, LERP_SPEED);
+```
+
+`LERP_SPEED = 0.06` なので、1 フレームあたりターゲットとの差分の 6% だけ移動します。映画のようなゆっくりとしたズームイン演出になります。
+
+`ZOOM_PADDING = 2.0` で顔がビューポートの約 50% を占めるようにズーム倍率を調整し、`MIN_VIEWPORT = 0.05`（最大 20 倍ズーム）で上限を設けています。
+
+### 顔が消えたときの処理
+
+顔が 60 フレーム（約 1 秒）検出されない場合、ビューポートをゆっくり全体表示に戻します。急に引きになるのではなく、同じ LERP で自然にズームアウトする挙動です。
+
+### 座標変換
+
+検出は低解像度の OffscreenCanvas 上で行われるため、検出結果の矩形座標を表示用 Canvas の座標系に変換する必要があります。ビューポートの位置・サイズを考慮した変換を行い、緑色のバウンディングボックスを正確な位置に描画しています。
+
+### プライバシー
+
+カメラ映像はすべてブラウザ内で処理され、サーバーへのアップロードは一切行いません。ページを離れるとカメラストリームは即座に停止されます。

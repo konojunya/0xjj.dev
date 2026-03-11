@@ -1,6 +1,8 @@
 import { createToolJsonLd, createToolMetadata } from '../../lib/metadata';
 import { trackView } from '../../lib/views';
+import '../../lib/prose.css';
 import { CurlNoiseLab } from './CurlNoiseLab';
+import Ja from './ja.mdx';
 
 export const metadata = createToolMetadata('curl-noise');
 
@@ -25,6 +27,10 @@ export default function Page() {
         </div>
 
         <CurlNoiseLab />
+
+        <article className="prose mt-12 max-w-3xl">
+          <Ja />
+        </article>
       </div>
     </>
   );

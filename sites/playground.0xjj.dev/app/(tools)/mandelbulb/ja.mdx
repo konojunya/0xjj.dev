@@ -1,0 +1,62 @@
+## How it works
+
+マンデルバルブ（Mandelbulb）は、有名な 2D のマンデルブロ集合を 3 次元に拡張したフラクタルです。2009 年に Daniel White と Paul Nylander によって発見され、無限に細かい自己相似構造を持つ驚異的な 3D 形状として知られています。このデモでは **WebGPU のフラグメントシェーダー上のレイマーチング**でリアルタイム描画しています。
+
+### マンデルバルブの数式
+
+3D 空間の各点を球面座標に変換し、角度を `power` 倍してからデカルト座標に戻すことで、マンデルブロ集合と同様の反復計算を 3D で行います。
+
+```wgsl
+fn mandelbulbDE(pos: vec3f, power: f32, maxIter: f32) -> f32 {
+  var z = pos;
+  var dr = 1.0;  // 導関数の追跡
+  var r = length(z);
+
+  for (var i = 0; i < 20; i++) {
+    if (f32(i) >= maxIter || r > 2.0) { break; }
+    let theta = acos(clamp(z.z / r, -1.0, 1.0)) * power;
+    let phi = atan2(z.y, z.x) * power;
+    let rp = pow(r, power);
+
+    dr = pow(r, power - 1.0) * power * dr + 1.0;
+    z = rp * vec3f(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)) + pos;
+    r = length(z);
+  }
+  return 0.5 * log(r) * r / dr;  // 距離推定値
+}
+```
+
+`power`（指数）パラメータを変えると形状が劇的に変化します。`power = 8` がクラシックなマンデルバルブで、値を下げると球に近づき、上げるとより複雑な突起が出現します。
+
+### レイマーチング
+
+各ピクセルについてカメラからレイを飛ばし、距離推定関数（DE）を使ってフラクタル表面までの距離を測りながら進みます。最大 150 ステップ、距離が 0.0003 未満になったら表面に到達と判定します。
+
+### ライティング
+
+表面に到達したら 5 つの要素を組み合わせてリアルなシェーディングを行います。
+
+1. **ディフューズ** — ランバート反射。法線と光源方向の内積
+2. **スペキュラー** — Blinn-Phong 反射。32 度のシャイニネス
+3. **アンビエントオクルージョン** — レイマーチのステップ数が多い = 隙間に入り込んでいる → 暗くする
+4. **ソフトシャドウ** — 表面から光源方向にレイを飛ばし、距離場からソフトな影を近似
+5. **フレネル** — 視線と法線の角度でリムライトを追加
+
+```wgsl
+// ソフトシャドウ
+fn softShadow(ro: vec3f, rd: vec3f, mint: f32, maxt: f32, k: f32) -> f32 {
+  var res = 1.0;
+  var t = mint;
+  for (var i = 0; i < 32; i++) {
+    let h = mandelbulbDE(ro + rd * t, power, maxIter);
+    res = min(res, k * h / t);
+    t += clamp(h, 0.01, 0.1);
+    if (t > maxt) { break; }
+  }
+  return clamp(res, 0.0, 1.0);
+}
+```
+
+### カメラ
+
+ポインターの X 座標で方位角、Y 座標で仰角を制御するオービットカメラです。`speed` パラメータを上げると自動回転し、フラクタルの全方位を鑑賞できます。
