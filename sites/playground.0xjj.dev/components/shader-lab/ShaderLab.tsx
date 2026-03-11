@@ -12,6 +12,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
+import { Slider } from '@/components/ui/slider';
 import { ShaderCanvas } from './ShaderCanvas';
 import type { ShaderControlValues, ShaderDefinition, ShaderSliderControl } from './types';
 
@@ -63,16 +64,15 @@ function ShaderControls({
               </span>
             </div>
 
-            <input
-              type="range"
+            <Slider
               min={control.min}
               max={control.max}
               step={control.step}
-              value={value}
-              onChange={(event) => {
-                onChange(control.key, Number(event.target.value));
+              value={[value]}
+              onValueChange={([v]) => {
+                onChange(control.key, v);
               }}
-              className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-black/10 accent-[var(--color-accent)] dark:bg-white/12"
+              className="mt-4"
             />
 
             <div className="mt-2 flex justify-between font-mono text-[11px] text-muted">
