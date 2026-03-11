@@ -41,12 +41,17 @@ fn hash(p : u32) -> f32 {
   return f32(x) / 4294967295.0;
 }
 
+fn wrapCoord(v : f32, size : u32) -> u32 {
+  let s = f32(size);
+  return u32(((v % s) + s) % s);
+}
+
 fn sense(agent : Agent, angleOffset : f32) -> f32 {
   let a = agent.angle + angleOffset;
   let sx = agent.x + cos(a) * params.sensorDist;
   let sy = agent.y + sin(a) * params.sensorDist;
-  let ix = u32(sx) % params.w;
-  let iy = u32(sy) % params.h;
+  let ix = wrapCoord(sx, params.w);
+  let iy = wrapCoord(sy, params.h);
   return trail[iy * params.w + ix];
 }
 
@@ -63,15 +68,16 @@ fn agentStep(@builtin(global_invocation_id) gid : vec3u) {
   let right = sense(agent, -params.sensorAngle);
 
   // Steer
-  let rng = hash(idx + u32(params.time * 1000.0));
+  let rng = hash(idx * 7919u + u32(params.time * 3571.0));
   if (fwd >= left && fwd >= right) {
-    // keep going
+    // keep going straight
+  } else if (fwd < left && fwd < right) {
+    // both sides stronger — random turn
+    agent.angle += select(-1.0, 1.0, rng > 0.5) * params.turnSpeed;
   } else if (left > right) {
     agent.angle += params.turnSpeed;
-  } else if (right > left) {
-    agent.angle -= params.turnSpeed;
   } else {
-    agent.angle += (rng - 0.5) * params.turnSpeed * 2.0;
+    agent.angle -= params.turnSpeed;
   }
 
   // Move
@@ -79,8 +85,10 @@ fn agentStep(@builtin(global_invocation_id) gid : vec3u) {
   let ny = agent.y + sin(agent.angle) * params.moveSpeed;
 
   // Wrap
-  agent.x = (nx + f32(params.w)) % f32(params.w);
-  agent.y = (ny + f32(params.h)) % f32(params.h);
+  let fw = f32(params.w);
+  let fh = f32(params.h);
+  agent.x = ((nx % fw) + fw) % fw;
+  agent.y = ((ny % fh) + fh) % fh;
 
   agents[idx] = agent;
 
@@ -132,7 +140,7 @@ fn diffuse(@builtin(global_invocation_id) gid : vec3u) {
   let blurred = sum / 9.0;
   let orig = src[y * w + x];
   let mixed = mix(orig, blurred, params.diffuseRate);
-  dst[y * w + x] = mixed * params.decayRate;
+  dst[y * w + x] = max(mixed * params.decayRate, 0.0);
 }
 `;
 
@@ -180,7 +188,9 @@ fn sampleTrail(uv : vec2f) -> f32 {
 
 @fragment
 fn fs(in : VSOut) -> @location(0) vec4f {
-  let v = clamp(sampleTrail(in.uv), 0.0, 1.0);
+  let raw = sampleTrail(in.uv);
+  // Tone-map: sqrt for contrast, gentle clamp
+  let v = clamp(sqrt(raw * 5.0), 0.0, 1.0);
   return vec4f(vec3f(v), 1.0);
 }
 `;
@@ -191,21 +201,21 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
   const SIM_W = isMobile ? 256 : 512;
   const SIM_H = isMobile ? 256 : 512;
-  const NUM_AGENTS = isMobile ? 100_000 : 300_000;
+  const NUM_AGENTS = isMobile ? 80_000 : 250_000;
   const CELL_COUNT = SIM_W * SIM_H;
 
-  // Init agents: random position + angle
+  // Init agents: circular distribution pointing inward
   function buildAgentData(): Float32Array {
     const data = new Float32Array(NUM_AGENTS * 4);
+    const cx = SIM_W / 2;
+    const cy = SIM_H / 2;
     for (let i = 0; i < NUM_AGENTS; i++) {
-      const cx = SIM_W / 2;
-      const cy = SIM_H / 2;
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * Math.min(SIM_W, SIM_H) * 0.4;
-      data[i * 4 + 0] = cx + Math.cos(angle) * radius; // x
-      data[i * 4 + 1] = cy + Math.sin(angle) * radius; // y
-      data[i * 4 + 2] = angle + Math.PI; // angle (point inward)
-      data[i * 4 + 3] = 0; // pad
+      const radius = Math.random() * Math.min(SIM_W, SIM_H) * 0.45;
+      data[i * 4 + 0] = cx + Math.cos(angle) * radius;
+      data[i * 4 + 1] = cy + Math.sin(angle) * radius;
+      data[i * 4 + 2] = angle + Math.PI; // point inward
+      data[i * 4 + 3] = 0;
     }
     return data;
   }
@@ -247,7 +257,6 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
     layout: 'auto',
     compute: { module: agentModule, entryPoint: 'agentStep' },
   });
-  // Agent bind group uses trailBufs[0] for read+write (deposit)
   const agentBindGroups = [0, 1].map((i) =>
     device.createBindGroup({
       layout: agentPipeline.getBindGroupLayout(0),
@@ -303,11 +312,11 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
 
   function render(time: number) {
     const vals = ctx.getValues();
-    const sensorDist = vals.sensorDist ?? 9;
-    const sensorAngle = ((vals.sensorAngle ?? 22.5) * Math.PI) / 180;
+    const sensorDist = vals.sensorDist ?? 20;
+    const sensorAngle = ((vals.sensorAngle ?? 30) * Math.PI) / 180;
     const turnSpeed = ((vals.turnSpeed ?? 45) * Math.PI) / 180;
     const moveSpeed = vals.moveSpeed ?? 1;
-    const stepsPerFrame = Math.round(vals.speed ?? 1);
+    const stepsPerFrame = Math.round(vals.speed ?? 2);
 
     const paramData = new ArrayBuffer(PARAM_SIZE);
     const u32 = new Uint32Array(paramData);
@@ -319,11 +328,11 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
     f32[4] = sensorAngle;
     f32[5] = turnSpeed;
     f32[6] = moveSpeed;
-    f32[7] = 1.0;     // depositAmt
-    f32[8] = 0.96;    // decayRate
-    f32[9] = 0.6;     // diffuseRate
+    f32[7] = 0.05;    // depositAmt — small so trails stay subtle
+    f32[8] = 0.97;    // decayRate
+    f32[9] = 0.5;     // diffuseRate
     f32[10] = time;
-    u32[11] = 0;       // pad
+    u32[11] = 0;
     device.queue.writeBuffer(paramBuf, 0, paramData);
 
     const encoder = device.createCommandEncoder();
@@ -399,10 +408,10 @@ export const physarumDefinition: WebGPUDefinition = {
       key: 'sensorDist',
       label: 'Sensor Distance',
       description: 'How far ahead agents look for trail concentration',
-      min: 3,
-      max: 30,
+      min: 5,
+      max: 50,
       step: 1,
-      defaultValue: 9,
+      defaultValue: 20,
       precision: 0,
     },
     {
@@ -412,7 +421,7 @@ export const physarumDefinition: WebGPUDefinition = {
       min: 5,
       max: 90,
       step: 1,
-      defaultValue: 22,
+      defaultValue: 30,
       precision: 0,
       unit: '°',
     },
@@ -443,7 +452,7 @@ export const physarumDefinition: WebGPUDefinition = {
       min: 1,
       max: 5,
       step: 1,
-      defaultValue: 1,
+      defaultValue: 2,
       precision: 0,
     },
   ],
