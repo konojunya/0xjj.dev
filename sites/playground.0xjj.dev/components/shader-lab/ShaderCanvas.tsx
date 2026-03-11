@@ -106,6 +106,13 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
     let resizeObserver: ResizeObserver | null = null;
     let program: WebGLProgram | null = null;
     let vao: WebGLVertexArrayObject | null = null;
+    let visible = true;
+
+    const TARGET_FPS = 30;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS;
+    let lastRenderTime = 0;
+
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
     try {
       if (definition.renderer.graphics !== 'webgl2') {
@@ -120,7 +127,7 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
         alpha: false,
         antialias: false,
         depth: false,
-        powerPreference: 'high-performance',
+        powerPreference: isMobile ? 'low-power' : 'high-performance',
         preserveDrawingBuffer: false,
         stencil: false,
       });
@@ -156,9 +163,10 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
 
       const resize = () => {
         const rect = canvas.getBoundingClientRect();
+        const maxDpr = isMobile ? 1.5 : 2;
         const dpr = Math.max(
           0.5,
-          Math.min(window.devicePixelRatio || 1, 2) * (definition.renderScale ?? 1),
+          Math.min(window.devicePixelRatio || 1, maxDpr) * (definition.renderScale ?? 1),
         );
         const width = Math.max(1, Math.round(rect.width * dpr));
         const height = Math.max(1, Math.round(rect.height * dpr));
@@ -177,14 +185,24 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
       });
       resizeObserver.observe(canvas);
 
+      const onVisibilityChange = () => {
+        visible = document.visibilityState === 'visible';
+      };
+      document.addEventListener('visibilitychange', onVisibilityChange);
+
       const render = (now: number) => {
         if (disposed) return;
 
         animationFrame = window.requestAnimationFrame(render);
 
-        if (!runningRef.current) {
+        if (!runningRef.current || !visible) {
           return;
         }
+
+        if (now - lastRenderTime < FRAME_INTERVAL) {
+          return;
+        }
+        lastRenderTime = now;
 
         resize();
         gl.useProgram(activeProgram);
@@ -218,6 +236,7 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
       return () => {
         disposed = true;
         window.cancelAnimationFrame(animationFrame);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
         resizeObserver?.disconnect();
         if (vao) gl.deleteVertexArray(vao);
         if (program) gl.deleteProgram(program);
