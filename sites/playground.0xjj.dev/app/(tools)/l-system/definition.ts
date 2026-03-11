@@ -80,7 +80,8 @@ interface TreeGrammar {
 }
 
 function generateLeafGrammar(seed: number): TreeGrammar {
-  const rng = mulberry32(seed);
+  // Mix seed bits so adjacent seeds scatter across templates
+  const rng = mulberry32(seed * 2654435761);
 
   const template = TEMPLATES[Math.floor(rng() * TEMPLATES.length)];
 
@@ -255,11 +256,11 @@ export const lSystemDefinition: OGLSceneDefinition = {
     {
       key: 'detail',
       label: 'Max Iterations',
-      description: 'Maximum growth depth — higher values reveal finer vein detail. 10+ may be slow.',
+      description: 'Maximum growth depth — higher values reveal finer vein detail.',
       min: 2,
-      max: 12,
+      max: 8,
       step: 1,
-      defaultValue: 7,
+      defaultValue: 6,
       precision: 0,
     },
     {
