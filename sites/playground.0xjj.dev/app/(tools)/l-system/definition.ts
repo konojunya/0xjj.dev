@@ -81,7 +81,7 @@ interface TreeGrammar {
 
 function generateLeafGrammar(seed: number): TreeGrammar {
   // Mix seed bits so adjacent seeds scatter across templates
-  const rng = mulberry32(seed * 2654435761);
+  const rng = mulberry32((seed + 1) * 2654435761);
 
   const template = TEMPLATES[Math.floor(rng() * TEMPLATES.length)];
 
