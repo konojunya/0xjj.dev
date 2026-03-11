@@ -15,6 +15,7 @@ import {
 import { Slider } from '@/components/ui/slider';
 import { OGLCanvas } from './OGLCanvas';
 import { ShaderCanvas } from './ShaderCanvas';
+import { WebGPUCanvas } from './WebGPUCanvas';
 import type { LabDefinition, ShaderControlValues, ShaderSliderControl } from './types';
 
 function buildDefaultValues(definition: LabDefinition): ShaderControlValues {
@@ -134,6 +135,8 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
 
         {definition.kind === 'fragment' ? (
           <ShaderCanvas definition={definition} values={values} isRunning={isRunning} />
+        ) : definition.kind === 'webgpu' ? (
+          <WebGPUCanvas definition={definition} values={values} isRunning={isRunning} />
         ) : (
           <OGLCanvas definition={definition} values={values} isRunning={isRunning} />
         )}

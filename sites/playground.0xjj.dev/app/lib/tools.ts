@@ -221,6 +221,13 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'reaction-diffusion',
+    name: 'Reaction-Diffusion',
+    description: 'Gray-Scott reaction-diffusion simulation running on the GPU via WebGPU compute shaders.',
+    href: '/reaction-diffusion/',
+    category: 'ui',
+  },
+  {
     slug: 'lorenz-attractor',
     name: 'Lorenz Attractor',
     description: 'Interactive 3D Lorenz attractor rendered as flowing colored lines in a WebGL2 fragment shader.',
