@@ -132,26 +132,34 @@ vec3 kaleidoFold(vec3 rd, float folds) {
 }
 
 // ── Scene SDF ──
-float scene(vec3 p, float time, float bass, float treble, float mid) {
-  // Domain repetition
+// energy controls shape scale: silence → tiny, loud → huge
+float scene(vec3 p, float time, float bass, float treble, float mid, float energy) {
   vec3 rp = p;
   rp.z = mod(rp.z + time * 2.0, 8.0) - 4.0;
   rp.x = mod(rp.x + 2.0, 4.0) - 2.0;
   rp.y = mod(rp.y + 2.0, 4.0) - 2.0;
 
-  // Morph shapes with bass
-  float morph = bass * 0.8 + 0.2;
+  // Bass dramatically pumps shape size
+  float pump = bass * 1.6;
+  float scaleE = 0.1 + energy * 1.8; // silence=tiny, loud=big
   float t = time * 0.5;
 
-  float sphere = sdSphere(rp, 0.8 + bass * 0.4);
-  float torus = sdTorus(rp - vec3(0, sin(t) * 0.3, 0), vec2(0.7 + mid * 0.3, 0.2 + bass * 0.1));
-  float octa = sdOctahedron(rp + vec3(sin(t * 0.7) * 0.5, 0, cos(t * 0.6) * 0.5), 0.9 + bass * 0.3);
+  float sphere = sdSphere(rp, (0.3 + pump) * scaleE);
+  float torus = sdTorus(
+    rp - vec3(0, sin(t) * 0.5 * scaleE, 0),
+    vec2((0.5 + mid * 0.8) * scaleE, (0.15 + pump * 0.2) * scaleE)
+  );
+  float octa = sdOctahedron(
+    rp + vec3(sin(t * 0.7) * 0.6, 0, cos(t * 0.6) * 0.6) * scaleE,
+    (0.4 + pump * 0.5) * scaleE
+  );
 
+  float morph = bass * 1.2 + 0.15;
   float d = smin(sphere, torus, 0.5 * morph);
   d = smin(d, octa, 0.6 * morph);
 
-  // Noise displacement from treble
-  d += noise(p * 3.0 + time) * treble * 0.3;
+  // Treble → noise displacement (silence = smooth)
+  d += noise(p * 3.0 + time) * treble * 0.5;
 
   return d;
 }
@@ -164,49 +172,63 @@ void main() {
   float complexity = u_complexity;
   float glowStrength = u_glow;
   int maxSteps = int(u_maxSteps);
-  float time = u_time * speed;
 
-  // Camera: continuous forward motion (tunnel/warp)
-  vec3 ro = vec3(0.0, 0.0, time * 2.0);
-  ro.x += sin(time * 0.3) * 1.5;
-  ro.y += cos(time * 0.4) * 1.0;
+  // Energy gates animation speed: silence → near-frozen
+  float energyGate = smoothstep(0.0, 0.15, u_energy); // 0→1 ramp
+  float timeScale = 0.05 + energyGate * 0.95; // silence=5% speed, full=100%
+  float time = u_time * speed * timeScale;
 
-  vec3 rd = normalize(vec3(uv, 1.2 - u_energy * 0.3));
+  // Camera: forward motion gated by energy
+  float forwardSpeed = (0.1 + u_energy * 3.0 + u_mid * 2.0) * speed;
+  vec3 ro = vec3(0.0, 0.0, u_time * forwardSpeed);
+  ro.x += sin(time * 0.3) * 1.5 * energyGate;
+  ro.y += cos(time * 0.4) * 1.0 * energyGate;
+
+  // FOV: beat makes it zoom in dramatically
+  float fov = 1.2 - u_beat * 0.4 - u_energy * 0.2;
+  vec3 rd = normalize(vec3(uv, fov));
 
   // Kaleidoscope fold: bass increases folds
-  float folds = complexity + u_bass * 4.0;
+  float folds = complexity + u_bass * 6.0;
   rd = kaleidoFold(rd, folds);
 
-  // Camera rotation
-  float ca = cos(time * 0.15), sa = sin(time * 0.15);
+  // Camera rotation speed gated by energy
+  float rotSpeed = 0.02 + energyGate * 0.18;
+  float ca = cos(time * rotSpeed), sa = sin(time * rotSpeed);
   rd.xz = mat2(ca, -sa, sa, ca) * rd.xz;
-  float cb = cos(time * 0.1 + u_mid * 0.5), sb = sin(time * 0.1 + u_mid * 0.5);
+  float cb = cos(time * rotSpeed * 0.7 + u_mid), sb = sin(time * rotSpeed * 0.7 + u_mid);
   rd.yz = mat2(cb, -sb, sb, cb) * rd.yz;
-
-  // Forward speed modulated by mid
-  float advance = u_mid * 1.5 + 0.5;
 
   // Raymarching with volumetric glow accumulation
   vec3 color = vec3(0.0);
   float totalDist = 0.0;
   float glowAcc = 0.0;
 
+  // Glow intensity scales with energy: silence → barely visible
+  float glowMult = (0.005 + energyGate * 0.055) * intensity;
+
   for (int i = 0; i < 80; i++) {
     if (i >= maxSteps) break;
     vec3 p = ro + rd * totalDist;
-    float d = scene(p, time, u_bass, u_treble, u_mid);
+    float d = scene(p, time, u_bass, u_treble, u_mid, u_energy);
 
-    // Volumetric glow accumulation (VJ core)
-    float glowContrib = intensity / (1.0 + d * d * (10.0 / glowStrength));
-    float t = totalDist * 0.02 + time * 0.1;
-    vec3 glowColor = palette(t, u_bass * 0.5);
-    color += glowColor * glowContrib * 0.04;
+    // Volumetric glow accumulation
+    float glowContrib = 1.0 / (1.0 + d * d * (8.0 / glowStrength));
+    float t = totalDist * 0.03 + time * 0.15 + u_bass * 0.8;
+    vec3 glowColor = palette(t, u_bass * 1.0);
+
+    // Saturation scales with energy: silence → grayscale
+    float sat = smoothstep(0.0, 0.1, u_energy);
+    vec3 gray = vec3(dot(glowColor, vec3(0.299, 0.587, 0.114)));
+    glowColor = mix(gray, glowColor, sat);
+
+    color += glowColor * glowContrib * glowMult;
     glowAcc += glowContrib;
 
     if (d < 0.001) {
-      // Surface hit: add bright color
-      vec3 hitColor = palette(totalDist * 0.05 + time * 0.2, u_bass * 0.8);
-      color += hitColor * intensity * 0.5;
+      vec3 hitColor = palette(totalDist * 0.05 + time * 0.3, u_bass * 1.5);
+      hitColor = mix(vec3(dot(hitColor, vec3(0.299, 0.587, 0.114))), hitColor, sat);
+      color += hitColor * intensity * 0.8 * energyGate;
       break;
     }
 
@@ -216,29 +238,30 @@ void main() {
 
   // ── Post-processing ──
 
-  // Beat flash: white additive + chromatic aberration
-  if (u_beat > 0.1) {
-    // White flash
-    color += vec3(u_beat * 0.4);
-
-    // Chromatic aberration
-    float aberration = u_beat * 0.006;
-    vec2 dir = uv * aberration;
-    color.r += glowAcc * 0.001 * smoothstep(0.0, 1.0, length(uv + dir));
-    color.b += glowAcc * 0.001 * smoothstep(0.0, 1.0, length(uv - dir));
+  // Beat flash: dramatic white + zoom aberration
+  if (u_beat > 0.05) {
+    color += vec3(u_beat * u_beat * 1.2); // quadratic for punch
+    // Strong chromatic aberration
+    float aber = u_beat * 0.015;
+    vec2 rOff = uv * (1.0 + aber) - uv;
+    vec2 bOff = uv * (1.0 - aber) - uv;
+    color.r += 0.15 * u_beat * smoothstep(0.3, 0.0, length(uv + rOff));
+    color.b += 0.15 * u_beat * smoothstep(0.3, 0.0, length(uv + bOff));
   }
 
-  // Energy-driven bloom multiplier
-  color *= 1.0 + u_energy * 1.5;
+  // Overall brightness: energy cubed for dramatic on/off
+  float brightness = u_energy * u_energy * 3.0 + 0.02;
+  color *= brightness;
 
-  // Vignette
-  float vig = 1.0 - smoothstep(0.4, 1.4, length(uv) * 1.2);
+  // Vignette (stronger when silent)
+  float vigStrength = 1.0 + (1.0 - energyGate) * 0.6;
+  float vig = 1.0 - smoothstep(0.3, 1.2, length(uv) * vigStrength);
   color *= vig;
 
   // Reinhard tone mapping
   color = color / (1.0 + color);
 
-  // Gamma correction
+  // Gamma
   color = pow(color, vec3(0.9));
 
   outColor = vec4(color, 1.0);
@@ -302,6 +325,8 @@ export function AudioReactorLab() {
   const beatPulseRef = useRef(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const meterRef = useRef({ bass: 0, mid: 0, treble: 0, energy: 0, beat: 0 });
+  const meterElRef = useRef<HTMLDivElement>(null);
 
   const [isStarting, setIsStarting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -430,6 +455,25 @@ export function AudioReactorLab() {
     // Time
     const dt = 0.016;
     timeRef.current += dt;
+
+    // ── Update audio meter (direct DOM for perf) ──
+    meterRef.current.bass = smoothBassRef.current;
+    meterRef.current.mid = smoothMidRef.current;
+    meterRef.current.treble = smoothTrebleRef.current;
+    meterRef.current.energy = smoothEnergyRef.current;
+    meterRef.current.beat = beatPulseRef.current;
+    const meterEl = meterElRef.current;
+    if (meterEl) {
+      const bars = meterEl.children;
+      const vals = [smoothBassRef.current, smoothMidRef.current, smoothTrebleRef.current, smoothEnergyRef.current];
+      for (let i = 0; i < 4; i++) {
+        const bar = bars[i] as HTMLElement | undefined;
+        if (bar) {
+          const fill = bar.lastElementChild as HTMLElement | undefined;
+          if (fill) fill.style.width = `${Math.min(vals[i] * 100, 100)}%`;
+        }
+      }
+    }
 
     // ── Render ──
     const canvas = canvasRef.current!;
@@ -565,6 +609,31 @@ export function AudioReactorLab() {
             ref={canvasRef}
             className="aspect-[16/10] w-full bg-black object-cover"
           />
+
+          {/* Audio level meter */}
+          {isRunning && (
+            <div
+              ref={meterElRef}
+              className="absolute left-3 top-3 flex flex-col gap-1.5 rounded-md border border-white/10 bg-black/50 px-3 py-2 backdrop-blur-sm"
+            >
+              {[
+                { label: 'BASS', color: 'bg-rose-500' },
+                { label: 'MID', color: 'bg-amber-400' },
+                { label: 'TRE', color: 'bg-cyan-400' },
+                { label: 'ALL', color: 'bg-white' },
+              ].map(({ label, color }) => (
+                <div key={label} className="flex items-center gap-2">
+                  <span className="w-7 text-[9px] font-medium tracking-wider text-white/40">{label}</span>
+                  <div className="h-1.5 w-20 overflow-hidden rounded-full bg-white/10 sm:w-28">
+                    <div
+                      className={`h-full rounded-full ${color} transition-[width] duration-75`}
+                      style={{ width: '0%' }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Start overlay */}
           {!isRunning && (
