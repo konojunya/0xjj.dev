@@ -42,27 +42,34 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
 
     async function init() {
       if (!navigator.gpu) {
-        setError('WebGPU is not supported in this browser. Try Chrome, Edge, or Safari 17+.');
+        setError('[Step 1] navigator.gpu is undefined. WebGPU is not available in this browser.');
         return;
       }
 
       let adapter: GPUAdapter | null = null;
       try {
-        adapter = await navigator.gpu.requestAdapter({
-          powerPreference: isMobile ? 'low-power' : 'high-performance',
-        });
-      } catch {
-        // Safari may throw instead of returning null
+        // Try without powerPreference first (Safari may reject options)
+        adapter = await navigator.gpu.requestAdapter();
+      } catch (e) {
+        setError(`[Step 2] requestAdapter() threw: ${e instanceof Error ? e.message : String(e)}`);
+        return;
       }
       if (!adapter) {
-        setError('Failed to get WebGPU adapter. Make sure WebGPU is enabled in your browser settings.');
+        setError('[Step 2] requestAdapter() returned null. WebGPU adapter not available.');
         return;
       }
 
-      const device = await adapter.requestDevice();
+      let device: GPUDevice;
+      try {
+        device = await adapter.requestDevice();
+      } catch (e) {
+        setError(`[Step 3] requestDevice() failed: ${e instanceof Error ? e.message : String(e)}`);
+        return;
+      }
+
       const context = canvas.getContext('webgpu');
       if (!context) {
-        setError('Failed to get WebGPU context.');
+        setError('[Step 4] canvas.getContext("webgpu") returned null.');
         return;
       }
 
@@ -102,7 +109,7 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
           getPointer: () => pointerRef.current,
         });
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to initialize WebGPU scene.');
+        setError(`[Step 5] setup() failed: ${e instanceof Error ? e.message : String(e)}`);
         return;
       }
 
