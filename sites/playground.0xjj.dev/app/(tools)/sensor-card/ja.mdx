@@ -1,6 +1,6 @@
-## Gyro Card
+## Sensor Card
 
-スマートフォンの加速度センサー（ジャイロスコープ）を使って、デバイスの傾きに応じてカードがリアルタイムに 3D 回転するインタラクティブデモです。
+スマートフォンのモーションセンサーを使って、デバイスの傾きに応じてカードがリアルタイムに 3D 回転するインタラクティブデモです。
 
 ### 仕組み
 
@@ -65,7 +65,7 @@ background: radial-gradient(
 
 ### iOS の権限
 
-iOS 13 以降では、モーションセンサーへのアクセスにユーザーの明示的な許可が必要です。「Activate Gyroscope」ボタンをタップすると `DeviceOrientationEvent.requestPermission()` が呼び出され、許可ダイアログが表示されます。
+iOS 13 以降では、モーションセンサーへのアクセスにユーザーの明示的な許可が必要です。カードをタップすると `DeviceOrientationEvent.requestPermission()` が呼び出され、許可ダイアログが表示されます。
 
 ```ts
 const DOE = DeviceOrientationEvent as unknown as {
@@ -80,7 +80,7 @@ if (typeof DOE.requestPermission === 'function') {
 
 ### デスクトップ環境
 
-加速度センサーを搭載していない PC やデスクトップブラウザでは、センサーが利用できない旨のメッセージが表示されます。デスクトップブラウザにも `DeviceOrientationEvent` API 自体は存在するため、1 秒間イベントの発火を監視し、タッチ対応でなければ非対応と判定しています。
+モーションセンサーを搭載していない PC やデスクトップブラウザでは、カード上にセンサーが利用できない旨のオーバーレイが表示されます。デスクトップブラウザにも `DeviceOrientationEvent` API 自体は存在するため、1 秒間イベントの発火を監視し、タッチ対応でなければ非対応と判定しています。
 
 ### Recalibrate
 

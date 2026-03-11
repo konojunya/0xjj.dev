@@ -8,7 +8,7 @@ type SensorState = 'idle' | 'requesting' | 'active' | 'unsupported' | 'denied';
 const SPRING_CONFIG = { stiffness: 150, damping: 20, mass: 0.5 };
 const MAX_TILT = 25;
 
-export const GyroCard: React.FC<{
+export const SensorCard: React.FC<{
   src: string;
   alt?: string;
 }> = ({ src, alt = '' }) => {
@@ -22,8 +22,8 @@ export const GyroCard: React.FC<{
 
   const handleOrientation = useCallback(
     (e: DeviceOrientationEvent) => {
-      const beta = e.beta ?? 0; // front-back (-180..180)
-      const gamma = e.gamma ?? 0; // left-right (-90..90)
+      const beta = e.beta ?? 0;
+      const gamma = e.gamma ?? 0;
 
       if (initialBeta.current === null) {
         initialBeta.current = beta;
@@ -39,11 +39,9 @@ export const GyroCard: React.FC<{
         Math.min(MAX_TILT, relativeGamma),
       );
 
-      // beta -> rotateX (front-back tilt), gamma -> rotateY (left-right tilt)
       rotateX.set(-clampedBeta);
       rotateY.set(clampedGamma);
 
-      // sheen position (0-100%)
       const sx = ((clampedGamma + MAX_TILT) / (MAX_TILT * 2)) * 100;
       const sy = ((clampedBeta + MAX_TILT) / (MAX_TILT * 2)) * 100;
       sheenX.set(sx);
@@ -55,7 +53,6 @@ export const GyroCard: React.FC<{
   const requestSensor = useCallback(async () => {
     setSensorState('requesting');
 
-    // iOS 13+ requires explicit permission
     const DOE = DeviceOrientationEvent as unknown as {
       requestPermission?: () => Promise<'granted' | 'denied'>;
     };
@@ -86,8 +83,6 @@ export const GyroCard: React.FC<{
       return;
     }
 
-    // Desktop browsers have the API but no actual sensor.
-    // Try listening for one event to detect.
     let timeout: ReturnType<typeof setTimeout>;
     let resolved = false;
 
@@ -96,7 +91,6 @@ export const GyroCard: React.FC<{
       resolved = true;
       clearTimeout(timeout);
       window.removeEventListener('deviceorientation', probe);
-      // sensor exists — stay idle so user can tap to activate
     };
 
     window.addEventListener('deviceorientation', probe);
@@ -105,8 +99,6 @@ export const GyroCard: React.FC<{
       if (!resolved) {
         resolved = true;
         window.removeEventListener('deviceorientation', probe);
-        // If we're on mobile (touch device) we may still get orientation events after permission
-        // Only mark unsupported if no touch support
         const isTouch =
           'ontouchstart' in window || navigator.maxTouchPoints > 0;
         if (!isTouch) {
@@ -131,18 +123,19 @@ export const GyroCard: React.FC<{
     };
   }, [sensorState, handleOrientation]);
 
-  // Recalibrate on double tap
   const recalibrate = useCallback(() => {
     initialBeta.current = null;
     initialGamma.current = null;
   }, []);
 
+  const needsActivation = sensorState === 'idle' || sensorState === 'requesting';
+
   return (
-    <div className="flex flex-col items-center gap-8">
-      {/* Card */}
+    <div className="flex flex-col items-center gap-6">
+      {/* Card with overlay */}
       <div
         style={{ perspective: 1000 }}
-        className="flex items-center justify-center"
+        className="relative flex items-center justify-center"
       >
         <motion.div
           className="aspect-trading-card relative w-64 overflow-hidden rounded-2xl shadow-2xl sm:w-72"
@@ -161,35 +154,78 @@ export const GyroCard: React.FC<{
             draggable={false}
           />
           {/* Holographic sheen overlay */}
-          {sensorState === 'active' && <SheenLayer sheenX={sheenX} sheenY={sheenY} />}
+          {sensorState === 'active' && (
+            <SheenLayer sheenX={sheenX} sheenY={sheenY} />
+          )}
+          {/* Activation overlay — blurred glass on the card */}
+          {(needsActivation || sensorState === 'denied') && (
+            <button
+              type="button"
+              onClick={sensorState === 'denied' ? undefined : requestSensor}
+              disabled={sensorState === 'requesting' || sensorState === 'denied'}
+              className="absolute inset-0 z-10 flex cursor-pointer flex-col items-center justify-center gap-3 bg-black/30 backdrop-blur-md transition-opacity active:bg-black/40 disabled:cursor-not-allowed"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                className="h-8 w-8 text-white/90"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+                />
+              </svg>
+              {sensorState === 'denied' ? (
+                <>
+                  <span className="text-sm font-medium text-white">
+                    Permission Denied
+                  </span>
+                  <span className="px-4 text-center text-xs text-white/70">
+                    ブラウザの設定からモーションセンサーの権限を許可してください
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm font-medium text-white">
+                  {sensorState === 'requesting'
+                    ? 'Requesting...'
+                    : 'Tap to allow sensor'}
+                </span>
+              )}
+            </button>
+          )}
+          {/* Unsupported overlay */}
+          {sensorState === 'unsupported' && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/40 backdrop-blur-md">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                className="h-8 w-8 text-white/80"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+                />
+              </svg>
+              <span className="text-sm font-medium text-white">
+                Sensor Not Available
+              </span>
+              <span className="px-4 text-center text-xs leading-relaxed text-white/70">
+                このデモはモーションセンサーを搭載した
+                <br />
+                モバイルデバイスでお楽しみいただけます
+              </span>
+            </div>
+          )}
         </motion.div>
       </div>
 
-      {/* Controls */}
-      {sensorState === 'unsupported' && <UnsupportedMessage />}
-
-      {sensorState === 'denied' && (
-        <div className="max-w-xs rounded-xl border border-red-300 bg-red-50 px-5 py-4 text-center text-sm text-red-700 dark:border-red-700/50 dark:bg-red-900/20 dark:text-red-300">
-          <p className="font-medium">Permission Denied</p>
-          <p className="mt-1 text-xs opacity-80">
-            ブラウザの設定からモーションセンサーの権限を許可してください。
-          </p>
-        </div>
-      )}
-
-      {(sensorState === 'idle' || sensorState === 'requesting') && (
-        <button
-          type="button"
-          onClick={requestSensor}
-          disabled={sensorState === 'requesting'}
-          className="rounded-xl bg-accent px-6 py-3 text-sm font-medium text-white shadow-lg transition-all hover:brightness-110 active:scale-95 disabled:opacity-50"
-        >
-          {sensorState === 'requesting'
-            ? 'Requesting...'
-            : 'Activate Gyroscope'}
-        </button>
-      )}
-
+      {/* Recalibrate (only when active) */}
       {sensorState === 'active' && (
         <div className="flex flex-col items-center gap-3">
           <p className="text-sm text-muted">
@@ -248,35 +284,5 @@ function SheenLayer({
         } as React.CSSProperties
       }
     />
-  );
-}
-
-function UnsupportedMessage() {
-  return (
-    <div className="max-w-sm rounded-xl border border-amber-300 bg-amber-50 px-6 py-5 text-center dark:border-amber-700/50 dark:bg-amber-900/20">
-      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-800/30">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.5}
-          className="h-6 w-6 text-amber-600 dark:text-amber-400"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-          />
-        </svg>
-      </div>
-      <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
-        Accelerometer Not Available
-      </p>
-      <p className="mt-2 text-xs leading-relaxed text-amber-700 dark:text-amber-300/80">
-        このデモは加速度センサー（ジャイロスコープ）を搭載したスマートフォンやタブレットでお楽しみいただけます。
-        <br />
-        お手持ちのモバイルデバイスからアクセスしてください。
-      </p>
-    </div>
   );
 }
