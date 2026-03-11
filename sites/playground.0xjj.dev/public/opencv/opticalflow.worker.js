@@ -7,6 +7,9 @@ var prevGray = null;
 var flow = null;
 var useInitialFlow = false;
 
+// Numeric fallback for cv.OPTFLOW_USE_INITIAL_FLOW (value = 4)
+var OPTFLOW_USE_INITIAL_FLOW = 4;
+
 // Downsample grid size
 var GRID_W = 40;
 var GRID_H = 30;
@@ -18,6 +21,13 @@ function initialize() {
   }
 
   var onReady = function () {
+    if (typeof cv.calcOpticalFlowFarneback !== 'function') {
+      self.postMessage({ type: 'error', error: 'この OpenCV.js ビルドは calcOpticalFlowFarneback をサポートしていません。' });
+      return;
+    }
+    if (typeof cv.OPTFLOW_USE_INITIAL_FLOW !== 'undefined') {
+      OPTFLOW_USE_INITIAL_FLOW = cv.OPTFLOW_USE_INITIAL_FLOW;
+    }
     ready = true;
     self.postMessage({ type: 'ready' });
   };
@@ -31,11 +41,23 @@ function initialize() {
 
 initialize();
 
+function emptyFlow() {
+  var flowX = new Float32Array(GRID_W * GRID_H);
+  var flowY = new Float32Array(GRID_W * GRID_H);
+  self.postMessage(
+    { type: 'flow', flowX: flowX, flowY: flowY, gridW: GRID_W, gridH: GRID_H },
+    [flowX.buffer, flowY.buffer]
+  );
+}
+
 self.onmessage = function (e) {
   var msg = e.data;
 
   if (msg.type === 'frame') {
-    if (!ready) return;
+    if (!ready) {
+      emptyFlow();
+      return;
+    }
 
     var width = msg.width;
     var height = msg.height;
@@ -55,7 +77,7 @@ self.onmessage = function (e) {
           flow = new cv.Mat();
         }
 
-        var flags = useInitialFlow ? cv.OPTFLOW_USE_INITIAL_FLOW : 0;
+        var flags = useInitialFlow ? OPTFLOW_USE_INITIAL_FLOW : 0;
         cv.calcOpticalFlowFarneback(
           prevGray, gray, flow,
           0.5,   // pyrScale
@@ -106,6 +128,9 @@ self.onmessage = function (e) {
           { type: 'flow', flowX: flowX, flowY: flowY, gridW: GRID_W, gridH: GRID_H },
           [flowX.buffer, flowY.buffer]
         );
+      } else {
+        // First frame — no previous frame to compare, send empty flow
+        emptyFlow();
       }
 
       // Swap prevGray
@@ -116,7 +141,7 @@ self.onmessage = function (e) {
       gray = null; // prevent deletion in finally
 
     } catch (err) {
-      // Silently handle errors
+      emptyFlow();
     } finally {
       if (src) src.delete();
       if (gray) gray.delete();

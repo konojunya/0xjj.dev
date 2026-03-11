@@ -8,7 +8,7 @@ const OPENCV_WORKER_PATH = '/opencv/opticalflow.worker.js';
 const OPENCV_LOAD_TIMEOUT_MS = 30_000;
 
 // Flow / particle config
-const FLOW_STRENGTH = 0.00035;
+const FLOW_STRENGTH = 0.0008;
 const DAMPING = 0.96;
 const AMBIENT_DRIFT = 0.0002;
 const EMA_ALPHA = 0.3; // raw weight in exponential moving average
