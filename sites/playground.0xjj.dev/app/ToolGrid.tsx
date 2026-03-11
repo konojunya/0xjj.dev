@@ -16,11 +16,13 @@ export default function ToolGrid() {
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
-    return tools.filter((t) => {
-      if (activeCategory && t.category !== activeCategory) return false;
-      if (q && !t.name.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q) && !t.slug.toLowerCase().includes(q)) return false;
-      return true;
-    });
+    return tools
+      .filter((t) => {
+        if (activeCategory && t.category !== activeCategory) return false;
+        if (q && !t.name.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q) && !t.slug.toLowerCase().includes(q)) return false;
+        return true;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [query, activeCategory]);
 
   const border = 'color-mix(in srgb, var(--color-fg) 12%, transparent)';
