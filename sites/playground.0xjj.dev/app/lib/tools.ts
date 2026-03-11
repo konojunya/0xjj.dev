@@ -214,6 +214,13 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'face-detect',
+    name: 'Face Detect Camera',
+    description: 'ローカルのWebカメラ映像をcanvasに描画し、OpenCV.jsでブラウザ内だけで顔検出を行います。',
+    href: '/face-detect/',
+    category: 'ui',
+  },
+  {
     slug: 'liquid-glass',
     name: 'Liquid Glass',
     description: 'SVGフィルターとbackdrop-filterを使った、Apple風のLiquid Glassエフェクト。',

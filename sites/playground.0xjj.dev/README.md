@@ -14,6 +14,7 @@
 | `color` | Color Converter | https://playground.0xjj.dev/color |
 | `cron` | Cron Expression Parser | https://playground.0xjj.dev/cron |
 | `easing` | Easing Visualizer | https://playground.0xjj.dev/easing |
+| `face-detect` | Face Detect Camera | https://playground.0xjj.dev/face-detect |
 | `exif` | EXIF Viewer | https://playground.0xjj.dev/exif |
 | `hash` | Hash Calculator | https://playground.0xjj.dev/hash |
 | `json` | JSON Formatter | https://playground.0xjj.dev/json |
@@ -85,6 +86,19 @@
 - `cubic-bezier(x1, y1, x2, y2)` のコピーボタン
 
 **Route**: `app/easing/`
+
+---
+
+### Face Detect Camera
+
+> Webカメラ映像を canvas に描画する。顔検出は次の段階で追加する。
+
+- 開始ボタン押下後にのみ `getUserMedia()` を呼び出し、ブラウザの権限ダイアログを表示
+- カメラ映像はブラウザ内のみで処理し、サーバーにアップロードしない
+- hidden な `video` 要素から `canvas` へ毎フレーム描画
+- 次の段階でこの canvas を入力にして face detect を載せる
+
+**Route**: `app/face-detect/`
 
 ---
 
