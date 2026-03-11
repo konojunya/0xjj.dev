@@ -13,6 +13,7 @@ const DAMPING = 0.96;
 const AMBIENT_DRIFT = 0.0002;
 const EMA_ALPHA = 0.3; // raw weight in exponential moving average
 const DESKTOP_PARTICLES = 12_000;
+const FULLSCREEN_PARTICLES = 30_000;
 const MOBILE_PARTICLES = 5_000;
 
 // Capture resolution
@@ -102,6 +103,7 @@ export function AirFlowLab() {
   const posBufferRef = useRef<WebGLBuffer | null>(null);
   const opacityBufferRef = useRef<WebGLBuffer | null>(null);
   const uResolutionLocRef = useRef<WebGLUniformLocation | null>(null);
+  const uPointScaleLocRef = useRef<WebGLUniformLocation | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -135,13 +137,19 @@ export function AirFlowLab() {
   }, []);
 
   // Setup WebGL
-  const setupGL = useCallback(() => {
+  const setupGL = useCallback((pointScale: number = 1.0, fullscreen: boolean = false) => {
     const canvas = canvasRef.current;
     if (!canvas) return false;
 
     const mobile = isMobile();
-    canvas.width = mobile ? 480 : 960;
-    canvas.height = mobile ? 360 : 720;
+    if (fullscreen) {
+      const dpr = Math.min(window.devicePixelRatio, 2);
+      canvas.width = Math.round(window.screen.width * dpr);
+      canvas.height = Math.round(window.screen.height * dpr);
+    } else {
+      canvas.width = mobile ? 480 : 960;
+      canvas.height = mobile ? 360 : 720;
+    }
 
     const gl = canvas.getContext('webgl', {
       alpha: false,
@@ -157,13 +165,14 @@ export function AirFlowLab() {
       attribute vec2 a_position;
       attribute float a_opacity;
       uniform vec2 u_resolution;
+      uniform float u_pointScale;
       varying float v_opacity;
       void main() {
         // Mirror X for selfie view, map [0,1] to clip space
         vec2 pos = vec2(1.0 - a_position.x, 1.0 - a_position.y);
         vec2 clip = pos * 2.0 - 1.0;
         gl_Position = vec4(clip, 0.0, 1.0);
-        gl_PointSize = 1.5 + a_opacity * 1.5;
+        gl_PointSize = (1.5 + a_opacity * 1.5) * u_pointScale;
         v_opacity = a_opacity;
       }
     `;
@@ -202,6 +211,8 @@ export function AirFlowLab() {
     // Uniforms
     uResolutionLocRef.current = gl.getUniformLocation(program, 'u_resolution');
     gl.uniform2f(uResolutionLocRef.current, canvas.width, canvas.height);
+    uPointScaleLocRef.current = gl.getUniformLocation(program, 'u_pointScale');
+    gl.uniform1f(uPointScaleLocRef.current, pointScale);
 
     // Blend: additive
     gl.enable(gl.BLEND);
@@ -440,13 +451,29 @@ export function AirFlowLab() {
     };
   }, []);
 
-  // Sync fullscreen state
+  // Rebuild particle count & GL when fullscreen changes while running
+  const rebuildForMode = useCallback((fullscreen: boolean) => {
+    if (!isRunningRef.current) return;
+    const mobile = isMobile();
+    const count = fullscreen ? FULLSCREEN_PARTICLES : mobile ? MOBILE_PARTICLES : DESKTOP_PARTICLES;
+    const pointScale = fullscreen ? 0.6 : 1.0;
+
+    // Preserve flow field, just re-init particles and GL
+    initParticles(count);
+    setupGL(pointScale, fullscreen);
+  }, [initParticles, setupGL]);
+
+  // Sync fullscreen state & rebuild
   useEffect(() => {
     setCanFullscreen(!!document.fullscreenEnabled);
-    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    const onChange = () => {
+      const fs = !!document.fullscreenElement;
+      setIsFullscreen(fs);
+      rebuildForMode(fs);
+    };
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
+  }, [rebuildForMode]);
 
   const handleFullscreen = () => {
     const el = containerRef.current;
