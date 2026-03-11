@@ -1,4 +1,4 @@
-import { Renderer, Camera, Geometry, Program, Mesh, Color } from 'ogl';
+import { Renderer, Camera, Transform, Geometry, Program, Mesh } from 'ogl';
 import type { OGLSceneDefinition } from '@/components/shader-lab/types';
 
 // ── L-System grammar ──
@@ -219,7 +219,10 @@ export const lSystemDefinition: OGLSceneDefinition = {
     const gl = renderer.gl;
     gl.clearColor(0.012, 0.012, 0.02, 1);
 
-    const camera = new Camera(gl, { left: -1, right: 1, top: 1, bottom: -1, near: -1, far: 1 });
+    const camera = new Camera(gl);
+    camera.orthographic({ left: -1, right: 1, top: 1, bottom: -1, near: -1, far: 1 });
+
+    const scene = new Transform();
 
     const program = new Program(gl, {
       vertex: `
@@ -296,6 +299,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
         mesh.geometry = geometry;
       } else {
         mesh = new Mesh(gl, { geometry, program, mode: gl.TRIANGLES });
+        mesh.setParent(scene);
       }
     }
 
@@ -347,7 +351,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
         resize();
         gl.clear(gl.COLOR_BUFFER_BIT);
         if (mesh) {
-          renderer.render({ scene: mesh, camera });
+          renderer.render({ scene, camera });
         }
       },
       dispose() {
