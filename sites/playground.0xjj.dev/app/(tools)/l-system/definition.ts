@@ -13,98 +13,63 @@ function mulberry32(seed: number) {
   };
 }
 
-// ── Proven plant L-System templates ──
-// Each template is known to produce beautiful plant-like patterns.
-// The seed selects a template and perturbs the angle.
+// ── Leaf venation L-System templates ──
+// Each template produces leaf-like patterns — midribs with branching veins.
 
-interface PlantTemplate {
-  name: string;
+interface LeafTemplate {
   axiom: string;
   rules: Record<string, string>;
-  baseAngle: number;
-  angleRange: [number, number]; // min/max perturbation
+  angleRange: [number, number];
 }
 
-const TEMPLATES: PlantTemplate[] = [
-  // Fractal plant (the most iconic L-System plant)
+const TEMPLATES: LeafTemplate[] = [
+  // Pinnate leaf: central midrib with alternating side veins
   {
-    name: 'plant',
-    axiom: 'X',
-    rules: { X: 'F+[[X]-X]-F[-FX]+X', F: 'FF' },
-    baseAngle: 25,
-    angleRange: [20, 30],
-  },
-  // Simple branching tree
-  {
-    name: 'tree',
     axiom: 'X',
     rules: { X: 'F[+X]F[-X]+X', F: 'FF' },
-    baseAngle: 20,
-    angleRange: [15, 28],
+    angleRange: [22, 32],
   },
-  // Symmetric tree
+  // Broad leaf: dense branching fills area
   {
-    name: 'tree-sym',
     axiom: 'X',
-    rules: { X: 'F[+X][-X]FX', F: 'FF' },
-    baseAngle: 25.7,
-    angleRange: [22, 30],
+    rules: { X: 'F+[[X]-X]-F[-FX]+X', F: 'FF' },
+    angleRange: [20, 28],
   },
-  // Dense bushy tree
+  // Palmate leaf: veins fan out from base
   {
-    name: 'bush',
     axiom: 'F',
     rules: { F: 'FF+[+F-F-F]-[-F+F+F]' },
-    baseAngle: 22.5,
-    angleRange: [18, 28],
+    angleRange: [18, 26],
   },
-  // Tall tree with canopy
+  // Fern frond: asymmetric side veins
   {
-    name: 'canopy',
-    axiom: 'X',
-    rules: { X: 'F[-X][+X]FX', F: 'FF' },
-    baseAngle: 22,
-    angleRange: [18, 28],
-  },
-  // Weeping willow style
-  {
-    name: 'willow',
-    axiom: 'X',
-    rules: { X: 'F[+X]F[-X]-X', F: 'FF' },
-    baseAngle: 18,
-    angleRange: [14, 24],
-  },
-  // Fern (asymmetric fronds)
-  {
-    name: 'fern',
     axiom: 'X',
     rules: { X: 'F-[[X]+X]+F[+FX]-X', F: 'FF' },
-    baseAngle: 22.5,
-    angleRange: [18, 28],
+    angleRange: [20, 28],
   },
-  // Stochastic-like branching
+  // Elm leaf: tight branching veins
   {
-    name: 'branch',
     axiom: 'X',
-    rules: { X: 'F[++X][-X]F[-FX]+X', F: 'FF' },
-    baseAngle: 20,
-    angleRange: [16, 26],
+    rules: { X: 'F[+X][-X]FX', F: 'FF' },
+    angleRange: [24, 34],
   },
-  // Spreading bush
+  // Willow leaf: narrow, drooping veins
   {
-    name: 'spread',
-    axiom: 'F',
-    rules: { F: 'F[+F]F[-F]F' },
-    baseAngle: 25.7,
-    angleRange: [20, 32],
-  },
-  // Kelp / seaweed
-  {
-    name: 'kelp',
     axiom: 'X',
-    rules: { X: 'F[+X][-X]FX', F: 'F+F' },
-    baseAngle: 15,
-    angleRange: [10, 22],
+    rules: { X: 'F[+X]F[-X]-X', F: 'FF' },
+    angleRange: [14, 22],
+  },
+  // Maple leaf: wide spreading veins
+  {
+    axiom: 'X',
+    rules: { X: 'F[-X][+X]FX', F: 'FF' },
+    angleRange: [26, 38],
+  },
+  // Dense venation: many small veins
+  {
+    axiom: 'X',
+    rules: { X: 'F[+F+X][-F-X]FX', F: 'FF' },
+    angleRange: [18, 26],
   },
 ];
 
@@ -114,31 +79,29 @@ interface TreeGrammar {
   angle: number;
 }
 
-function generateTreeGrammar(seed: number): TreeGrammar {
+function generateLeafGrammar(seed: number): TreeGrammar {
   const rng = mulberry32(seed);
 
-  // Pick template based on seed
   const template = TEMPLATES[Math.floor(rng() * TEMPLATES.length)];
 
-  // Perturb angle within the template's range
   const [minA, maxA] = template.angleRange;
   const angle = minA + rng() * (maxA - minA);
 
-  // Small rule mutations for variety while preserving plant structure
+  // Small mutations to keep it leaf-like but unique
   const rules: Record<string, string> = {};
   for (const [key, rule] of Object.entries(template.rules)) {
     let mutated = rule;
 
-    // Occasionally add an extra F for longer segments
+    // Occasionally add an extra F for longer veins
     if (rng() < 0.3) {
-      const insertAt = Math.floor(rng() * mutated.length);
-      if (mutated[insertAt] === 'F' && rng() < 0.5) {
-        mutated = mutated.slice(0, insertAt) + 'FF' + mutated.slice(insertAt + 1);
+      const idx = mutated.indexOf('F');
+      if (idx >= 0 && rng() < 0.5) {
+        mutated = mutated.slice(0, idx) + 'FF' + mutated.slice(idx + 1);
       }
     }
 
-    // Occasionally swap + and - for mirroring
-    if (rng() < 0.2) {
+    // Occasionally mirror for left/right variety
+    if (rng() < 0.25) {
       mutated = mutated.split('').map(c => c === '+' ? '-' : c === '-' ? '+' : c).join('');
     }
 
@@ -272,7 +235,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
   id: 'l-system',
   name: 'L-System',
   summary:
-    'Lindenmayer systems are parallel rewriting grammars that produce fractal plant-like structures. Each page load grows a unique tree from a time-based seed.',
+    'Lindenmayer systems are parallel rewriting grammars that produce fractal leaf venation patterns. Each page load grows a unique leaf from a time-based seed.',
   canvasHeight: 'clamp(320px, 52vh, 560px)',
   notes: [
     'L-System (Aristid Lindenmayer, 1968). A string-rewriting grammar where each iteration replaces symbols according to production rules, producing fractal growth.',
@@ -282,7 +245,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
     {
       key: 'spread',
       label: 'Seed',
-      description: 'Random seed — each value grows a unique plant. Randomized on page load.',
+      description: 'Random seed — each value generates a unique leaf pattern.',
       min: 0,
       max: 9999,
       step: 1,
@@ -291,18 +254,18 @@ export const lSystemDefinition: OGLSceneDefinition = {
     },
     {
       key: 'detail',
-      label: 'Growth',
-      description: 'Growth stage — how many generations the plant has developed.',
-      min: 1,
-      max: 7,
+      label: 'Max Iterations',
+      description: 'Maximum growth depth — higher values reveal finer vein detail.',
+      min: 2,
+      max: 8,
       step: 1,
-      defaultValue: 1,
+      defaultValue: 6,
       precision: 0,
     },
     {
       key: 'bloom',
       label: 'Line Width',
-      description: 'Thickness of the branches.',
+      description: 'Thickness of the veins.',
       min: 1,
       max: 5,
       step: 0.5,
@@ -318,17 +281,6 @@ export const lSystemDefinition: OGLSceneDefinition = {
       max: 100,
       step: 1,
       defaultValue: 40,
-      precision: 0,
-      unit: '%',
-    },
-    {
-      key: 'symmetry',
-      label: 'Hue Shift',
-      description: 'Shift the color palette along branches.',
-      min: 0,
-      max: 100,
-      step: 1,
-      defaultValue: 0,
       precision: 0,
       unit: '%',
     },
@@ -378,7 +330,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
     let segmentsByLevel: TurtleSegment[][] = [];
 
     function buildAllLevels(seed: number, maxLevel: number) {
-      const grammar = generateTreeGrammar(seed);
+      const grammar = generateLeafGrammar(seed);
       grammarCache = grammar;
       segmentsByLevel = [];
       for (let i = 1; i <= maxLevel; i++) {
@@ -388,7 +340,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
       }
     }
 
-    function rebuildGeometry(segments: TurtleSegment[], lineWidth: number, drawRatio: number, hueShift: number, maxBranchDepth: number) {
+    function rebuildGeometry(segments: TurtleSegment[], lineWidth: number, drawRatio: number, maxBranchDepth: number) {
       const drawCount = Math.max(1, Math.floor(segments.length * drawRatio));
 
       const positions: number[] = [];
@@ -416,12 +368,11 @@ export const lSystemDefinition: OGLSceneDefinition = {
         positions.push(ax, ay, 0, bx, by, 0, cx, cy, 0);
         positions.push(bx, by, 0, ddx, ddy, 0, cx, cy, 0);
 
-        // Color: brown trunk → green tips
+        // Color: dark green midrib → lighter green tips
         const branchRatio = maxBranchDepth > 0 ? s.branchDepth / maxBranchDepth : 0;
-        const baseHue = 0.08 + branchRatio * 0.25;
-        const hue = ((baseHue + hueShift) % 1.0 + 1.0) % 1.0;
-        const sat = 0.50 + branchRatio * 0.30;
-        const val = 0.92 - branchRatio * 0.12;
+        const hue = 0.28 + branchRatio * 0.08; // green range
+        const sat = 0.65 - branchRatio * 0.15;
+        const val = 0.55 + branchRatio * 0.35;
         const [r, g, b] = hsv2rgb(hue, sat, val);
         for (let j = 0; j < 6; j++) {
           colors.push(r, g, b);
@@ -465,25 +416,22 @@ export const lSystemDefinition: OGLSceneDefinition = {
       render(time) {
         const values = getValues();
         const seed = Math.round(values.spread ?? 0);
-        const manualGrowth = Math.round(values.detail ?? 1);
+        const maxIter = Math.round(values.detail ?? 6);
         const lineWidth = values.bloom ?? 1.5;
         const speedN = (values.motion ?? 40) / 100;
-        const hueShift = (values.symmetry ?? 0) / 100;
 
-        const maxGrowth = 7;
-
-        // Auto-growth: increment level over time
+        // Auto-growth: increment level over time up to maxIter
         const growthInterval = Math.max(0.5, 4 - speedN * 3.5);
-        if (time - lastGrowthTime > growthInterval && autoGrowthLevel < maxGrowth) {
+        if (time - lastGrowthTime > growthInterval && autoGrowthLevel < maxIter) {
           autoGrowthLevel++;
           lastGrowthTime = time;
         }
 
-        const effectiveGrowth = Math.max(manualGrowth, autoGrowthLevel);
+        const effectiveGrowth = autoGrowthLevel;
 
         // Rebuild if params changed
-        if (seed !== prevSeed || effectiveGrowth !== prevGrowth) {
-          if (seed !== prevSeed) {
+        if (seed !== prevSeed || effectiveGrowth !== prevGrowth || maxIter !== prevGrowth) {
+          if (seed !== prevSeed || maxIter < autoGrowthLevel) {
             autoGrowthLevel = 1;
             lastGrowthTime = time;
           }
@@ -499,9 +447,9 @@ export const lSystemDefinition: OGLSceneDefinition = {
         // Draw progress within current growth level
         const levelProgress = Math.min((time - lastGrowthTime) / growthInterval, 1.0);
         const eased = levelProgress < 1 ? levelProgress * levelProgress * (3 - 2 * levelProgress) : 1;
-        const drawRatio = effectiveGrowth >= maxGrowth ? 1.0 : eased;
+        const drawRatio = effectiveGrowth >= maxIter ? 1.0 : eased;
 
-        rebuildGeometry(currentSegments, lineWidth, drawRatio, hueShift, maxBranchDepth);
+        rebuildGeometry(currentSegments, lineWidth, drawRatio, maxBranchDepth);
 
         resize();
         gl.clear(gl.COLOR_BUFFER_BIT);
