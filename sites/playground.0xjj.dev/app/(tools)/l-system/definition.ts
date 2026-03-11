@@ -270,7 +270,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
       min: 0.5,
       max: 5,
       step: 0.5,
-      defaultValue: 1,
+      defaultValue: 2.5,
       precision: 1,
       unit: 'px',
     },
