@@ -268,7 +268,7 @@ export default function CronParser() {
                 </span>
                 {i === 0 && (
                   <span className="font-mono text-xs" style={{ color: 'var(--color-accent)' }}>
-                    次の
+                    次回
                   </span>
                 )}
               </li>
