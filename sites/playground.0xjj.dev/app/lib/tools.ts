@@ -284,6 +284,13 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'gyro-card',
+    name: 'Gyro Card',
+    description: 'スマホの加速度センサーでカードを傾けるインタラクティブな3Dカード体験。',
+    href: '/gyro-card/',
+    category: 'ui',
+  },
+  {
     slug: 'tilt-card',
     name: 'Tilt Card',
     description: 'Motionで駆動する、フリップアニメーション付きのインタラクティブな3Dチルトカード。',

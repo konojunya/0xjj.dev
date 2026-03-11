@@ -31,6 +31,7 @@
 | `tictactoe` | Tic-Tac-Toe | https://playground.0xjj.dev/tictactoe |
 | `wordwolf` | Word Wolf | https://playground.0xjj.dev/wordwolf |
 | `liquid-glass` | Liquid Glass | https://playground.0xjj.dev/liquid-glass |
+| `gyro-card` | Gyro Card | https://playground.0xjj.dev/gyro-card |
 | `tilt-card` | Tilt Card | https://playground.0xjj.dev/tilt-card |
 
 ---
@@ -309,6 +310,22 @@
 - Chrome/Edge 推奨 (SVG filter + backdrop-filter の組み合わせ)
 
 **Route**: `app/liquid-glass/`
+
+---
+
+### Gyro Card
+
+> スマホの加速度センサーでカードを傾けるインタラクティブな3Dカード体験。
+
+- DeviceOrientationEvent API で端末の物理的な傾きを取得
+- beta (前後) → rotateX、gamma (左右) → rotateY にマッピング
+- Motion useSpring によるスプリングベースのなめらかな補間
+- 傾きに追従するホログラフィック光沢エフェクト
+- iOS 13+ の requestPermission 対応
+- 加速度センサー非対応デバイスでは警告メッセージを表示
+- Recalibrate ボタンで基準点をリセット
+
+**Route**: `app/gyro-card/`
 
 ---
 
