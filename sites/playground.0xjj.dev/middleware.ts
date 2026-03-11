@@ -51,17 +51,13 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  const needsCamera =
+  const needsOpenCv =
     pathname === '/face-detect' || pathname.startsWith('/face-detect/') ||
     pathname === '/air-flow' || pathname.startsWith('/air-flow/');
 
-  response.headers.set('Content-Security-Policy', needsCamera ? faceDetectCsp : baseCsp);
-  response.headers.set(
-    'Permissions-Policy',
-    needsCamera
-      ? 'camera=(self), microphone=(), geolocation=()'
-      : 'camera=(), microphone=(), geolocation=()',
-  );
+  response.headers.set('Content-Security-Policy', needsOpenCv ? faceDetectCsp : baseCsp);
+  // Allow camera=(self) globally so client-side navigation doesn't block getUserMedia
+  response.headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
 
   for (const [key, value] of Object.entries(securityHeaders)) {
     response.headers.set(key, value);
