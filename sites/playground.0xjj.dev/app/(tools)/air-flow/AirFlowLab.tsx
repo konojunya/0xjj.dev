@@ -1,6 +1,6 @@
 'use client';
 
-import { Camera, LoaderCircle, VideoOff, Wind } from 'lucide-react';
+import { Camera, LoaderCircle, Maximize, Minimize, VideoOff, Wind } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -103,8 +103,11 @@ export function AirFlowLab() {
   const opacityBufferRef = useRef<WebGLBuffer | null>(null);
   const uResolutionLocRef = useRef<WebGLUniformLocation | null>(null);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const [isStarting, setIsStarting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Initialize particles
@@ -436,6 +439,23 @@ export function AirFlowLab() {
     };
   }, []);
 
+  // Sync fullscreen state
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const handleFullscreen = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      el.requestFullscreen();
+    }
+  };
+
   const handleStart = async () => {
     if (isStarting || isRunning) return;
 
@@ -496,7 +516,7 @@ export function AirFlowLab() {
 
   return (
     <section className="mt-8 space-y-4">
-      <div className="overflow-hidden rounded-xl border border-black/10 dark:border-white/10">
+      <div ref={containerRef} className="overflow-hidden rounded-xl border border-black/10 bg-black dark:border-white/10">
         <div className="relative">
           <canvas
             ref={canvasRef}
@@ -519,6 +539,15 @@ export function AirFlowLab() {
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-black/10 bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.02]">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleFullscreen}
+            className="font-mono text-xs"
+          >
+            {isFullscreen ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
+            {isFullscreen ? '縮小' : '全画面'}
+          </Button>
           <Button
             type="button"
             onClick={handleStart}
