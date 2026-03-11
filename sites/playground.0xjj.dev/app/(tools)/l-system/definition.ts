@@ -267,10 +267,10 @@ export const lSystemDefinition: OGLSceneDefinition = {
       key: 'bloom',
       label: 'Line Width',
       description: 'Thickness of the veins.',
-      min: 1,
+      min: 0.5,
       max: 5,
       step: 0.5,
-      defaultValue: 1.5,
+      defaultValue: 1,
       precision: 1,
       unit: 'px',
     },
@@ -341,8 +341,13 @@ export const lSystemDefinition: OGLSceneDefinition = {
       }
     }
 
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    // Cap segments: mobile 80K, desktop 200K to stay smooth
+    const MAX_SEGMENTS = isMobile ? 80_000 : 200_000;
+
     function rebuildGeometry(segments: TurtleSegment[], lineWidth: number, drawRatio: number, maxBranchDepth: number) {
-      const drawCount = Math.max(1, Math.floor(segments.length * drawRatio));
+      const rawCount = Math.max(1, Math.floor(segments.length * drawRatio));
+      const drawCount = Math.min(rawCount, MAX_SEGMENTS);
 
       const positions: number[] = [];
       const colors: number[] = [];
@@ -354,9 +359,10 @@ export const lSystemDefinition: OGLSceneDefinition = {
         const len = Math.sqrt(dx * dx + dy * dy);
         if (len < 1e-8) continue;
 
-        // Thicker trunk, thinner branches
-        const depthFade = Math.max(0.3, 1.0 - s.branchDepth * 0.15);
-        const hw = lineWidth * 0.001 * depthFade;
+        // Aggressive depth thinning: midrib thick → deep veins hairline
+        const t = maxBranchDepth > 0 ? s.branchDepth / maxBranchDepth : 0;
+        const depthFade = Math.max(0.08, 1.0 - t * 0.92);
+        const hw = lineWidth * 0.0006 * depthFade;
 
         const nx = (-dy / len) * hw;
         const ny = (dx / len) * hw;
@@ -369,11 +375,11 @@ export const lSystemDefinition: OGLSceneDefinition = {
         positions.push(ax, ay, 0, bx, by, 0, cx, cy, 0);
         positions.push(bx, by, 0, ddx, ddy, 0, cx, cy, 0);
 
-        // Color: dark green midrib → lighter green tips
+        // Color: dark green midrib → bright, slightly transparent tips
         const branchRatio = maxBranchDepth > 0 ? s.branchDepth / maxBranchDepth : 0;
-        const hue = 0.28 + branchRatio * 0.08; // green range
-        const sat = 0.65 - branchRatio * 0.15;
-        const val = 0.55 + branchRatio * 0.35;
+        const hue = 0.28 + branchRatio * 0.06;
+        const sat = 0.70 - branchRatio * 0.20;
+        const val = 0.40 + branchRatio * 0.50;
         const [r, g, b] = hsv2rgb(hue, sat, val);
         for (let j = 0; j < 6; j++) {
           colors.push(r, g, b);
