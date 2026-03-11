@@ -303,7 +303,11 @@ function generateRangeChars(): UnicodeChar[] {
   return chars;
 }
 
-const ALL_CHARS: UnicodeChar[] = [...generateRangeChars(), ...NAMED];
+const ALL_CHARS: UnicodeChar[] = (() => {
+  const rangeChars = generateRangeChars();
+  const rangeCps = new Set(rangeChars.map((c) => c.cp));
+  return [...rangeChars, ...NAMED.filter((c) => !rangeCps.has(c.cp))];
+})();
 const CATEGORIES = ['All', ...new Set(ALL_CHARS.map((c) => c.cat))].filter(
   (c) => !['Basic Latin', 'Latin-1'].includes(c),
 );
