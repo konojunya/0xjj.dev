@@ -559,107 +559,121 @@ export function AudioTerrainLab() {
 
   return (
     <section className="mt-8 space-y-4">
-      {/* Canvas container — immersive, no inner border */}
-      <div className="relative overflow-hidden rounded-xl bg-[#010108]">
-        <canvas
-          ref={canvasRef}
-          className="aspect-[16/10] w-full bg-[#010108]"
-          style={isRunning && !isMobile() ? { cursor: 'grab' } : undefined}
-        />
+      <div className="overflow-hidden rounded-xl border border-black/10 bg-black dark:border-white/10">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            className="aspect-video w-full bg-[#010108] object-cover"
+            style={isRunning && !isMobile() ? { cursor: 'grab' } : undefined}
+          />
 
-        {/* Start overlay */}
-        {!isRunning && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="max-w-sm px-6 text-center">
-              <div className="mx-auto inline-flex size-16 items-center justify-center rounded-full border border-white/10 bg-white/5">
-                {isStarting ? <LoaderCircle className="size-7 animate-spin text-white/70" /> : <Mountain className="size-7 text-white/70" />}
+          {/* Start overlay */}
+          {!isRunning && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/85 backdrop-blur-sm dark:bg-black/65">
+              <div className="max-w-md px-6 text-center">
+                <div className="mx-auto inline-flex size-14 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] dark:border-white/14 dark:bg-white/6">
+                  {isStarting ? <LoaderCircle className="size-6 animate-spin" /> : <Mountain className="size-6" />}
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-muted">
+                  {isStarting
+                    ? 'マイクを初期化しています...'
+                    : 'マイクのFFTスペクトルを3D地形としてリアルタイム描画します。'}
+                </p>
+                {!isStarting && (
+                  <Button type="button" onClick={handleStart} className="mt-4 font-mono text-xs">
+                    <Mic className="size-4" />
+                    開始
+                  </Button>
+                )}
               </div>
-              <p className="mt-5 text-sm leading-relaxed text-white/50">
-                {isStarting
-                  ? 'マイクを初期化しています...'
-                  : 'マイクのFFTスペクトルを3D地形としてリアルタイム描画します。'}
-              </p>
-              {!isStarting && (
-                <Button type="button" onClick={handleStart} className="mt-5 font-mono text-xs">
-                  <Mic className="size-4" />
-                  開始
-                </Button>
-              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Floating controls (top-right) */}
-        {isRunning && (
-          <div className="absolute right-3 top-3 flex gap-2">
+          {/* Floating settings panel */}
+          {isRunning && showControls && (
+            <div className="absolute bottom-3 left-3 right-3 rounded-lg border border-white/10 bg-black/60 p-4 backdrop-blur-xl sm:left-auto sm:w-72">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium tracking-wide text-white/50">SPEED</span>
+                    <span className="font-mono text-[11px] text-white/40">{scrollSpeed.toFixed(1)}</span>
+                  </div>
+                  <Slider
+                    min={0.1} max={3.0} step={0.1}
+                    value={[scrollSpeed]}
+                    onValueChange={([v]) => { setScrollSpeed(v); scrollSpeedRef.current = v; }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium tracking-wide text-white/50">HEIGHT</span>
+                    <span className="font-mono text-[11px] text-white/40">{heightScale.toFixed(1)}</span>
+                  </div>
+                  <Slider
+                    min={0.5} max={5.0} step={0.1}
+                    value={[heightScale]}
+                    onValueChange={([v]) => { setHeightScale(v); heightScaleRef.current = v; }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium tracking-wide text-white/50">TREBLE</span>
+                    <span className="font-mono text-[11px] text-white/40">{trebleDetail.toFixed(1)}</span>
+                  </div>
+                  <Slider
+                    min={0.0} max={2.0} step={0.1}
+                    value={[trebleDetail]}
+                    onValueChange={([v]) => { setTrebleDetail(v); trebleDetailRef.current = v; }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setWireframe((p) => { wireframeRef.current = !p; return !p; }); }}
+                  className={`w-full rounded-md border px-3 py-1.5 font-mono text-[11px] tracking-wide transition-colors ${
+                    wireframe
+                      ? 'border-white/20 bg-white/10 text-white/80'
+                      : 'border-white/10 bg-transparent text-white/40 hover:text-white/60'
+                  }`}
+                >
+                  {wireframe ? 'WIREFRAME' : 'SOLID'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-black/10 bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.02]">
+          {isRunning && (
             <Button
-              type="button" size="icon" variant="ghost"
+              type="button"
+              variant="outline"
               onClick={() => setShowControls((p) => !p)}
-              className="size-8 bg-black/40 text-white/70 backdrop-blur-md hover:bg-black/60 hover:text-white"
+              className="font-mono text-xs"
             >
               <Settings2 className="size-4" />
+              設定
             </Button>
-            <Button
-              type="button" size="icon" variant="ghost"
-              onClick={handleStop}
-              className="size-8 bg-black/40 text-white/70 backdrop-blur-md hover:bg-black/60 hover:text-white"
-            >
-              <MicOff className="size-4" />
-            </Button>
-          </div>
-        )}
-
-        {/* Floating settings panel */}
-        {isRunning && showControls && (
-          <div className="absolute bottom-3 left-3 right-3 rounded-lg border border-white/10 bg-black/60 p-4 backdrop-blur-xl sm:left-auto sm:w-72">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium tracking-wide text-white/50">SPEED</span>
-                  <span className="font-mono text-[11px] text-white/40">{scrollSpeed.toFixed(1)}</span>
-                </div>
-                <Slider
-                  min={0.1} max={3.0} step={0.1}
-                  value={[scrollSpeed]}
-                  onValueChange={([v]) => { setScrollSpeed(v); scrollSpeedRef.current = v; }}
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium tracking-wide text-white/50">HEIGHT</span>
-                  <span className="font-mono text-[11px] text-white/40">{heightScale.toFixed(1)}</span>
-                </div>
-                <Slider
-                  min={0.5} max={5.0} step={0.1}
-                  value={[heightScale]}
-                  onValueChange={([v]) => { setHeightScale(v); heightScaleRef.current = v; }}
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium tracking-wide text-white/50">TREBLE</span>
-                  <span className="font-mono text-[11px] text-white/40">{trebleDetail.toFixed(1)}</span>
-                </div>
-                <Slider
-                  min={0.0} max={2.0} step={0.1}
-                  value={[trebleDetail]}
-                  onValueChange={([v]) => { setTrebleDetail(v); trebleDetailRef.current = v; }}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => { setWireframe((p) => { wireframeRef.current = !p; return !p; }); }}
-                className={`w-full rounded-md border px-3 py-1.5 font-mono text-[11px] tracking-wide transition-colors ${
-                  wireframe
-                    ? 'border-white/20 bg-white/10 text-white/80'
-                    : 'border-white/10 bg-transparent text-white/40 hover:text-white/60'
-                }`}
-              >
-                {wireframe ? 'WIREFRAME' : 'SOLID'}
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+          <Button
+            type="button"
+            onClick={handleStart}
+            disabled={isStarting || isRunning}
+            className="font-mono text-xs"
+          >
+            {isStarting ? <LoaderCircle className="size-4 animate-spin" /> : <Mic className="size-4" />}
+            開始
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleStop}
+            disabled={!isRunning && !isStarting}
+            className="font-mono text-xs"
+          >
+            <MicOff className="size-4" />
+            停止
+          </Button>
+        </div>
       </div>
 
       {error && (
