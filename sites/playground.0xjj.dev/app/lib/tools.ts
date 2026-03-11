@@ -228,13 +228,6 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
-    slug: 'physarum',
-    name: 'Physarum',
-    description: 'WebGPUコンピュートシェーダーで化学物質の痕跡を残し追従するエージェントによる粘菌シミュレーション。',
-    href: '/physarum/',
-    category: 'ui',
-  },
-  {
     slug: 'reaction-diffusion',
     name: 'Reaction-Diffusion',
     description: 'WebGPUコンピュートシェーダーでGPU上で動作するGray-Scott反応拡散シミュレーション。',
