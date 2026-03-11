@@ -20,9 +20,7 @@ export default function Page() {
             Audio Reactor
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            マイクのFFTスペクトルをレイマーチングと万華鏡で描画するVJスタイルのリアルタイムビジュアライゼーション。Bass
-            → 形状モーフィング、Treble → ノイズディスプレースメント、Beat →
-            フラッシュと色シフト。処理はすべてブラウザ内で完結します。
+            マイクのFFTスペクトルでレイマーチングされた万華鏡空間が脈動するVJビジュアライゼーション。音が豊かなほど万華鏡が複雑に割れ、Bassで形状が膨張し、Beatで画面がフラッシュ。無音では暗闇に沈み、音で一気に爆発します。処理はすべてブラウザ内で完結します。
           </p>
         </div>
 

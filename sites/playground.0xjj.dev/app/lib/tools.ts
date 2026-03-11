@@ -216,7 +216,7 @@ export const tools: Tool[] = [
   {
     slug: 'audio-reactor',
     name: 'Audio Reactor',
-    description: 'マイクのFFTスペクトルをレイマーチングと万華鏡で描画するVJスタイルのリアルタイムビジュアライゼーション。',
+    description: 'マイクの音でレイマーチングされた万華鏡空間が脈動するVJビジュアライゼーション。音が豊かなほど万華鏡が複雑に割れる。',
     href: '/audio-reactor/',
     category: 'ui',
   },

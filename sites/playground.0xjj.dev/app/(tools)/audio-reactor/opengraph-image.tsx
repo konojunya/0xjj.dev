@@ -7,6 +7,6 @@ export const contentType = 'image/png';
 export default async function Image() {
   return createOgImage(
     'Audio Reactor',
-    'Raymarched kaleidoscope VJ visualisation driven by microphone FFT — bass morphs shapes, treble adds noise, beats trigger flashes.',
+    'Raymarched kaleidoscope VJ driven by microphone FFT — richer audio fractures the kaleidoscope further, bass pumps shapes, beats flash the screen.',
   );
 }

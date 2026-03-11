@@ -600,7 +600,7 @@ export function AudioReactorLab() {
                 <p className="mt-4 text-sm leading-relaxed text-muted">
                   {isStarting
                     ? 'マイクを初期化しています...'
-                    : 'マイクのFFTスペクトルをレイマーチングと万華鏡で描画するVJビジュアライゼーション。'}
+                    : 'マイクの音でレイマーチングされた万華鏡空間が脈動します。音が豊かなほど複雑に割れます。'}
                 </p>
                 {!isStarting && (
                   <Button type="button" onClick={handleStart} className="mt-4 font-mono text-xs">
