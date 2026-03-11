@@ -91,15 +91,15 @@ function getNextRuns(expr: string, count: number): Date[] {
 
 // ─── Human-readable description ─────────────────────────────────────────────
 
-const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DOW_NAMES   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const DOW_NAMES   = ['日','月','火','水','木','金','土'];
 
 function describeField(field: string, names?: string[]): string {
-  if (field === '*') return 'every';
+  if (field === '*') return 'すべて';
   if (names) {
     return parseCronField(field, 0, names.length - 1)
       ?.map((n) => names[n])
-      .join(', ') ?? field;
+      .join('・') ?? field;
   }
   return field.replace(/,/g, ', ');
 }
@@ -123,12 +123,12 @@ function describeCron(expr: string): string {
     return '毎年1月1日 00:00';
 
   const parts: string[] = [];
-  parts.push(`minute ${describeField(min)}`);
-  parts.push(`hour ${describeField(hour)}`);
-  if (dom !== '*') parts.push(`day-of-month ${describeField(dom)}`);
-  if (mon !== '*') parts.push(`month ${describeField(mon, MONTH_NAMES)}`);
-  if (dow !== '*') parts.push(`day-of-week ${describeField(dow, DOW_NAMES)}`);
-  return `At ${parts.join(', ')}`;
+  parts.push(`${describeField(min)}分`);
+  parts.push(`${describeField(hour)}時`);
+  if (dom !== '*') parts.push(`${describeField(dom)}日`);
+  if (mon !== '*') parts.push(`${describeField(mon, MONTH_NAMES)}`);
+  if (dow !== '*') parts.push(`${describeField(dow, DOW_NAMES)}曜日`);
+  return parts.join(' / ');
 }
 
 // ─── Presets ────────────────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ const PRESETS = [
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-const FIELD_LABELS = ['minute', 'hour', 'dom', 'month', 'dow'];
+const FIELD_LABELS = ['分', '時', '日', '月', '曜日'];
 
 export default function CronParser() {
   const [expr, setExpr] = useState('0 9 * * 1-5');
