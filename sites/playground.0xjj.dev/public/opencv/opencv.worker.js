@@ -79,8 +79,8 @@ self.onmessage = function (e) {
       cv.equalizeHist(gray, gray);
 
       faces = new cv.RectVector();
-      var minSize = new cv.Size(Math.round(width * 0.05), Math.round(height * 0.05));
-      classifier.detectMultiScale(gray, faces, 1.1, 4, 0, minSize);
+      var minSize = new cv.Size(Math.round(width * 0.1), Math.round(height * 0.1));
+      classifier.detectMultiScale(gray, faces, 1.2, 6, 0, minSize);
 
       var result = [];
       for (var i = 0; i < faces.size(); i++) {
