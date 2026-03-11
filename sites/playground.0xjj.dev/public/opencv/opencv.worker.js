@@ -80,7 +80,7 @@ self.onmessage = function (e) {
 
       faces = new cv.RectVector();
       var minSize = new cv.Size(Math.round(width * 0.1), Math.round(height * 0.1));
-      classifier.detectMultiScale(gray, faces, 1.2, 6, 0, minSize);
+      classifier.detectMultiScale(gray, faces, 1.3, 8, 0, minSize);
 
       var result = [];
       for (var i = 0; i < faces.size(); i++) {
