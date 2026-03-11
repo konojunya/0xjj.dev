@@ -214,6 +214,13 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'audio-terrain',
+    name: 'Audio Terrain',
+    description: 'マイクのFFTスペクトルを3D地形に変換し、音楽がリアルタイムで山脈を生成するビジュアライゼーション。',
+    href: '/audio-terrain/',
+    category: 'ui',
+  },
+  {
     slug: 'curl-noise',
     name: 'Curl Noise Flow Field',
     description: 'WebGPUコンピュートシェーダーで駆動する、カールノイズベクトル場を流れる数千のパーティクルによる流体的なビジュアル。',

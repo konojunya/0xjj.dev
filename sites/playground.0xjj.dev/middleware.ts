@@ -55,7 +55,7 @@ export function middleware(request: NextRequest) {
 
   response.headers.set('Content-Security-Policy', needsOpenCv ? faceDetectCsp : baseCsp);
   // Allow camera=(self) globally so client-side navigation doesn't block getUserMedia
-  response.headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
+  response.headers.set('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=()');
 
   for (const [key, value] of Object.entries(securityHeaders)) {
     response.headers.set(key, value);
