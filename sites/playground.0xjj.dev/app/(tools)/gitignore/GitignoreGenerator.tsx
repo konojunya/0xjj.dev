@@ -25,7 +25,7 @@ export default function GitignoreGenerator() {
         setLoading(false);
       })
       .catch(() => {
-        setError('Failed to load template list. Please check your internet connection.');
+        setError('テンプレート一覧の読み込みに失敗しました。インターネット接続を確認してください。');
         setLoading(false);
       });
   }, []);
@@ -47,7 +47,7 @@ export default function GitignoreGenerator() {
       ).then((r) => r.text());
       setOutput(text);
     } catch {
-      setError('Failed to generate .gitignore. Please try again.');
+      setError('.gitignore の生成に失敗しました。もう一度お試しください。');
     } finally {
       setGenerating(false);
     }
@@ -66,7 +66,7 @@ export default function GitignoreGenerator() {
           .gitignore Generator
         </h1>
         <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem' }}>
-          Select technologies to generate a .gitignore file powered by gitignore.io.
+          gitignore.io APIを使って、プロジェクトに合った .gitignore を生成します。
         </p>
       </div>
 
@@ -84,7 +84,7 @@ export default function GitignoreGenerator() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search templates…"
+              placeholder="テンプレートを検索..."
               style={{
                 flex: 1,
                 padding: '0.5rem 0.75rem',
@@ -110,7 +110,7 @@ export default function GitignoreGenerator() {
                   whiteSpace: 'nowrap',
                 }}
               >
-                Clear ({selected.length})
+                クリア ({selected.length})
               </button>
             )}
           </div>
@@ -126,7 +126,7 @@ export default function GitignoreGenerator() {
           >
             {loading ? (
               <div style={{ padding: '1rem', color: 'var(--color-muted)', fontSize: '0.875rem', textAlign: 'center' }}>
-                Loading templates…
+                テンプレートを読み込み中...
               </div>
             ) : (
               filtered.map((name) => (
@@ -174,7 +174,7 @@ export default function GitignoreGenerator() {
               fontWeight: 600,
             }}
           >
-            {generating ? 'Generating…' : `Generate${selected.length > 0 ? ` (${selected.length})` : ''}`}
+            {generating ? '生成中...' : `生成${selected.length > 0 ? ` (${selected.length})` : ''}`}
           </button>
         </div>
 
@@ -195,14 +195,14 @@ export default function GitignoreGenerator() {
                   fontSize: '0.75rem',
                 }}
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? 'コピー済み!' : 'コピー'}
               </button>
             )}
           </div>
           <textarea
             readOnly
             value={output}
-            placeholder="Generated .gitignore will appear here…"
+            placeholder="生成された .gitignore がここに表示されます..."
             style={{
               flex: 1,
               minHeight: 420,

@@ -49,18 +49,18 @@ export default function QrCode() {
         QR Code Generator
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Generate QR codes from any text or URL and download as PNG.
+        テキストやURLからQRコードを生成し、PNGでダウンロードできます。
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
           <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-muted)', marginBottom: '0.4rem' }}>
-            Text or URL
+            テキストまたはURL
           </label>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Enter text or URL…"
+            placeholder="テキストまたはURLを入力..."
             rows={3}
             style={{
               width: '100%',
@@ -80,7 +80,7 @@ export default function QrCode() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <label style={{ fontSize: '0.8rem', color: 'var(--color-muted)', whiteSpace: 'nowrap' }}>
-            Size: {size}px
+            サイズ: {size}px
           </label>
           <input
             type="range"
@@ -126,7 +126,7 @@ export default function QrCode() {
                 fontWeight: 600,
               }}
             >
-              Download PNG
+              PNGをダウンロード
             </button>
           )}
         </div>

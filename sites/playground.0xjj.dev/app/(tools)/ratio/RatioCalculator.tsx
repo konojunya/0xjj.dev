@@ -86,8 +86,8 @@ export default function RatioCalculator() {
   let simpError: string | null = null;
 
   if (aSimp !== '' || bSimp !== '') {
-    if (simpA === null && aSimp !== '') simpError = 'x must be a positive number';
-    else if (simpB === null && bSimp !== '') simpError = 'y must be a positive number';
+    if (simpA === null && aSimp !== '') simpError = 'xは正の数を入力してください';
+    else if (simpB === null && bSimp !== '') simpError = 'yは正の数を入力してください';
     else if (simpA !== null && simpB !== null) simpResult = simplify(simpA, simpB);
   }
 
@@ -103,13 +103,13 @@ export default function RatioCalculator() {
   let derivedA: number | null = null;
 
   if (ratioA !== '' || ratioB !== '' || calcA !== '' || calcB !== '') {
-    if (rA === null && ratioA !== '') calcError = 'Ratio left must be a positive number';
-    else if (rB === null && ratioB !== '') calcError = 'Ratio right must be a positive number';
+    if (rA === null && ratioA !== '') calcError = '比率の左辺は正の数を入力してください';
+    else if (rB === null && ratioB !== '') calcError = '比率の右辺は正の数を入力してください';
     else if (rA !== null && rB !== null) {
       if (vA !== null) derivedB = (vA * rB) / rA;
       if (vB !== null) derivedA = (vB * rA) / rB;
-      if (vA === null && calcA !== '') calcError = 'x must be a positive number';
-      else if (vB === null && calcB !== '') calcError = 'y must be a positive number';
+      if (vA === null && calcA !== '') calcError = 'xは正の数を入力してください';
+      else if (vB === null && calcB !== '') calcError = 'yは正の数を入力してください';
     }
   }
 
@@ -118,13 +118,13 @@ export default function RatioCalculator() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Ratio Calculator</h1>
         <p className="mt-1 text-sm text-muted">
-          Simplify ratios and calculate missing values.
+          比率の約分や、不明な値の計算を行います。
         </p>
       </div>
 
       {/* ── Simplify ────────────────────────────────────────────────────────── */}
       <section className="mb-10 rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_2%,transparent)] px-6 py-5">
-        <SectionHeading>Simplify</SectionHeading>
+        <SectionHeading>約分</SectionHeading>
 
         <div className="flex flex-wrap items-center gap-3">
           <NumInput value={aSimp} onChange={setASimp} placeholder="x" />
@@ -141,7 +141,7 @@ export default function RatioCalculator() {
           )}
 
           {!simpResult && !simpError && (
-            <span className="font-mono text-xs text-muted">Enter values to simplify</span>
+            <span className="font-mono text-xs text-muted">約分する値を入力</span>
           )}
         </div>
 
@@ -152,11 +152,11 @@ export default function RatioCalculator() {
 
       {/* ── Calculate ───────────────────────────────────────────────────────── */}
       <section className="rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_2%,transparent)] px-6 py-5">
-        <SectionHeading>Calculate</SectionHeading>
+        <SectionHeading>計算</SectionHeading>
 
         {/* Ratio inputs */}
         <div className="mb-5 flex flex-wrap items-center gap-2">
-          <span className="w-16 font-mono text-xs text-muted">Ratio</span>
+          <span className="w-16 font-mono text-xs text-muted">比率</span>
           <NumInput value={ratioA} onChange={setRatioA} placeholder="16" />
           <span className="font-mono text-lg text-muted">:</span>
           <NumInput value={ratioB} onChange={setRatioB} placeholder="9" />
@@ -208,7 +208,7 @@ export default function RatioCalculator() {
 
         {!calcError && rA === null && rB === null && (
           <p className="mt-3 font-mono text-xs text-muted">
-            Enter a ratio, then fill in x or y to calculate the other.
+            比率を入力し、xまたはyを入力するともう一方が計算されます。
           </p>
         )}
       </section>

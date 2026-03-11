@@ -36,25 +36,25 @@ interface EditFieldDef {
 // ─── edit field definitions ───────────────────────────────────────────────────
 
 const PDF_EDIT_FIELDS: EditFieldDef[] = [
-  { key: 'Title', label: 'Title', type: 'text' },
-  { key: 'Author', label: 'Author', type: 'text' },
-  { key: 'Subject', label: 'Subject', type: 'text' },
-  { key: 'Keywords', label: 'Keywords', type: 'text' },
-  { key: 'Creator', label: 'Creator', type: 'text' },
-  { key: 'Producer', label: 'Producer', type: 'text' },
-  { key: 'Creation Date', label: 'Creation Date', type: 'datetime-local' },
-  { key: 'Modification Date', label: 'Modification Date', type: 'datetime-local' },
+  { key: 'Title', label: 'タイトル', type: 'text' },
+  { key: 'Author', label: '著者', type: 'text' },
+  { key: 'Subject', label: '件名', type: 'text' },
+  { key: 'Keywords', label: 'キーワード', type: 'text' },
+  { key: 'Creator', label: '作成者', type: 'text' },
+  { key: 'Producer', label: 'プロデューサー', type: 'text' },
+  { key: 'Creation Date', label: '作成日', type: 'datetime-local' },
+  { key: 'Modification Date', label: '更新日', type: 'datetime-local' },
 ];
 
 // JPEG editable fields (stored in IFD0 / Exif IFD)
 const JPEG_EDIT_FIELDS: EditFieldDef[] = [
-  { key: 'Description', label: 'Description', type: 'text', rawKey: 'ImageDescription' },
-  { key: 'Artist', label: 'Artist', type: 'text' },
-  { key: 'Copyright', label: 'Copyright', type: 'text' },
-  { key: 'Software', label: 'Software', type: 'text' },
-  { key: 'DateTime', label: 'Date Modified', type: 'datetime-local' },
-  { key: 'DateTimeOriginal', label: 'Date Original', type: 'datetime-local' },
-  { key: 'DateTimeDigitized', label: 'Date Digitized', type: 'datetime-local' },
+  { key: 'Description', label: '説明', type: 'text', rawKey: 'ImageDescription' },
+  { key: 'Artist', label: 'アーティスト', type: 'text' },
+  { key: 'Copyright', label: '著作権', type: 'text' },
+  { key: 'Software', label: 'ソフトウェア', type: 'text' },
+  { key: 'DateTime', label: '更新日時', type: 'datetime-local' },
+  { key: 'DateTimeOriginal', label: '撮影日時', type: 'datetime-local' },
+  { key: 'DateTimeDigitized', label: 'デジタル化日時', type: 'datetime-local' },
 ];
 
 function getEditFields(type: FileType): EditFieldDef[] {
@@ -68,13 +68,13 @@ function getEditFields(type: FileType): EditFieldDef[] {
 const IMAGE_GROUPS: Array<{ id: string; label: string; match: (k: string) => boolean }> = [
   {
     id: 'camera',
-    label: 'Camera',
+    label: 'カメラ',
     match: (k) =>
       ['Make', 'Model', 'Software', 'BodySerialNumber', 'LensMake', 'LensSerialNumber'].includes(k),
   },
   {
     id: 'image',
-    label: 'Image',
+    label: '画像',
     match: (k) =>
       [
         'ImageWidth', 'ImageHeight', 'ExifImageWidth', 'ExifImageHeight',
@@ -87,7 +87,7 @@ const IMAGE_GROUPS: Array<{ id: string; label: string; match: (k: string) => boo
   },
   {
     id: 'exposure',
-    label: 'Exposure',
+    label: '露出',
     match: (k) =>
       [
         'ExposureTime', 'FNumber', 'ISO', 'ISOSpeedRatings',
@@ -103,7 +103,7 @@ const IMAGE_GROUPS: Array<{ id: string; label: string; match: (k: string) => boo
   },
   {
     id: 'datetime',
-    label: 'Date / Time',
+    label: '日時',
     match: (k) =>
       [
         'DateTime', 'DateTimeOriginal', 'DateTimeDigitized',
@@ -116,7 +116,7 @@ const IMAGE_GROUPS: Array<{ id: string; label: string; match: (k: string) => boo
     label: 'GPS',
     match: (k) => k.startsWith('GPS') || k === 'latitude' || k === 'longitude' || k === 'altitude',
   },
-  { id: 'other', label: 'Other', match: () => true },
+  { id: 'other', label: 'その他', match: () => true },
 ];
 
 // ─── value formatting ─────────────────────────────────────────────────────────
@@ -325,8 +325,8 @@ async function parsePdf(
   }
 
   const sections: ExifSection[] = [
-    { id: 'document', label: 'Document', entries: docEntries },
-    ...(metaEntries.length ? [{ id: 'metadata', label: 'Metadata', entries: metaEntries }] : []),
+    { id: 'document', label: 'ドキュメント', entries: docEntries },
+    ...(metaEntries.length ? [{ id: 'metadata', label: 'メタデータ', entries: metaEntries }] : []),
   ];
 
   return { sections, rawMeta };
@@ -407,10 +407,10 @@ function MetaTable({ sections }: { sections: ExifSection[] }) {
               <thead>
                 <tr className="border-b border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]">
                   <th className="w-56 px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">
-                    property
+                    プロパティ
                   </th>
                   <th className="px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">
-                    value
+                    値
                   </th>
                 </tr>
               </thead>
@@ -459,10 +459,10 @@ function EditForm({
           <thead>
             <tr className="border-b border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]">
               <th className="w-44 px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">
-                field
+                フィールド
               </th>
               <th className="px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">
-                value
+                値
               </th>
             </tr>
           </thead>
@@ -498,7 +498,7 @@ function EditForm({
 
       <div className="mt-4 flex items-center justify-between gap-4">
         <p className="font-mono text-xs text-muted">
-          Original file is unchanged — this downloads a modified copy.
+          元のファイルは変更されません — 修正されたコピーがダウンロードされます。
         </p>
         <button
           type="button"
@@ -509,10 +509,10 @@ function EditForm({
           {isSaving ? (
             <span className="flex items-center gap-2">
               <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-bg/30 border-t-bg" />
-              Saving…
+              保存中...
             </span>
           ) : (
-            'Download modified file'
+            '修正ファイルをダウンロード'
           )}
         </button>
       </div>
@@ -633,8 +633,7 @@ export default function ExifViewer() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">EXIF Viewer</h1>
         <p className="mt-1 text-sm text-muted">
-          View and edit metadata (EXIF, XMP, IPTC) from images and PDF documents. Files are
-          processed entirely in your browser — nothing is uploaded.
+          画像やPDFのメタデータ（EXIF・XMP・IPTC）を表示・編集します。ファイルはすべてブラウザ内で処理され、アップロードされません。
         </p>
       </div>
 
@@ -642,7 +641,7 @@ export default function ExifViewer() {
       <div
         role="button"
         tabIndex={0}
-        aria-label="Drop a file or click to select"
+        aria-label="ファイルをドロップまたはクリックして選択"
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click();
@@ -671,8 +670,8 @@ export default function ExifViewer() {
           />
         </svg>
         <p className="text-sm text-muted">
-          Drop an image or PDF, or{' '}
-          <span className="text-fg underline underline-offset-2">click to select</span>
+          画像またはPDFをドロップ、または{' '}
+          <span className="text-fg underline underline-offset-2">クリックして選択</span>
         </p>
         <p className="font-mono text-xs text-muted opacity-60">
           JPEG · TIFF · PNG · HEIC · AVIF · WebP · PDF
@@ -690,7 +689,7 @@ export default function ExifViewer() {
       {isLoading && (
         <div className="flex items-center gap-3 text-sm text-muted">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-[color-mix(in_srgb,var(--color-fg)_20%,transparent)] border-t-muted" />
-          Parsing metadata…
+          メタデータを解析中...
         </div>
       )}
 
@@ -729,8 +728,8 @@ export default function ExifViewer() {
           <div className="mb-6 flex border-b border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)]">
             {(
               [
-                { id: 'view', label: 'Metadata' },
-                ...(canEdit ? [{ id: 'edit', label: 'Edit' }] : []),
+                { id: 'view', label: 'メタデータ' },
+                ...(canEdit ? [{ id: 'edit', label: '編集' }] : []),
               ] as { id: Tab; label: string }[]
             ).map(({ id, label }) => (
               <button
@@ -753,13 +752,13 @@ export default function ExifViewer() {
           {activeTab === 'view' && (
             <>
               {result.sections.length === 0 ? (
-                <p className="text-sm text-muted">No metadata found in this file.</p>
+                <p className="text-sm text-muted">このファイルにメタデータは見つかりませんでした。</p>
               ) : (
                 <MetaTable sections={result.sections} />
               )}
               {!canEdit && (
                 <p className="mt-6 font-mono text-xs text-muted">
-                  Metadata editing is supported for PDF and JPEG files only.
+                  メタデータの編集はPDFとJPEGファイルのみ対応しています。
                 </p>
               )}
             </>
@@ -768,7 +767,7 @@ export default function ExifViewer() {
           {activeTab === 'edit' && canEdit && (
             <div>
               <p className="mb-4 font-mono text-xs text-muted uppercase tracking-widest">
-                Editable Metadata{' '}
+                編集可能なメタデータ{' '}
                 <span className="normal-case opacity-60">
                   ({result.type === 'pdf' ? 'PDF' : 'JPEG'})
                 </span>

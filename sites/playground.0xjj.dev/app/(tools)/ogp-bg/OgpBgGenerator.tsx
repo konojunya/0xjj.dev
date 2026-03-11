@@ -463,7 +463,7 @@ export default function OgpBgGenerator() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">OGP Background Generator</h1>
         <p className="mt-1 text-sm text-muted">
-          Extract colors from an image and generate a 1200x630 OGP background.
+          画像から色を抽出し、1200×630のOGP背景画像を生成します。
         </p>
       </div>
 
@@ -473,7 +473,7 @@ export default function OgpBgGenerator() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
         </svg>
         <p className="text-xs text-muted">
-          <span className="font-medium text-fg">Privacy:</span> Runs entirely in your browser. No images are uploaded to any server.
+          <span className="font-medium text-fg">プライバシー:</span> すべてブラウザ内で処理されます。画像はサーバーにアップロードされません。
         </p>
       </div>
 
@@ -481,7 +481,7 @@ export default function OgpBgGenerator() {
       <div
         role="button"
         tabIndex={0}
-        aria-label="Drop an image or click to select"
+        aria-label="画像をドロップまたはクリックして選択"
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click(); }}
         onDrop={handleDrop}
@@ -498,7 +498,7 @@ export default function OgpBgGenerator() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
         </svg>
         <p className="text-sm text-muted">
-          Drop an image here, or <span className="text-fg underline underline-offset-2">click to select</span>
+          画像をここにドロップ、または<span className="text-fg underline underline-offset-2">クリックして選択</span>
         </p>
         <p className="font-mono text-xs text-muted opacity-60">PNG, JPEG, WebP, etc.</p>
         <input ref={inputRef} type="file" accept="image/*" className="sr-only" onChange={handleChange} />
@@ -508,7 +508,7 @@ export default function OgpBgGenerator() {
       {isProcessing && (
         <div className="flex items-center gap-3 text-sm text-muted">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-[color-mix(in_srgb,var(--color-fg)_20%,transparent)] border-t-muted" />
-          Extracting colors…
+          色を抽出中...
         </div>
       )}
 
@@ -517,7 +517,7 @@ export default function OgpBgGenerator() {
         <div className="space-y-8">
           {/* Source image */}
           <div>
-            <h2 className="mb-2 font-mono text-xs font-medium uppercase tracking-widest text-muted">Source Image</h2>
+            <h2 className="mb-2 font-mono text-xs font-medium uppercase tracking-widest text-muted">元画像</h2>
             <div className="relative overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={sourceUrl} alt="Source" className="block w-full" />
@@ -537,8 +537,8 @@ export default function OgpBgGenerator() {
 
           {/* Extracted colors with per-color weight */}
           <div>
-            <h2 className="mb-1 font-mono text-xs font-medium uppercase tracking-widest text-muted">Extracted Colors</h2>
-            <p className="mb-3 text-[11px] text-muted opacity-70">Adjust each color&apos;s weight. 0 = exclude, 1 = normal, 2 = boost.</p>
+            <h2 className="mb-1 font-mono text-xs font-medium uppercase tracking-widest text-muted">抽出された色</h2>
+            <p className="mb-3 text-[11px] text-muted opacity-70">各色の比重を調整。0 = 除外、1 = 通常、2 = 強調。</p>
             <div className="space-y-2">
               {colors.map((c, i) => {
                 const w = weights[i] ?? 1;
@@ -583,19 +583,19 @@ export default function OgpBgGenerator() {
 
           {/* Adjustments */}
           <div>
-            <h2 className="mb-3 font-mono text-xs font-medium uppercase tracking-widest text-muted">Adjustments</h2>
+            <h2 className="mb-3 font-mono text-xs font-medium uppercase tracking-widest text-muted">調整</h2>
             <div className="space-y-3 rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_3%,transparent)] px-4 py-4">
-              <ParamSlider label="Lightness" value={params.lightness} min={0.6} max={0.95} step={0.01} onChange={(v) => updateParam('lightness', v)} />
-              <ParamSlider label="Chroma" value={params.chroma} min={0.5} max={4.0} step={0.05} onChange={(v) => updateParam('chroma', v)} />
-              <ParamSlider label="Intensity" value={params.intensity} min={0.3} max={0.9} step={0.05} onChange={(v) => updateParam('intensity', v)} />
-              <ParamSlider label="Blob Size" value={params.blobSize} min={0.5} max={2.0} step={0.1} onChange={(v) => updateParam('blobSize', v)} />
-              <ParamSlider label="Blur" value={params.blur} min={0} max={80} step={1} onChange={(v) => updateParam('blur', v)} />
+              <ParamSlider label="明度" value={params.lightness} min={0.6} max={0.95} step={0.01} onChange={(v) => updateParam('lightness', v)} />
+              <ParamSlider label="彩度" value={params.chroma} min={0.5} max={4.0} step={0.05} onChange={(v) => updateParam('chroma', v)} />
+              <ParamSlider label="強度" value={params.intensity} min={0.3} max={0.9} step={0.05} onChange={(v) => updateParam('intensity', v)} />
+              <ParamSlider label="ブロブサイズ" value={params.blobSize} min={0.5} max={2.0} step={0.1} onChange={(v) => updateParam('blobSize', v)} />
+              <ParamSlider label="ぼかし" value={params.blur} min={0} max={80} step={1} onChange={(v) => updateParam('blur', v)} />
               <button
                 type="button"
                 onClick={() => { setParams(DEFAULT_PARAMS); setWeights((prev) => prev.map(() => 1)); }}
                 className="font-mono text-xs text-muted underline underline-offset-2 transition-colors hover:text-fg"
               >
-                Reset to defaults
+                初期値に戻す
               </button>
             </div>
           </div>
@@ -603,7 +603,7 @@ export default function OgpBgGenerator() {
           {/* Preview */}
           <div>
             <h2 className="mb-2 font-mono text-xs font-medium uppercase tracking-widest text-muted">
-              Preview <span className="opacity-50">({OGP_W} x {OGP_H})</span>
+              プレビュー <span className="opacity-50">({OGP_W} x {OGP_H})</span>
             </h2>
             <div className="overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] shadow-sm">
               <canvas
@@ -621,7 +621,7 @@ export default function OgpBgGenerator() {
               onClick={handleDownload}
               className="rounded-lg bg-fg px-6 py-2.5 font-mono text-sm font-medium text-bg shadow-sm transition-colors hover:opacity-80"
             >
-              Download PNG
+              PNGをダウンロード
             </button>
           </div>
         </div>

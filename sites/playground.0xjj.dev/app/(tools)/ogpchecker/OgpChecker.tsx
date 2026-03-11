@@ -24,7 +24,7 @@ const GROUPS: Array<{
   },
   {
     id: 'standard',
-    label: 'Standard',
+    label: '標準',
     match: (k) =>
       [
         'title',
@@ -48,12 +48,12 @@ const GROUPS: Array<{
   },
   {
     id: 'link',
-    label: 'Link Tags',
+    label: 'リンクタグ',
     match: (k) => k.startsWith('link:'),
   },
   {
     id: 'other',
-    label: 'Other',
+    label: 'その他',
     match: () => true,
   },
 ];
@@ -86,7 +86,7 @@ function PreviewCard({ entries, title }: { entries: MetaEntry[]; title: string }
   return (
     <div className="mb-8">
       <h2 className="mb-3 font-mono text-xs font-medium uppercase tracking-widest text-muted">
-        Preview
+        プレビュー
       </h2>
       <div
         className="overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-fg)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_3%,transparent)] shadow-sm max-w-lg"
@@ -118,7 +118,7 @@ function PreviewCard({ entries, title }: { entries: MetaEntry[]; title: string }
             <p className="mb-1 font-mono text-xs text-muted">{ogSiteName}</p>
           )}
           <p className="font-semibold leading-snug text-fg line-clamp-2">
-            {ogTitle || '(no title)'}
+            {ogTitle || '(タイトルなし)'}
           </p>
           {ogDesc && (
             <p className="mt-1 text-sm text-muted line-clamp-2">{ogDesc}</p>
@@ -154,10 +154,10 @@ function MetaTable({ entries }: { entries: MetaEntry[] }) {
                 <thead>
                   <tr className="border-b border-[color-mix(in_srgb,var(--color-fg)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-fg)_4%,transparent)]">
                     <th className="w-56 px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">
-                      property
+                      プロパティ
                     </th>
                     <th className="px-4 py-2.5 text-left font-mono text-xs font-medium text-muted">
-                      content
+                      内容
                     </th>
                   </tr>
                 </thead>
@@ -236,7 +236,7 @@ export default function OgpChecker() {
           setResult(json);
         }
       } catch {
-        setError('Network error — could not reach the server');
+        setError('ネットワークエラー — サーバーに接続できませんでした');
       }
     });
   }
@@ -259,7 +259,7 @@ export default function OgpChecker() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">OGP Checker</h1>
         <p className="mt-1 text-sm text-muted">
-          Inspect Open Graph, Twitter Card, and all meta tags for any URL.
+          任意のURLのOpen Graph・Twitter Card・メタタグを確認します。
         </p>
       </div>
 
@@ -284,7 +284,7 @@ export default function OgpChecker() {
             disabled={isPending}
             className="shrink-0 rounded-lg bg-fg px-5 py-2.5 font-mono text-sm font-medium text-bg shadow-sm transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {isPending ? 'Checking…' : 'Check'}
+            {isPending ? '確認中...' : '確認'}
           </button>
         </div>
       </form>
@@ -294,7 +294,7 @@ export default function OgpChecker() {
       {isPending && (
         <div className="flex items-center gap-3 text-sm text-muted">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-[color-mix(in_srgb,var(--color-fg)_20%,transparent)] border-t-muted" />
-          Fetching and parsing meta tags…
+          メタタグを取得・解析中...
         </div>
       )}
 
@@ -308,7 +308,7 @@ export default function OgpChecker() {
         <div>
           {result.finalUrl !== result.url && (
             <p className="mb-6 font-mono text-xs text-muted">
-              Redirected to{' '}
+              リダイレクト先:{' '}
               <a
                 href={result.finalUrl}
                 target="_blank"
@@ -322,7 +322,7 @@ export default function OgpChecker() {
           <PreviewCard entries={result.entries} title={result.title} />
           <MetaTable entries={result.entries} />
           {result.entries.length === 0 && (
-            <p className="text-sm text-muted">No meta tags found.</p>
+            <p className="text-sm text-muted">メタタグが見つかりませんでした。</p>
           )}
         </div>
       )}
