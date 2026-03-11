@@ -36,10 +36,14 @@ function ShaderControls({
   definition: ShaderDefinition;
   values: ShaderControlValues;
   onChange: (key: string, value: number) => void;
-  columns?: 'responsive' | 'two';
+  columns?: 'responsive' | 'two' | 'three';
 }) {
   return (
-    <div className={columns === 'two' ? 'grid gap-3 md:grid-cols-2' : 'grid gap-3 sm:grid-cols-2 xl:grid-cols-3'}>
+    <div className={
+      columns === 'three' ? 'grid gap-3 grid-cols-3' :
+      columns === 'two' ? 'grid gap-3 grid-cols-2' :
+      'grid gap-3 sm:grid-cols-2 xl:grid-cols-3'
+    }>
       {definition.controls.map((control) => {
         const value = values[control.key] ?? control.defaultValue;
 
@@ -188,25 +192,25 @@ export function ShaderLab({ definition }: { definition: ShaderDefinition }) {
       </div>
 
       <div className="hidden md:block">
-        <Drawer direction="right" open={desktopControlsOpen} onOpenChange={setDesktopControlsOpen} showOverlay>
-          <DrawerContent className="flex h-full flex-col">
-            <DrawerHeader className="border-b px-6 pt-6 pb-4">
+        <Drawer direction="bottom" open={desktopControlsOpen} onOpenChange={setDesktopControlsOpen} showOverlay>
+          <DrawerContent showOverlay className="flex max-h-[70svh] flex-col">
+            <DrawerHeader className="shrink-0 border-b">
               <DrawerTitle>Controls</DrawerTitle>
               <DrawerDescription>
                 Tune the attractor while keeping the preview visible.
               </DrawerDescription>
             </DrawerHeader>
-            <div className="flex-1 overflow-y-auto px-5 py-5">
+            <div className="flex-1 overflow-y-auto overscroll-y-contain px-5 py-5">
               <ShaderControls
                 definition={definition}
                 values={values}
-                columns="two"
+                columns="three"
                 onChange={(key, value) => {
                   setValues((current) => ({ ...current, [key]: value }));
                 }}
               />
             </div>
-            <DrawerFooter className="px-5">
+            <DrawerFooter className="shrink-0 px-5">
               <DrawerClose asChild>
                 <Button variant="outline" className="w-full font-mono text-xs">
                   Close

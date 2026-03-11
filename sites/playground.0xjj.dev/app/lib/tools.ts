@@ -214,6 +214,13 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'lorenz-attractor',
+    name: 'Lorenz Attractor',
+    description: 'Interactive 3D Lorenz attractor rendered as flowing colored lines in a WebGL2 fragment shader.',
+    href: '/lorenz-attractor/',
+    category: 'ui',
+  },
+  {
     slug: 'tilt-card',
     name: 'Tilt Card',
     description: 'Interactive 3D tilt card with flip animation powered by Motion.',

@@ -85,7 +85,7 @@ function DrawerContent({
         data-slot="drawer-content"
         className={cn(
           resolvedDirection === "bottom"
-            ? "fixed inset-x-0 bottom-0 z-50 mt-24 rounded-t-[28px] border border-b-0 bg-background pb-[env(safe-area-inset-bottom)] shadow-lg outline-none"
+            ? "fixed inset-x-0 bottom-0 z-50 mx-auto mt-24 max-w-screen-lg rounded-t-[28px] border border-b-0 bg-background pb-[env(safe-area-inset-bottom)] shadow-lg outline-none"
             : "fixed top-0 right-0 bottom-0 z-50 w-[min(420px,100vw)] rounded-l-[28px] border border-r-0 bg-background pr-[env(safe-area-inset-right)] shadow-lg outline-none",
           className,
         )}
