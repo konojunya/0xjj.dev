@@ -1,6 +1,6 @@
 'use client';
 
-import { LoaderCircle, Mic, MicOff, Mountain, Settings2 } from 'lucide-react';
+import { LoaderCircle, Maximize, Mic, MicOff, Minimize, Mountain, Settings2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -251,8 +251,12 @@ export function AudioTerrainLab() {
 
   const orbitRef = useRef({ rotX: -0.48, rotY: 0.3, dragging: false, lastX: 0, lastY: 0, lastDrag: 0 });
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const [isStarting, setIsStarting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [canFullscreen, setCanFullscreen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showControls, setShowControls] = useState(false);
 
@@ -267,16 +271,21 @@ export function AudioTerrainLab() {
   const [wireframe, setWireframe] = useState(true);
 
   // ── Setup ──
-  const setupGL = useCallback(() => {
+  const setupGL = useCallback((fullscreen: boolean = false) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
 
     const mobile = isMobile();
     mobileRef.current = mobile;
     const dpr = Math.min(window.devicePixelRatio, mobile ? MOBILE_DPR_CAP : DESKTOP_DPR_CAP);
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.round(rect.width * dpr);
-    canvas.height = Math.round(rect.height * dpr);
+    if (fullscreen) {
+      canvas.width = Math.round(window.screen.width * dpr);
+      canvas.height = Math.round(window.screen.height * dpr);
+    } else {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+    }
 
     const gl = canvas.getContext('webgl', {
       alpha: false, antialias: true, depth: true,
@@ -519,6 +528,34 @@ export function AudioTerrainLab() {
     };
   }, []);
 
+  // Rebuild GL when fullscreen changes while running
+  const rebuildForMode = useCallback((fullscreen: boolean) => {
+    if (!isRunningRef.current) return;
+    setupGL(fullscreen);
+  }, [setupGL]);
+
+  // Sync fullscreen state & rebuild
+  useEffect(() => {
+    setCanFullscreen(!!document.fullscreenEnabled);
+    const onChange = () => {
+      const fs = !!document.fullscreenElement;
+      setIsFullscreen(fs);
+      rebuildForMode(fs);
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, [rebuildForMode]);
+
+  const handleFullscreen = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      el.requestFullscreen();
+    }
+  };
+
   const handleStart = async () => {
     if (isStarting || isRunning) return;
     setError(null);
@@ -561,7 +598,7 @@ export function AudioTerrainLab() {
 
   return (
     <section className="mt-8 space-y-4">
-      <div className="overflow-hidden rounded-xl border border-black/10 bg-black dark:border-white/10">
+      <div ref={containerRef} className="overflow-hidden rounded-xl border border-black/10 bg-black dark:border-white/10">
         <div className="relative">
           <canvas
             ref={canvasRef}
@@ -645,6 +682,17 @@ export function AudioTerrainLab() {
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-black/10 bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.02]">
+          {canFullscreen && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleFullscreen}
+              className="font-mono text-xs"
+            >
+              {isFullscreen ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
+              {isFullscreen ? '縮小' : '全画面'}
+            </Button>
+          )}
           {isRunning && (
             <Button
               type="button"
