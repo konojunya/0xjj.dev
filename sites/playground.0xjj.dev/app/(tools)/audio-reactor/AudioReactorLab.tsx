@@ -511,6 +511,7 @@ export function AudioReactorLab() {
     const onChange = () => {
       const fs = !!document.fullscreenElement;
       setIsFullscreen(fs);
+      if (fs) setShowControls(false);
       rebuildForMode(fs);
     };
     document.addEventListener('fullscreenchange', onChange);
