@@ -1,25 +1,111 @@
 import { Renderer, Camera, Transform, Geometry, Program, Mesh } from 'ogl';
 import type { OGLSceneDefinition } from '@/components/shader-lab/types';
 
-// ── L-System grammar ──
+// ── Seeded PRNG (mulberry32) ──
 
-interface LSystemRule {
-  axiom: string;
-  rules: Record<string, string>;
+function mulberry32(seed: number) {
+  let s = seed | 0;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-const PRESETS: LSystemRule[] = [
-  // 0: Fractal Plant (Lindenmayer classic)
-  { axiom: 'X', rules: { X: 'F+[[X]-X]-F[-FX]+X', F: 'FF' } },
-  // 1: Koch Snowflake variant
-  { axiom: 'F-F-F-F', rules: { F: 'F-F+F+FF-F-F+F' } },
-  // 2: Dragon Curve
-  { axiom: 'FX', rules: { X: 'X+YF+', Y: '-FX-Y' } },
-  // 3: Sierpinski Triangle
-  { axiom: 'F-G-G', rules: { F: 'F-G+F+G-F', G: 'GG' } },
-  // 4: Hilbert Curve
-  { axiom: 'A', rules: { A: '-BF+AFA+FB-', B: '+AF-BFB-FA+' } },
-];
+// ── Random L-System rule generation ──
+
+interface LSystemGrammar {
+  axiom: string;
+  rules: Record<string, string>;
+  angle: number;
+}
+
+function generateRandomGrammar(seed: number, complexity: number): LSystemGrammar {
+  const rng = mulberry32(seed);
+  const pick = <T>(arr: T[]): T => arr[Math.floor(rng() * arr.length)];
+  const chance = (p: number) => rng() < p;
+
+  // Decide structure type
+  const useBranching = chance(0.6 + complexity * 0.2);
+  const useSecondSymbol = chance(0.4);
+
+  // Rule length scales with complexity (4–14 tokens)
+  const ruleLen = Math.floor(4 + complexity * 10);
+
+  // Generate angle from a set of "nice" angles
+  const niceAngles = [15, 20, 22.5, 25, 30, 36, 45, 60, 72, 90, 120];
+  const angle = pick(niceAngles);
+
+  function generateRule(length: number, branchProb: number): string {
+    const tokens: string[] = [];
+    let bracketDepth = 0;
+
+    for (let i = 0; i < length; i++) {
+      const r = rng();
+
+      if (bracketDepth > 0 && r < 0.15 && i > 0) {
+        // Close bracket
+        tokens.push(']');
+        bracketDepth--;
+      } else if (useBranching && r < branchProb && bracketDepth < 2 && i < length - 2) {
+        // Open bracket
+        tokens.push('[');
+        bracketDepth++;
+      } else if (r < 0.35 + branchProb * 0.2) {
+        tokens.push('+');
+      } else if (r < 0.55 + branchProb * 0.2) {
+        tokens.push('-');
+      } else {
+        tokens.push(useSecondSymbol && chance(0.3) ? 'G' : 'F');
+      }
+    }
+
+    // Close any remaining brackets
+    while (bracketDepth > 0) {
+      tokens.push(']');
+      bracketDepth--;
+    }
+
+    // Ensure at least one F
+    if (!tokens.includes('F') && !tokens.includes('G')) {
+      tokens[Math.floor(rng() * tokens.length)] = 'F';
+    }
+
+    return tokens.join('');
+  }
+
+  const branchProb = useBranching ? 0.15 + complexity * 0.15 : 0;
+  const rules: Record<string, string> = {
+    F: generateRule(ruleLen, branchProb),
+  };
+
+  let axiom: string;
+
+  if (useSecondSymbol) {
+    rules.G = generateRule(Math.max(3, ruleLen - 2), branchProb * 0.7);
+    axiom = chance(0.5) ? 'F-G-G' : 'F+G+F';
+  } else if (useBranching) {
+    axiom = pick(['F', 'X']);
+    if (axiom === 'X') {
+      // X is a non-drawing symbol that expands into branching structure
+      rules.X = generateRule(Math.max(4, ruleLen), branchProb * 1.3);
+    }
+  } else {
+    // Geometric / tiling patterns
+    const sides = pick([3, 4, 5, 6]);
+    const parts: string[] = [];
+    for (let i = 0; i < sides; i++) {
+      parts.push('F');
+      if (i < sides - 1) parts.push('-');
+    }
+    axiom = parts.join('');
+  }
+
+  return { axiom, rules, angle };
+}
+
+// ── L-System expansion ──
 
 function expandLSystem(axiom: string, rules: Record<string, string>, iterations: number): string {
   let str = axiom;
@@ -29,22 +115,23 @@ function expandLSystem(axiom: string, rules: Record<string, string>, iterations:
       next += rules[ch] ?? ch;
     }
     str = next;
-    // Safety: cap string length to avoid memory explosion
     if (str.length > 500_000) break;
   }
   return str;
 }
 
+// ── Turtle graphics ──
+
 interface TurtleSegment {
   x1: number; y1: number;
   x2: number; y2: number;
-  depth: number; // normalized 0..1 along the path
+  depth: number;
 }
 
 function interpretTurtle(lstr: string, angleDeg: number): TurtleSegment[] {
   const segments: TurtleSegment[] = [];
   const angleRad = (angleDeg * Math.PI) / 180;
-  let x = 0, y = 0, a = Math.PI / 2; // start facing up
+  let x = 0, y = 0, a = Math.PI / 2;
   const stack: { x: number; y: number; a: number }[] = [];
   let step = 0;
   const totalDrawable = [...lstr].filter(c => c === 'F' || c === 'G').length;
@@ -96,7 +183,7 @@ function normalizeSegments(segments: TurtleSegment[]): TurtleSegment[] {
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
   const range = Math.max(maxX - minX, maxY - minY, 0.001);
-  const scale = 1.8 / range; // fit into [-0.9, 0.9]
+  const scale = 1.8 / range;
 
   return segments.map(s => ({
     x1: (s.x1 - cx) * scale,
@@ -142,24 +229,24 @@ export const lSystemDefinition: OGLSceneDefinition = {
   controls: [
     {
       key: 'spread',
-      label: 'Preset',
-      description: 'Choose an L-System pattern: Plant, Koch, Dragon, Sierpinski, Hilbert.',
+      label: 'Seed',
+      description: 'Random seed — each value generates a unique L-System grammar.',
       min: 0,
-      max: 4,
+      max: 999,
       step: 1,
-      defaultValue: 0,
+      defaultValue: Math.floor(Math.random() * 1000),
       precision: 0,
     },
     {
       key: 'twist',
-      label: 'Angle',
-      description: 'Turning angle in degrees.',
-      min: 10,
-      max: 120,
+      label: 'Complexity',
+      description: 'Rule length and branching probability.',
+      min: 0,
+      max: 100,
       step: 1,
-      defaultValue: 25,
+      defaultValue: 50,
       precision: 0,
-      unit: '°',
+      unit: '%',
     },
     {
       key: 'detail',
@@ -168,7 +255,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
       min: 1,
       max: 7,
       step: 1,
-      defaultValue: 5,
+      defaultValue: 4,
       precision: 0,
     },
     {
@@ -206,7 +293,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
     },
   ],
   setup(ctx) {
-    const { canvas, getValues, getPointer } = ctx;
+    const { canvas, getValues } = ctx;
 
     const renderer = new Renderer({
       canvas,
@@ -244,20 +331,17 @@ export const lSystemDefinition: OGLSceneDefinition = {
     });
 
     let mesh: Mesh | null = null;
-    let prevPreset = -1;
-    let prevAngle = -1;
+    let prevSeed = -1;
+    let prevComplexity = -1;
     let prevIter = -1;
     let cachedSegments: TurtleSegment[] = [];
-    let totalSegments = 0;
 
     function rebuildGeometry(segments: TurtleSegment[], lineWidth: number, drawRatio: number, hueShift: number) {
       const drawCount = Math.max(1, Math.floor(segments.length * drawRatio));
 
-      // Build line-quad geometry (2 triangles per segment for thick lines)
       const positions: number[] = [];
       const colors: number[] = [];
-
-      const hw = lineWidth * 0.001; // half-width in normalized coords
+      const hw = lineWidth * 0.001;
 
       for (let i = 0; i < drawCount; i++) {
         const s = segments[i];
@@ -266,21 +350,17 @@ export const lSystemDefinition: OGLSceneDefinition = {
         const len = Math.sqrt(dx * dx + dy * dy);
         if (len < 1e-8) continue;
 
-        // Normal perpendicular to segment
         const nx = (-dy / len) * hw;
         const ny = (dx / len) * hw;
 
-        // Quad corners
         const ax = s.x1 + nx, ay = s.y1 + ny;
         const bx = s.x1 - nx, by = s.y1 - ny;
         const cx = s.x2 + nx, cy = s.y2 + ny;
         const ddx = s.x2 - nx, ddy = s.y2 - ny;
 
-        // Two triangles
         positions.push(ax, ay, 0, bx, by, 0, cx, cy, 0);
         positions.push(bx, by, 0, ddx, ddy, 0, cx, cy, 0);
 
-        // Color based on depth along path
         const hue = (s.depth + hueShift) % 1.0;
         const [r, g, b] = hsv2rgb(hue, 0.7, 0.95);
         for (let j = 0; j < 6; j++) {
@@ -320,31 +400,30 @@ export const lSystemDefinition: OGLSceneDefinition = {
     return {
       render(time) {
         const values = getValues();
-        const presetIdx = Math.round(Math.min(Math.max(values.spread ?? 0, 0), 4));
-        const angle = values.twist ?? 25;
-        const iterations = Math.round(Math.min(Math.max(values.detail ?? 5, 1), 7));
+        const seed = Math.round(values.spread ?? 0);
+        const complexity = (values.twist ?? 50) / 100;
+        const iterations = Math.round(Math.min(Math.max(values.detail ?? 4, 1), 7));
         const lineWidth = values.bloom ?? 1.5;
         const speedN = (values.motion ?? 50) / 100;
         const hueShift = (values.symmetry ?? 0) / 100;
 
-        // Rebuild segments if params changed
-        if (presetIdx !== prevPreset || angle !== prevAngle || iterations !== prevIter) {
-          prevPreset = presetIdx;
-          prevAngle = angle;
+        // Rebuild segments if generation params changed
+        if (seed !== prevSeed || complexity !== prevComplexity || iterations !== prevIter) {
+          prevSeed = seed;
+          prevComplexity = complexity;
           prevIter = iterations;
 
-          const preset = PRESETS[presetIdx];
-          const lstr = expandLSystem(preset.axiom, preset.rules, iterations);
-          const raw = interpretTurtle(lstr, angle);
+          const grammar = generateRandomGrammar(seed, complexity);
+          const lstr = expandLSystem(grammar.axiom, grammar.rules, iterations);
+          const raw = interpretTurtle(lstr, grammar.angle);
           cachedSegments = normalizeSegments(raw);
-          totalSegments = cachedSegments.length;
         }
 
         // Progressive draw animation
         const drawSpeed = Math.max(0.01, speedN);
         const cycleTime = 10 / drawSpeed;
         const progress = Math.min((time % cycleTime) / (cycleTime * 0.8), 1.0);
-        const eased = progress < 1 ? progress * progress * (3 - 2 * progress) : 1; // smoothstep
+        const eased = progress < 1 ? progress * progress * (3 - 2 * progress) : 1;
 
         rebuildGeometry(cachedSegments, lineWidth, eased, hueShift);
 
