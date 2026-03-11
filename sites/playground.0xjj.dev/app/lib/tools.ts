@@ -214,10 +214,24 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'dejong-attractor',
+    name: 'De Jong Attractor',
+    description: 'Interactive 2D De Jong attractor rendered as flowing colored lines in a WebGL2 fragment shader.',
+    href: '/dejong-attractor/',
+    category: 'ui',
+  },
+  {
     slug: 'lorenz-attractor',
     name: 'Lorenz Attractor',
     description: 'Interactive 3D Lorenz attractor rendered as flowing colored lines in a WebGL2 fragment shader.',
     href: '/lorenz-attractor/',
+    category: 'ui',
+  },
+  {
+    slug: 'rossler-attractor',
+    name: 'Rössler Attractor',
+    description: 'Interactive 3D Rössler attractor rendered as flowing colored lines in a WebGL2 fragment shader.',
+    href: '/rossler-attractor/',
     category: 'ui',
   },
   {
