@@ -228,6 +228,13 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'mandelbulb',
+    name: 'Mandelbulb',
+    description: '3D Mandelbulb fractal rendered via GPU ray marching in WebGPU.',
+    href: '/mandelbulb/',
+    category: 'ui',
+  },
+  {
     slug: 'lorenz-attractor',
     name: 'Lorenz Attractor',
     description: 'Interactive 3D Lorenz attractor rendered as flowing colored lines in a WebGL2 fragment shader.',
