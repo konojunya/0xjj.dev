@@ -205,7 +205,7 @@ void main() {
   float glowAcc = 0.0;
 
   // Glow intensity scales with energy: silence → barely visible
-  float glowMult = (0.005 + energyGate * 0.055) * intensity;
+  float glowMult = (0.02 + energyGate * 0.14) * intensity;
 
   for (int i = 0; i < 80; i++) {
     if (i >= maxSteps) break;
@@ -228,7 +228,7 @@ void main() {
     if (d < 0.001) {
       vec3 hitColor = palette(totalDist * 0.05 + time * 0.3, u_bass * 1.5);
       hitColor = mix(vec3(dot(hitColor, vec3(0.299, 0.587, 0.114))), hitColor, sat);
-      color += hitColor * intensity * 0.8 * energyGate;
+      color += hitColor * intensity * 1.5 * energyGate;
       break;
     }
 
@@ -250,7 +250,7 @@ void main() {
   }
 
   // Overall brightness: energy cubed for dramatic on/off
-  float brightness = u_energy * 4.0 + 0.05;
+  float brightness = u_energy * 6.0 + 0.15;
   color *= brightness;
 
   // Vignette (stronger when silent)
