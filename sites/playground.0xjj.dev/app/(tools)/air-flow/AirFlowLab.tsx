@@ -456,7 +456,7 @@ export function AirFlowLab() {
     if (!isRunningRef.current) return;
     const mobile = isMobile();
     const count = fullscreen ? FULLSCREEN_PARTICLES : mobile ? MOBILE_PARTICLES : DESKTOP_PARTICLES;
-    const pointScale = fullscreen ? 0.8 : 1.0;
+    const pointScale = 1.0;
 
     // Preserve flow field, just re-init particles and GL
     initParticles(count);
