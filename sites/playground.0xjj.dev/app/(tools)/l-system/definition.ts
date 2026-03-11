@@ -13,63 +13,63 @@ function mulberry32(seed: number) {
   };
 }
 
-// ── Leaf venation L-System templates ──
-// Each template produces leaf-like patterns — midribs with branching veins.
+// ── Proven plant L-System templates ──
+// Each template produces beautiful tree / plant patterns.
 
-interface LeafTemplate {
+interface PlantTemplate {
   axiom: string;
   rules: Record<string, string>;
   angleRange: [number, number];
 }
 
-const TEMPLATES: LeafTemplate[] = [
-  // Pinnate leaf: central midrib with alternating side veins
-  {
-    axiom: 'X',
-    rules: { X: 'F[+X]F[-X]+X', F: 'FF' },
-    angleRange: [30, 45],
-  },
-  // Broad leaf: dense branching fills area
+const TEMPLATES: PlantTemplate[] = [
+  // Fractal plant (the most iconic L-System)
   {
     axiom: 'X',
     rules: { X: 'F+[[X]-X]-F[-FX]+X', F: 'FF' },
-    angleRange: [25, 40],
+    angleRange: [22, 30],
   },
-  // Palmate leaf: veins fan out from base
-  {
-    axiom: 'F',
-    rules: { F: 'FF+[+F-F-F]-[-F+F+F]' },
-    angleRange: [25, 38],
-  },
-  // Fern frond: asymmetric side veins
+  // Simple branching tree
   {
     axiom: 'X',
-    rules: { X: 'F-[[X]+X]+F[+FX]-X', F: 'FF' },
-    angleRange: [28, 42],
+    rules: { X: 'F[+X]F[-X]+X', F: 'FF' },
+    angleRange: [18, 26],
   },
-  // Elm leaf: wide branching veins
+  // Symmetric tree
   {
     axiom: 'X',
     rules: { X: 'F[+X][-X]FX', F: 'FF' },
-    angleRange: [35, 50],
+    angleRange: [22, 30],
   },
-  // Drooping leaf: sweeping curves
+  // Dense bush
   {
-    axiom: 'X',
-    rules: { X: 'F[+X]F[-X]-X', F: 'FF' },
-    angleRange: [25, 38],
+    axiom: 'F',
+    rules: { F: 'FF+[+F-F-F]-[-F+F+F]' },
+    angleRange: [20, 26],
   },
-  // Maple leaf: wide spreading veins
+  // Tall canopy tree
   {
     axiom: 'X',
     rules: { X: 'F[-X][+X]FX', F: 'FF' },
-    angleRange: [35, 55],
+    angleRange: [20, 28],
   },
-  // Dense venation: many small veins
+  // Weeping willow
   {
     axiom: 'X',
-    rules: { X: 'F[+F+X][-F-X]FX', F: 'FF' },
-    angleRange: [28, 42],
+    rules: { X: 'F[+X]F[-X]-X', F: 'FF' },
+    angleRange: [16, 22],
+  },
+  // Fern
+  {
+    axiom: 'X',
+    rules: { X: 'F-[[X]+X]+F[+FX]-X', F: 'FF' },
+    angleRange: [20, 28],
+  },
+  // Spreading bush
+  {
+    axiom: 'F',
+    rules: { F: 'F[+F]F[-F]F' },
+    angleRange: [22, 30],
   },
 ];
 
@@ -236,7 +236,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
   id: 'l-system',
   name: 'L-System',
   summary:
-    'Lindenmayer systems are parallel rewriting grammars that produce fractal leaf venation patterns. Each page load grows a unique leaf from a time-based seed.',
+    'Lindenmayer systems are parallel rewriting grammars that produce fractal plant-like structures. Each page load grows a unique tree from a time-based seed.',
   canvasHeight: 'clamp(320px, 52vh, 560px)',
   notes: [
     'L-System (Aristid Lindenmayer, 1968). A string-rewriting grammar where each iteration replaces symbols according to production rules, producing fractal growth.',
@@ -246,7 +246,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
     {
       key: 'spread',
       label: 'Seed',
-      description: 'Random seed — each value generates a unique leaf pattern.',
+      description: 'Random seed — each value grows a unique tree.',
       min: 0,
       max: 9999,
       step: 1,
@@ -266,7 +266,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
     {
       key: 'bloom',
       label: 'Line Width',
-      description: 'Thickness of the veins.',
+      description: 'Thickness of the branches.',
       min: 0.5,
       max: 5,
       step: 0.5,
@@ -375,11 +375,11 @@ export const lSystemDefinition: OGLSceneDefinition = {
         positions.push(ax, ay, 0, bx, by, 0, cx, cy, 0);
         positions.push(bx, by, 0, ddx, ddy, 0, cx, cy, 0);
 
-        // Color: dark green midrib → bright, slightly transparent tips
+        // Color: brown trunk → green tips
         const branchRatio = maxBranchDepth > 0 ? s.branchDepth / maxBranchDepth : 0;
-        const hue = 0.28 + branchRatio * 0.06;
-        const sat = 0.70 - branchRatio * 0.20;
-        const val = 0.40 + branchRatio * 0.50;
+        const hue = 0.08 + branchRatio * 0.25;
+        const sat = 0.50 + branchRatio * 0.30;
+        const val = 0.55 + branchRatio * 0.35;
         const [r, g, b] = hsv2rgb(hue, sat, val);
         for (let j = 0; j < 6; j++) {
           colors.push(r, g, b);
