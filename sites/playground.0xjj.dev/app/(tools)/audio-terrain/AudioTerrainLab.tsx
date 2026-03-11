@@ -18,6 +18,12 @@ const EMA_WEIGHT = 0.38;
 const AUTO_ROTATE_SPEED = 0.06;
 const NOISE_GATE = 0.06; // FFT values below this threshold are silenced
 
+// ── Beat detection / BPM ──
+const BEAT_THRESHOLD = 1.4; // bass must exceed recent average by this factor
+const MIN_BEAT_INTERVAL_S = 0.25; // max ~240 BPM
+const MAX_BEAT_HISTORY = 12;
+const BASS_HISTORY_LEN = 30; // ~0.5 s window at 60 fps
+
 function isMobile() {
   return typeof window !== 'undefined' && window.innerWidth < 768;
 }
@@ -264,11 +270,21 @@ export function AudioTerrainLab() {
   const heightScaleRef = useRef(2.0);
   const trebleDetailRef = useRef(0.8);
   const wireframeRef = useRef(true);
+  const bpmSyncRef = useRef(false);
+
+  // Beat detection refs
+  const beatTimesRef = useRef<number[]>([]);
+  const lastBeatTimeRef = useRef(0);
+  const bassHistoryRef = useRef<number[]>([]);
+  const bpmRef = useRef(0);
+  const rowAccRef = useRef(0);
 
   const [scrollSpeed, setScrollSpeed] = useState(1.0);
   const [heightScale, setHeightScale] = useState(2.0);
   const [trebleDetail, setTrebleDetail] = useState(0.8);
   const [wireframe, setWireframe] = useState(true);
+  const [bpmSync, setBpmSync] = useState(false);
+  const [detectedBpm, setDetectedBpm] = useState(0);
 
   // ── Setup ──
   const setupGL = useCallback((fullscreen: boolean = false) => {
@@ -425,7 +441,37 @@ export function AudioTerrainLab() {
     const energy = smoothEnergyRef.current;
     const bass = smoothBassRef.current;
 
-    const dt = scrollSpeedRef.current * 0.016;
+    // ── Beat detection ──
+    const now = performance.now() / 1000;
+    const bassHist = bassHistoryRef.current;
+    bassHist.push(rawBass);
+    if (bassHist.length > BASS_HISTORY_LEN) bassHist.shift();
+    const bassAvg = bassHist.reduce((s, v) => s + v, 0) / bassHist.length;
+
+    if (rawBass > bassAvg * BEAT_THRESHOLD && rawBass > 0.05 && now - lastBeatTimeRef.current > MIN_BEAT_INTERVAL_S) {
+      lastBeatTimeRef.current = now;
+      const beats = beatTimesRef.current;
+      beats.push(now);
+      if (beats.length > MAX_BEAT_HISTORY) beats.shift();
+      if (beats.length >= 3) {
+        const intervals: number[] = [];
+        for (let i = 1; i < beats.length; i++) intervals.push(beats[i] - beats[i - 1]);
+        intervals.sort((a, b) => a - b);
+        const median = intervals[Math.floor(intervals.length / 2)];
+        const newBpm = Math.round(60 / median);
+        if (newBpm >= 40 && newBpm <= 240 && newBpm !== bpmRef.current) {
+          bpmRef.current = newBpm;
+          setDetectedBpm(newBpm);
+        }
+      }
+    }
+
+    // ── Scroll speed: BPM-synced or manual ──
+    const effectiveSpeed = bpmSyncRef.current && bpmRef.current > 0
+      ? bpmRef.current / 120 // 120 BPM = normal speed (1.0)
+      : scrollSpeedRef.current;
+
+    const dt = effectiveSpeed * 0.016;
     timeRef.current += dt;
     const t = timeRef.current;
 
@@ -433,22 +479,32 @@ export function AudioTerrainLab() {
     const scale = heightScaleRef.current;
     const trebleK = trebleDetailRef.current;
 
-    // New front row: log-scale FFT bin mapping
-    const frontRow = frontIndexRef.current;
+    // Write FFT to current front row
     const logMax = Math.log(binCount);
-    for (let ix = 0; ix <= gridW; ix++) {
-      const nx = ix / gridW;
-      const binF = Math.exp(nx * logMax);
-      const b0 = Math.min(Math.floor(binF), binCount - 1);
-      const b1 = Math.min(b0 + 1, binCount - 1);
-      const frac = binF - b0;
-      const raw = (freqData[b0] * (1 - frac) + freqData[b1] * frac) / 255;
-      const val = raw < NOISE_GATE ? 0 : raw;
-      const freqFactor = 1.0 - nx * (1.0 - trebleK);
-      // Power curve makes peaks more dramatic
-      heightmap[frontRow * w + ix] = Math.pow(val, 1.3) * freqFactor * scale;
+    const writeFftRow = (row: number) => {
+      for (let ix = 0; ix <= gridW; ix++) {
+        const nx = ix / gridW;
+        const binF = Math.exp(nx * logMax);
+        const b0 = Math.min(Math.floor(binF), binCount - 1);
+        const b1 = Math.min(b0 + 1, binCount - 1);
+        const frac = binF - b0;
+        const raw = (freqData[b0] * (1 - frac) + freqData[b1] * frac) / 255;
+        const val = raw < NOISE_GATE ? 0 : raw;
+        const freqFactor = 1.0 - nx * (1.0 - trebleK);
+        heightmap[row * w + ix] = Math.pow(val, 1.3) * freqFactor * scale;
+      }
+    };
+
+    writeFftRow(frontIndexRef.current);
+
+    // Advance rows via accumulator
+    rowAccRef.current += effectiveSpeed;
+    const advance = Math.floor(rowAccRef.current);
+    rowAccRef.current -= advance;
+    for (let r = 0; r < advance; r++) {
+      frontIndexRef.current = (frontIndexRef.current + 1) % (gridH + 1);
+      writeFftRow(frontIndexRef.current);
     }
-    frontIndexRef.current = (frontRow + 1) % (gridH + 1);
 
     for (let iz = 0; iz <= gridH; iz++) {
       const ring = (frontIndexRef.current + iz) % (gridH + 1);
@@ -568,6 +624,12 @@ export function AudioTerrainLab() {
       timeRef.current = 0;
       smoothEnergyRef.current = 0;
       smoothBassRef.current = 0;
+      rowAccRef.current = 0;
+      beatTimesRef.current = [];
+      lastBeatTimeRef.current = 0;
+      bassHistoryRef.current = [];
+      bpmRef.current = 0;
+      setDetectedBpm(0);
       rafRef.current = requestAnimationFrame(renderLoop);
     } catch (err) {
       streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -591,6 +653,12 @@ export function AudioTerrainLab() {
     frequencyDataRef.current = null;
     heightmapRef.current = null;
     frontIndexRef.current = 0;
+    rowAccRef.current = 0;
+    beatTimesRef.current = [];
+    lastBeatTimeRef.current = 0;
+    bassHistoryRef.current = [];
+    bpmRef.current = 0;
+    setDetectedBpm(0);
     setIsRunning(false);
     const g = glRef.current;
     if (g) g.gl.clear(g.gl.COLOR_BUFFER_BIT | g.gl.DEPTH_BUFFER_BIT);
@@ -632,6 +700,18 @@ export function AudioTerrainLab() {
           {isRunning && showControls && (
             <div className="absolute bottom-3 left-3 right-3 rounded-lg border border-white/10 bg-black/60 p-4 backdrop-blur-xl sm:left-auto sm:w-72">
               <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => { setBpmSync((p) => { bpmSyncRef.current = !p; return !p; }); }}
+                  className={`w-full rounded-md border px-3 py-1.5 font-mono text-[11px] tracking-wide transition-colors ${
+                    bpmSync
+                      ? 'border-white/20 bg-white/10 text-white/80'
+                      : 'border-white/10 bg-transparent text-white/40 hover:text-white/60'
+                  }`}
+                >
+                  {bpmSync ? `BPM SYNC${detectedBpm ? ` — ${detectedBpm} BPM` : ' (検出中...)'}` : 'BPM SYNC OFF'}
+                </button>
+                {!bpmSync && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-medium tracking-wide text-white/50">SPEED</span>
@@ -643,6 +723,7 @@ export function AudioTerrainLab() {
                     onValueChange={([v]) => { setScrollSpeed(v); scrollSpeedRef.current = v; }}
                   />
                 </div>
+                )}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-medium tracking-wide text-white/50">HEIGHT</span>
