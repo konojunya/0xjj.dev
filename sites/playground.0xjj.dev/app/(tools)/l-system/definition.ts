@@ -364,7 +364,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
         // Aggressive depth thinning: midrib thick → deep veins hairline
         const t = maxBranchDepth > 0 ? s.branchDepth / maxBranchDepth : 0;
         const depthFade = Math.max(0.08, 1.0 - t * 0.92);
-        const hw = lineWidth * 0.0006 * depthFade;
+        const hw = lineWidth * 0.0012 * depthFade;
 
         const nx = (-dy / len) * hw;
         const ny = (dx / len) * hw;
