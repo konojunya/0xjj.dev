@@ -256,11 +256,11 @@ export const lSystemDefinition: OGLSceneDefinition = {
     {
       key: 'detail',
       label: 'Max Iterations',
-      description: 'Maximum growth depth — higher values reveal finer vein detail.',
+      description: 'Maximum growth depth — higher values reveal finer, photorealistic vein detail.',
       min: 2,
-      max: 8,
+      max: 12,
       step: 1,
-      defaultValue: 6,
+      defaultValue: 9,
       precision: 0,
     },
     {
