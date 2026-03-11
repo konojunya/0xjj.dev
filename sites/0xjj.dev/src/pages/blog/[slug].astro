@@ -78,7 +78,6 @@ const isOld = Date.now() - post.data.date.getTime() > 365 * 24 * 60 * 60 * 1000;
         <div class="outdated-notice" role="note">
           <svg class="outdated-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <div>
-            <p>This article was published over a year ago. The information may be outdated.</p>
             <p>この記事は公開から1年以上経過しています。情報が古くなっている可能性があります。</p>
           </div>
         </div>
@@ -87,11 +86,11 @@ const isOld = Date.now() - post.data.date.getTime() > 365 * 24 * 60 * 60 * 1000;
         <div class="ai-badge-wrap">
           <button class="ai-badge" type="button">
             <svg class="ai-badge-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
-            Made with AI
+            AIで作成
             <span class="ai-badge-q">?</span>
           </button>
           <div class="ai-badge-tooltip" role="tooltip">
-            This article was made with AI. It is not intended for mass content production — AI is used here as a tool to organize and record information as personal notes.
+            この記事はAIを活用して作成されました。大量コンテンツの生産を目的としたものではなく、個人的なメモとして情報を整理・記録するためのツールとしてAIを使用しています。
           </div>
         </div>
       )}
