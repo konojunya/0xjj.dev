@@ -21,6 +21,7 @@
     "motion": "^12.34.3",
     "next": "^16.1.6",
     "nuqs": "^2.8.9",
+    "ogl": "^1.0.11",
     "pdf-lib": "^1.17.1",
     "piexifjs": "^1.0.6",
     "qrcode": "^1.5.4",
@@ -33,6 +34,7 @@
     "shiki": "^3.23.0",
     "sql-formatter": "^15.7.2",
     "tailwind-merge": "^3.5.0",
+    "vaul": "^1.1.2",
     "web-haptics": "^0.0.6"
   },
   "devDependencies": {
