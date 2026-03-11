@@ -207,6 +207,13 @@ export const tools: Tool[] = [
   },
   // ── UI Lab (A→Z) ──
   {
+    slug: 'curl-noise',
+    name: 'Curl Noise Flow Field',
+    description: 'Thousands of particles flowing through a curl noise vector field, creating fluid-like visuals — powered by WebGPU compute shaders.',
+    href: '/curl-noise/',
+    category: 'ui',
+  },
+  {
     slug: 'liquid-glass',
     name: 'Liquid Glass',
     description: 'Apple-inspired Liquid Glass effect using SVG filters and backdrop-filter.',
