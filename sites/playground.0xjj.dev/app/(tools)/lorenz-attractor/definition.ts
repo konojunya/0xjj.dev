@@ -5,18 +5,18 @@ export const lorenzAttractorDefinition: FragmentShaderDefinition = {
   id: 'lorenz-attractor',
   name: 'Lorenz Attractor',
   summary:
-    'The Lorenz attractor is a chaotic system of three coupled differential equations that traces an endlessly evolving butterfly-shaped trajectory, rendered as flowing colored lines.',
+    'ローレンツ・アトラクタは、3つの連立微分方程式が生み出すカオス系です。蝶のような軌跡を無限に描き続け、流れるような色付きの線として描画されます。',
   renderScale: 0.82,
   canvasHeight: 'clamp(320px, 52vh, 560px)',
   notes: [
-    'Lorenz attractor (1963). The 3D trajectory is integrated per-pixel, projected to 2D, and rendered as continuous colored lines.',
-    'The butterfly shape emerges from the deterministic chaos of just three coupled differential equations.',
+    'ローレンツ・アトラクタ（1963年）。3D 軌道をピクセルごとに積分し、2D に投影して連続的な色付き線として描画。',
+    '蝶の形は、たった3つの連立微分方程式による決定論的カオスから生まれます。',
   ],
   controls: [
     {
       key: 'spread',
-      label: 'Zoom',
-      description: 'Zoom into or out of the attractor.',
+      label: 'ズーム',
+      description: 'アトラクタの拡大・縮小。',
       min: 0,
       max: 100,
       step: 1,
@@ -26,8 +26,8 @@ export const lorenzAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'twist',
-      label: 'Rotation',
-      description: 'Speed of the 3D view rotation.',
+      label: '回転',
+      description: '3D ビューの回転速度。',
       min: 0,
       max: 100,
       step: 1,
@@ -37,8 +37,8 @@ export const lorenzAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'symmetry',
-      label: 'Elevation',
-      description: 'Camera tilt angle — top-down vs side view.',
+      label: '仰角',
+      description: 'カメラの傾き — 真上からの視点 vs 横からの視点。',
       min: 0,
       max: 100,
       step: 1,
@@ -48,8 +48,8 @@ export const lorenzAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'detail',
-      label: 'Trail',
-      description: 'Length of the visible trajectory.',
+      label: '軌跡',
+      description: '表示する軌跡の長さ。',
       min: 0,
       max: 100,
       step: 1,
@@ -59,8 +59,8 @@ export const lorenzAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'bloom',
-      label: 'Thickness',
-      description: 'Line thickness and glow radius.',
+      label: '太さ',
+      description: '線の太さとグロー半径。',
       min: 0,
       max: 100,
       step: 1,
@@ -70,8 +70,8 @@ export const lorenzAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'motion',
-      label: 'Speed',
-      description: 'How fast the trajectory flows through the attractor.',
+      label: '速度',
+      description: '軌跡がアトラクタ上を流れる速さ。',
       min: 0,
       max: 100,
       step: 1,

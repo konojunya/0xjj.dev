@@ -217,13 +217,13 @@ export const mandelbulbDefinition: WebGPUDefinition = {
   kind: 'webgpu',
   id: 'mandelbulb',
   name: 'Mandelbulb',
-  summary: '3D Mandelbulb fractal rendered via GPU ray marching in WebGPU.',
+  summary: '3D マンデルバルブ・フラクタルを WebGPU のレイマーチングで描画。',
   canvasHeight: 480,
   controls: [
     {
       key: 'power',
-      label: 'Power',
-      description: 'Fractal exponent — 8 is the classic Mandelbulb',
+      label: '指数',
+      description: 'フラクタルの指数 — 8 がクラシックなマンデルバルブ',
       min: 2,
       max: 12,
       step: 0.5,
@@ -231,8 +231,8 @@ export const mandelbulbDefinition: WebGPUDefinition = {
     },
     {
       key: 'detail',
-      label: 'Detail',
-      description: 'Distance estimator iterations — higher = sharper detail',
+      label: 'ディテール',
+      description: '距離推定の反復回数 — 大きいほどシャープな描画',
       min: 4,
       max: 20,
       step: 1,
@@ -241,8 +241,8 @@ export const mandelbulbDefinition: WebGPUDefinition = {
     },
     {
       key: 'zoom',
-      label: 'Zoom',
-      description: 'Camera distance from the origin',
+      label: 'ズーム',
+      description: '原点からのカメラ距離',
       min: 1.2,
       max: 5,
       step: 0.1,
@@ -250,8 +250,8 @@ export const mandelbulbDefinition: WebGPUDefinition = {
     },
     {
       key: 'speed',
-      label: 'Rotation Speed',
-      description: 'Auto-rotation speed — 0 to stop',
+      label: '回転速度',
+      description: '自動回転の速さ — 0 で停止',
       min: 0,
       max: 1,
       step: 0.05,
@@ -259,8 +259,8 @@ export const mandelbulbDefinition: WebGPUDefinition = {
     },
   ],
   notes: [
-    'Move your pointer over the canvas to orbit the camera.',
-    'Requires a WebGPU-capable browser (Chrome, Edge, Safari 17+).',
+    'キャンバス上でポインタを動かすとカメラがオービットします。',
+    'WebGPU 対応ブラウザが必要です（Chrome、Edge、Safari 17+）。',
   ],
   setup,
 };

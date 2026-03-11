@@ -122,21 +122,21 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
             onClick={() => setIsRunning((current) => !current)}
             className="rounded-full border border-white/12 bg-black/26 px-4 py-2 font-mono text-xs text-white/88 backdrop-blur-md transition-colors hover:bg-black/40"
           >
-            {isRunning ? 'Pause' : 'Resume'}
+            {isRunning ? '一時停止' : '再開'}
           </button>
           <button
             type="button"
             onClick={handleReset}
             className="rounded-full border border-white/12 bg-black/20 px-4 py-2 font-mono text-xs text-white/70 backdrop-blur-md transition-colors hover:bg-black/34"
           >
-            Reset
+            リセット
           </button>
           <button
             type="button"
             onClick={() => setDesktopControlsOpen(true)}
             className="rounded-full border border-white/12 bg-black/20 px-4 py-2 font-mono text-xs text-white/70 backdrop-blur-md transition-colors hover:bg-black/34"
           >
-            Controls
+            コントロール
           </button>
         </div>
 
@@ -154,7 +154,7 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
             onClick={() => setIsRunning((current) => !current)}
             className="rounded-full border border-white/12 bg-black/35 px-4 py-2 font-mono text-xs text-white/88 backdrop-blur-md"
           >
-            {isRunning ? 'Pause' : 'Resume'}
+            {isRunning ? '一時停止' : '再開'}
           </button>
 
           <div className="flex items-center gap-2">
@@ -163,7 +163,7 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
               onClick={handleReset}
               className="rounded-full border border-white/12 bg-black/28 px-4 py-2 font-mono text-xs text-white/72 backdrop-blur-md"
             >
-              Reset
+              リセット
             </button>
 
             <Drawer direction="bottom" open={mobileControlsOpen} onOpenChange={setMobileControlsOpen} showOverlay>
@@ -173,14 +173,14 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
                   suppressHydrationWarning
                   className="rounded-full border border-white/12 bg-white/94 px-4 py-2 font-mono text-xs text-black shadow-[0_12px_30px_rgba(0,0,0,0.22)]"
                 >
-                  Controls
+                  コントロール
                 </button>
               </DrawerTrigger>
               <DrawerContent showOverlay className="flex max-h-[70svh] flex-col">
                 <DrawerHeader className="shrink-0 border-b">
-                  <DrawerTitle>Controls</DrawerTitle>
+                  <DrawerTitle>コントロール</DrawerTitle>
                   <DrawerDescription>
-                    Tune the attractor without covering the preview.
+                    プレビューを見ながらパラメータを調整できます。
                   </DrawerDescription>
                 </DrawerHeader>
                 <div className="flex-1 overflow-y-auto overscroll-y-contain px-4 py-4">
@@ -196,7 +196,7 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
                 <DrawerFooter className="shrink-0">
                   <DrawerClose asChild>
                     <Button variant="outline" className="w-full font-mono text-xs">
-                      Close
+                      閉じる
                     </Button>
                   </DrawerClose>
                 </DrawerFooter>
@@ -210,9 +210,9 @@ export function ShaderLab({ definition }: { definition: LabDefinition }) {
         <Drawer direction="bottom" open={desktopControlsOpen} onOpenChange={setDesktopControlsOpen} showOverlay>
           <DrawerContent showOverlay className="flex max-h-[70svh] flex-col">
             <DrawerHeader className="shrink-0 border-b">
-              <DrawerTitle>Controls</DrawerTitle>
+              <DrawerTitle>コントロール</DrawerTitle>
               <DrawerDescription>
-                Tune the attractor while keeping the preview visible.
+                プレビューを見ながらパラメータを調整できます。
               </DrawerDescription>
             </DrawerHeader>
             <div className="flex-1 overflow-y-auto overscroll-y-contain px-5 py-5">

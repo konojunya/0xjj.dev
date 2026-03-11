@@ -51,7 +51,7 @@ export function WebGPUCanvas({ definition, values, isRunning, resetKey }: WebGPU
 
     async function init() {
       if (!navigator.gpu) {
-        setError('WebGPU is not available. Requires HTTPS and a supported browser (Chrome, Edge, Safari 17+).');
+        setError('WebGPU を利用できません。HTTPS と対応ブラウザ（Chrome、Edge、Safari 17+）が必要です。');
         return;
       }
 
@@ -60,11 +60,11 @@ export function WebGPUCanvas({ definition, values, isRunning, resetKey }: WebGPU
         // Try without powerPreference first (Safari may reject options)
         adapter = await navigator.gpu.requestAdapter();
       } catch (e) {
-        setError('Failed to initialize WebGPU adapter.');
+        setError('WebGPU アダプターの初期化に失敗しました。');
         return;
       }
       if (!adapter) {
-        setError('WebGPU adapter not available.');
+        setError('WebGPU アダプターが利用できません。');
         return;
       }
 
@@ -72,13 +72,13 @@ export function WebGPUCanvas({ definition, values, isRunning, resetKey }: WebGPU
       try {
         device = await adapter.requestDevice({});
       } catch (e) {
-        setError('Failed to get WebGPU device.');
+        setError('WebGPU デバイスの取得に失敗しました。');
         return;
       }
 
       const context = canvas.getContext('webgpu');
       if (!context) {
-        setError('Failed to get WebGPU canvas context.');
+        setError('WebGPU キャンバスコンテキストの取得に失敗しました。');
         return;
       }
 
@@ -118,7 +118,7 @@ export function WebGPUCanvas({ definition, values, isRunning, resetKey }: WebGPU
           getPointer: () => pointerRef.current,
         });
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to initialize WebGPU scene.');
+        setError(e instanceof Error ? e.message : 'WebGPU シーンの初期化に失敗しました。');
         return;
       }
 
@@ -168,7 +168,7 @@ export function WebGPUCanvas({ definition, values, isRunning, resetKey }: WebGPU
         cleanup = fn;
       })
       .catch((e) => {
-        setError(e instanceof Error ? e.message : 'An unexpected error occurred.');
+        setError(e instanceof Error ? e.message : '予期しないエラーが発生しました。');
       });
 
     return () => {
@@ -198,7 +198,7 @@ export function WebGPUCanvas({ definition, values, isRunning, resetKey }: WebGPU
       />
 
       <div className="pointer-events-none absolute inset-x-0 top-0 p-4 font-mono text-[11px] uppercase tracking-[0.24em] text-white/60">
-        <span>{isRunning ? `${fps} fps` : 'paused'}</span>
+        <span>{isRunning ? `${fps} fps` : '停止中'}</span>
       </div>
 
       {error && (

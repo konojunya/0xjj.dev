@@ -5,18 +5,18 @@ export const rosslerAttractorDefinition: FragmentShaderDefinition = {
   id: 'rossler-attractor',
   name: 'Rössler Attractor',
   summary:
-    'The Rössler attractor is a chaotic system that traces a flat spiral band with a characteristic fold — mostly confined to the x-y plane with occasional excursions in z, rendered as flowing colored lines.',
+    'レスラー・アトラクタは、x-y 平面上の平らな螺旋帯と特徴的な折り返しを描くカオス系です。時折 z 方向へ飛び出しながら、流れるような色付きの線として描画されます。',
   renderScale: 0.82,
   canvasHeight: 'clamp(320px, 52vh, 560px)',
   notes: [
-    'Rössler attractor (1976). The 3D trajectory is integrated per-pixel, projected to 2D, and rendered as continuous colored lines.',
-    'Unlike the Lorenz butterfly, the Rössler attractor forms a flat spiral band that occasionally folds upward — one of the simplest chaotic systems.',
+    'レスラー・アトラクタ（1976年）。3D 軌道をピクセルごとに積分し、2D に投影して連続的な色付き線として描画。',
+    'ローレンツの蝶とは異なり、レスラー・アトラクタは時折上方へ折り返す平らな螺旋帯を形成します — 最もシンプルなカオス系の一つ。',
   ],
   controls: [
     {
       key: 'spread',
-      label: 'Zoom',
-      description: 'Zoom into or out of the attractor.',
+      label: 'ズーム',
+      description: 'アトラクタの拡大・縮小。',
       min: 0,
       max: 100,
       step: 1,
@@ -26,8 +26,8 @@ export const rosslerAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'twist',
-      label: 'Rotation',
-      description: 'Speed of the 3D view rotation.',
+      label: '回転',
+      description: '3D ビューの回転速度。',
       min: 0,
       max: 100,
       step: 1,
@@ -37,8 +37,8 @@ export const rosslerAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'symmetry',
-      label: 'Elevation',
-      description: 'Camera tilt angle — top-down vs side view.',
+      label: '仰角',
+      description: 'カメラの傾き — 真上からの視点 vs 横からの視点。',
       min: 0,
       max: 100,
       step: 1,
@@ -48,8 +48,8 @@ export const rosslerAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'detail',
-      label: 'Trail',
-      description: 'Length of the visible trajectory.',
+      label: '軌跡',
+      description: '表示する軌跡の長さ。',
       min: 0,
       max: 100,
       step: 1,
@@ -59,8 +59,8 @@ export const rosslerAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'bloom',
-      label: 'Thickness',
-      description: 'Line thickness and glow radius.',
+      label: '太さ',
+      description: '線の太さとグロー半径。',
       min: 0,
       max: 100,
       step: 1,
@@ -70,8 +70,8 @@ export const rosslerAttractorDefinition: FragmentShaderDefinition = {
     },
     {
       key: 'motion',
-      label: 'Speed',
-      description: 'How fast the trajectory flows through the attractor.',
+      label: '速度',
+      description: '軌跡がアトラクタ上を流れる速さ。',
       min: 0,
       max: 100,
       step: 1,

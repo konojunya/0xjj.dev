@@ -35,14 +35,14 @@ interface BuiltinUniforms {
 function compileShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
   const shader = gl.createShader(type);
   if (!shader) {
-    throw new Error('Failed to create shader.');
+    throw new Error('シェーダーの作成に失敗しました。');
   }
 
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
 
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const info = gl.getShaderInfoLog(shader) ?? 'Unknown shader compile error.';
+    const info = gl.getShaderInfoLog(shader) ?? 'シェーダーのコンパイルエラー（詳細不明）';
     gl.deleteShader(shader);
     throw new Error(info);
   }
@@ -58,7 +58,7 @@ function createProgram(gl: WebGL2RenderingContext, fragmentShaderSource: string)
   if (!program) {
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
-    throw new Error('Failed to create program.');
+    throw new Error('プログラムの作成に失敗しました。');
   }
 
   gl.attachShader(program, vertexShader);
@@ -69,7 +69,7 @@ function createProgram(gl: WebGL2RenderingContext, fragmentShaderSource: string)
   gl.deleteShader(fragmentShader);
 
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const info = gl.getProgramInfoLog(program) ?? 'Unknown program link error.';
+    const info = gl.getProgramInfoLog(program) ?? 'プログラムのリンクエラー（詳細不明）';
     gl.deleteProgram(program);
     throw new Error(info);
   }
@@ -124,7 +124,7 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
       });
 
       if (!gl) {
-        throw new Error('WebGL2 is not available in this browser.');
+        throw new Error('このブラウザでは WebGL2 を利用できません。');
       }
 
       program = createProgram(gl, definition.fragmentShader);
@@ -132,7 +132,7 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
       vao = gl.createVertexArray();
 
       if (!vao) {
-        throw new Error('Failed to create vertex array.');
+        throw new Error('頂点配列の作成に失敗しました。');
       }
 
       gl.bindVertexArray(vao);
@@ -243,7 +243,7 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
         gl?.deleteProgram(program);
       }
       setCapability('error');
-      setMessage(error instanceof Error ? error.message : 'Shader compilation failed.');
+      setMessage(error instanceof Error ? error.message : 'シェーダーのコンパイルに失敗しました。');
       return;
     }
   }, [definition]);
@@ -268,7 +268,7 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
       />
 
       <div className="pointer-events-none absolute inset-x-0 top-0 p-4 font-mono text-[11px] uppercase tracking-[0.24em] text-white/60">
-        <span>{isRunning ? `${fps} fps` : 'paused'}</span>
+        <span>{isRunning ? `${fps} fps` : '停止中'}</span>
       </div>
 
       {capability !== 'ready' && (

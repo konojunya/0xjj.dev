@@ -414,13 +414,13 @@ export const curlNoiseDefinition: WebGPUDefinition = {
   id: 'curl-noise',
   name: 'Curl Noise Flow Field',
   summary:
-    'Thousands of particles flowing through a curl noise vector field, creating fluid-like visuals — powered by WebGPU compute shaders.',
+    '数千のパーティクルがカールノイズのベクトル場を流れ、流体のようなビジュアルを生み出します — WebGPU コンピュートシェーダーで駆動。',
   canvasHeight: 480,
   controls: [
     {
       key: 'noiseScale',
-      label: 'Noise Scale',
-      description: 'Zoom level of the noise field — lower values create larger flow structures',
+      label: 'ノイズスケール',
+      description: 'ノイズ場のズーム — 小さいほど大きな流れの構造を生成',
       min: 0.5,
       max: 5.0,
       step: 0.1,
@@ -429,8 +429,8 @@ export const curlNoiseDefinition: WebGPUDefinition = {
     },
     {
       key: 'flowSpeed',
-      label: 'Flow Speed',
-      description: 'How fast particles follow the curl noise vectors',
+      label: '流速',
+      description: 'パーティクルがカールノイズに追従する速さ',
       min: 0.1,
       max: 3.0,
       step: 0.1,
@@ -439,8 +439,8 @@ export const curlNoiseDefinition: WebGPUDefinition = {
     },
     {
       key: 'noiseEvol',
-      label: 'Noise Evolution',
-      description: 'How fast the noise field changes over time',
+      label: 'ノイズ変化',
+      description: 'ノイズ場が時間とともに変化する速さ',
       min: 0.0,
       max: 2.0,
       step: 0.05,
@@ -449,8 +449,8 @@ export const curlNoiseDefinition: WebGPUDefinition = {
     },
     {
       key: 'particleSize',
-      label: 'Particle Size',
-      description: 'Size of each particle',
+      label: 'パーティクルサイズ',
+      description: '各パーティクルの大きさ',
       min: 0.5,
       max: 4.0,
       step: 0.1,
@@ -459,9 +459,9 @@ export const curlNoiseDefinition: WebGPUDefinition = {
     },
   ],
   notes: [
-    'Particles follow a divergence-free curl noise field, creating smooth fluid-like motion.',
-    'The noise field evolves over time, producing an endlessly changing flow.',
-    'Requires a WebGPU-capable browser (Chrome 113+, Edge 113+, Safari 17+).',
+    '発散のないカールノイズ場に沿ってパーティクルが流れ、滑らかな流体的運動を生み出します。',
+    'ノイズ場は時間とともに変化し、絶え間なく変わる流れを生成します。',
+    'WebGPU 対応ブラウザが必要です（Chrome 113+、Edge 113+、Safari 17+）。',
   ],
   setup,
 };

@@ -345,13 +345,13 @@ export const reactionDiffusionDefinition: WebGPUDefinition = {
   id: 'reaction-diffusion',
   name: 'Reaction-Diffusion',
   summary:
-    'Gray-Scott reaction-diffusion simulation running entirely on the GPU via WebGPU compute shaders.',
+    'Gray-Scott 反応拡散シミュレーション。WebGPU コンピュートシェーダーで全て GPU 上で実行されます。',
   canvasHeight: 480,
   controls: [
     {
       key: 'pattern',
-      label: 'Pattern',
-      description: '1 Coral / 2 Mitosis / 3 Spots / 4 Stripes / 5 Worms / 6 Bubbles / 7 Waves / 8 Fingerprint',
+      label: 'パターン',
+      description: '1 サンゴ / 2 有糸分裂 / 3 斑点 / 4 縞模様 / 5 ワーム / 6 泡 / 7 波 / 8 指紋',
       min: 1,
       max: 8,
       step: 1,
@@ -360,8 +360,8 @@ export const reactionDiffusionDefinition: WebGPUDefinition = {
     },
     {
       key: 'speed',
-      label: 'Speed',
-      description: 'Simulation steps per frame — higher = faster evolution',
+      label: '速度',
+      description: 'フレームごとのシミュレーション回数 — 大きいほど高速に進化',
       min: 2,
       max: 20,
       step: 1,
@@ -370,9 +370,9 @@ export const reactionDiffusionDefinition: WebGPUDefinition = {
     },
   ],
   notes: [
-    'Gray-Scott model: two chemicals react and diffuse on a 2D grid.',
-    'Click/touch the canvas to inject chemical B and seed new patterns.',
-    'Requires a WebGPU-capable browser (Chrome 113+, Edge 113+).',
+    'Gray-Scott モデル：2つの化学物質が 2D グリッド上で反応・拡散します。',
+    'キャンバスをクリック/タッチすると化学物質 B を注入し、新しいパターンを生成できます。',
+    'WebGPU 対応ブラウザが必要です（Chrome 113+、Edge 113+）。',
   ],
   setup,
 };

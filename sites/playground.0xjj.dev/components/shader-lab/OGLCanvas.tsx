@@ -87,7 +87,7 @@ export function OGLCanvas({ definition, values, isRunning }: OGLCanvasProps) {
         handle.dispose();
       };
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to initialize OGL scene.');
+      setError(e instanceof Error ? e.message : 'OGL シーンの初期化に失敗しました。');
       return;
     }
   }, [definition]);
@@ -112,7 +112,7 @@ export function OGLCanvas({ definition, values, isRunning }: OGLCanvasProps) {
       />
 
       <div className="pointer-events-none absolute inset-x-0 top-0 p-4 font-mono text-[11px] uppercase tracking-[0.24em] text-white/60">
-        <span>{isRunning ? `${fps} fps` : 'paused'}</span>
+        <span>{isRunning ? `${fps} fps` : '停止中'}</span>
       </div>
 
       {error && (

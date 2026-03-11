@@ -236,17 +236,17 @@ export const lSystemDefinition: OGLSceneDefinition = {
   id: 'l-system',
   name: 'L-System',
   summary:
-    'Lindenmayer systems are parallel rewriting grammars that produce fractal plant-like structures. Each page load grows a unique tree from a time-based seed.',
+    'リンデンマイヤーシステムは、フラクタルな植物構造を生成する並列書き換え文法です。ページを読み込むたびに時刻ベースのシードからユニークな樹木が育ちます。',
   canvasHeight: 'clamp(320px, 52vh, 560px)',
   notes: [
-    'L-System (Aristid Lindenmayer, 1968). A string-rewriting grammar where each iteration replaces symbols according to production rules, producing fractal growth.',
-    'Turtle graphics interprets the string as drawing commands: F = forward, + = turn left, − = turn right, [ ] = push/pop state for branching.',
+    'L-System（Aristid Lindenmayer、1968年）。各反復で生成規則に従い記号を置換し、フラクタル的な成長を生み出す文字列書き換え文法。',
+    'タートルグラフィクスが文字列を描画命令として解釈：F = 前進、+ = 左回転、− = 右回転、[ ] = 分岐のための状態の保存/復元。',
   ],
   controls: [
     {
       key: 'spread',
-      label: 'Seed',
-      description: 'Random seed — each value grows a unique tree.',
+      label: 'シード',
+      description: 'ランダムシード — 値ごとに異なる樹木が育ちます。',
       min: 0,
       max: 9999,
       step: 1,
@@ -255,8 +255,8 @@ export const lSystemDefinition: OGLSceneDefinition = {
     },
     {
       key: 'detail',
-      label: 'Max Iterations',
-      description: 'Maximum growth depth — higher values reveal finer vein detail.',
+      label: '最大反復',
+      description: '成長の最大深度 — 大きいほど細かい枝が現れます。',
       min: 2,
       max: 8,
       step: 1,
@@ -265,8 +265,8 @@ export const lSystemDefinition: OGLSceneDefinition = {
     },
     {
       key: 'bloom',
-      label: 'Line Width',
-      description: 'Thickness of the branches.',
+      label: '線幅',
+      description: '枝の太さ。',
       min: 0.5,
       max: 5,
       step: 0.5,
@@ -276,8 +276,8 @@ export const lSystemDefinition: OGLSceneDefinition = {
     },
     {
       key: 'motion',
-      label: 'Growth Speed',
-      description: 'Speed of automatic growth animation.',
+      label: '成長速度',
+      description: '自動成長アニメーションの速さ。',
       min: 0,
       max: 100,
       step: 1,
