@@ -110,17 +110,17 @@ function describeCron(expr: string): string {
   const [min, hour, dom, mon, dow] = f;
 
   if (min === '*' && hour === '*' && dom === '*' && mon === '*' && dow === '*')
-    return 'Every minute';
+    return '毎分';
   if (min === '0' && hour === '*' && dom === '*' && mon === '*' && dow === '*')
-    return 'Every hour, at minute 0';
+    return '毎時0分';
   if (min === '0' && hour === '0' && dom === '*' && mon === '*' && dow === '*')
-    return 'Every day at 00:00';
+    return '毎日 00:00';
   if (min === '0' && hour === '0' && dom === '*' && mon === '*' && dow === '1')
-    return 'Every Monday at 00:00';
+    return '毎週月曜 00:00';
   if (min === '0' && hour === '0' && dom === '1' && mon === '*' && dow === '*')
-    return 'At 00:00 on day 1 of every month';
+    return '毎月1日 00:00';
   if (min === '0' && hour === '0' && dom === '1' && mon === '1' && dow === '*')
-    return 'At 00:00 on January 1st';
+    return '毎年1月1日 00:00';
 
   const parts: string[] = [];
   parts.push(`minute ${describeField(min)}`);
@@ -134,11 +134,11 @@ function describeCron(expr: string): string {
 // ─── Presets ────────────────────────────────────────────────────────────────
 
 const PRESETS = [
-  { label: 'Every minute', value: '* * * * *' },
-  { label: 'Every hour',   value: '0 * * * *' },
-  { label: 'Daily',        value: '0 0 * * *' },
-  { label: 'Weekly',       value: '0 0 * * 1' },
-  { label: 'Monthly',      value: '0 0 1 * *' },
+  { label: '毎分', value: '* * * * *' },
+  { label: '毎時',   value: '0 * * * *' },
+  { label: '毎日',        value: '0 0 * * *' },
+  { label: '毎週',       value: '0 0 * * 1' },
+  { label: '毎月',      value: '0 0 1 * *' },
 ] as const;
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -166,7 +166,7 @@ export default function CronParser() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Cron Expression Parser</h1>
         <p className="mt-1 text-sm text-muted">
-          Parse cron expressions and preview the next scheduled run times.
+          cron式を解析し、次回以降の実行予定時刻をプレビューします。
         </p>
       </div>
 
@@ -246,7 +246,7 @@ export default function CronParser() {
             className="mb-3 border-b pb-2"
             style={{ borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)' }}
           >
-            <span className="font-mono text-xs font-semibold text-fg">Next {runs.length} runs</span>
+            <span className="font-mono text-xs font-semibold text-fg">次の{runs.length}回の実行予定</span>
           </div>
           <ol className="space-y-2">
             {runs.map((date, i) => (
@@ -268,7 +268,7 @@ export default function CronParser() {
                 </span>
                 {i === 0 && (
                   <span className="font-mono text-xs" style={{ color: 'var(--color-accent)' }}>
-                    next
+                    次の
                   </span>
                 )}
               </li>

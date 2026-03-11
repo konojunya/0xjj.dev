@@ -613,7 +613,7 @@ function CopyButton({ value }: { value: string }) {
           : 'text-muted hover:text-fg'
       }`}
     >
-      {copied ? '✓ copied' : 'copy'}
+      {copied ? '✓ コピー済み' : 'コピー'}
     </button>
   );
 }
@@ -670,7 +670,7 @@ export default function ColorConverter() {
       {/* header */}
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Color Converter</h1>
-        <p className="mt-1 text-sm text-muted">Convert any CSS color format — HEX, RGB, HSL, OKLAB, OKLCH, and more.</p>
+        <p className="mt-1 text-sm text-muted">HEX・RGB・HSL・OKLAB・OKLCH など、あらゆるCSS色形式を相互変換します。</p>
       </div>
 
       {/* input row */}
@@ -680,7 +680,7 @@ export default function ColorConverter() {
           value={lastValidPickerRef.current}
           onChange={(e) => setColorInput(e.target.value)}
           className="h-10 w-10 cursor-pointer rounded-lg border border-[color-mix(in_srgb,var(--color-fg)_15%,transparent)] bg-transparent p-0.5"
-          title="Pick a color"
+          title="色を選択"
         />
         <input
           type="text"
@@ -705,7 +705,7 @@ export default function ColorConverter() {
       {/* error */}
       {isInvalid && (
         <p className="mb-6 font-mono text-xs text-red-500">
-          Unrecognized color format.
+          認識できない色形式です。
         </p>
       )}
 
@@ -731,7 +731,7 @@ export default function ColorConverter() {
           <FormatRow name="color(srgb)" value={colors.colorSrgb} />
           <FormatRow name="color(display-p3)" value={colors.colorDisplayP3} />
 
-          <SectionDivider label="Design / Other" />
+          <SectionDivider label="デザイン / その他" />
           <FormatRow name="HSV / HSB" value={colors.hsv} />
           <FormatRow name="CMYK" value={colors.cmyk} />
         </>

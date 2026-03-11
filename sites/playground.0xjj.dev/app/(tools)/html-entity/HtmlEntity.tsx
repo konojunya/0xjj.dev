@@ -76,7 +76,7 @@ export default function HtmlEntity() {
         HTML Entity Encoder / Decoder
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Encode special characters to HTML entities or decode entities back to text.
+        特殊文字をHTMLエンティティにエンコード、またはデコードします。
       </p>
 
       {/* Mode tabs */}
@@ -105,12 +105,12 @@ export default function HtmlEntity() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
           <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-muted)', marginBottom: '0.4rem' }}>
-            {mode === 'encode' ? 'Plain text' : 'HTML entities'}
+            {mode === 'encode' ? 'プレーンテキスト' : 'HTMLエンティティ'}
           </label>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={mode === 'encode' ? 'Enter text with special characters…' : 'Enter HTML entities (e.g. &lt;div&gt;)…'}
+            placeholder={mode === 'encode' ? '特殊文字を含むテキストを入力...' : 'HTMLエンティティを入力 (例: &lt;div&gt;)...'}
             rows={5}
             style={{
               width: '100%',
@@ -142,14 +142,14 @@ export default function HtmlEntity() {
               fontSize: '0.875rem',
             }}
           >
-            ⇅ Swap
+            ⇅ 入れ替え
           </button>
         </div>
 
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
             <label style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>
-              {mode === 'encode' ? 'HTML entities' : 'Plain text'}
+              {mode === 'encode' ? 'HTMLエンティティ' : 'プレーンテキスト'}
             </label>
             {output && (
               <button
@@ -164,14 +164,14 @@ export default function HtmlEntity() {
                   fontSize: '0.75rem',
                 }}
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? 'コピー済み!' : 'コピー'}
               </button>
             )}
           </div>
           <textarea
             readOnly
             value={output}
-            placeholder="Output will appear here…"
+            placeholder="出力がここに表示されます..."
             rows={5}
             style={{
               width: '100%',

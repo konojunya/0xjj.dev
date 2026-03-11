@@ -62,13 +62,13 @@ export default function CaseConverter() {
         Case Converter
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Convert text between camelCase, PascalCase, snake_case, kebab-case, and UPPER_SNAKE_CASE.
+        camelCase・PascalCase・snake_case・kebab-case・UPPER_SNAKE_CASE を相互変換します。
       </p>
 
       <textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter text to convert…"
+        placeholder="変換するテキストを入力..."
         rows={3}
         style={{
           width: '100%',
@@ -137,7 +137,7 @@ export default function CaseConverter() {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {copied === label ? 'Copied!' : 'Copy'}
+                  {copied === label ? 'コピー済み!' : 'コピー'}
                 </button>
               )}
             </div>

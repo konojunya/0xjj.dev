@@ -31,7 +31,7 @@ function CopyButton({ text }: { text: string }) {
         color: 'var(--color-muted)',
       }}
     >
-      {copied ? 'copied!' : 'copy'}
+      {copied ? 'コピー済み!' : 'コピー'}
     </button>
   );
 }
@@ -63,17 +63,17 @@ export default function HashCalculator() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Hash Calculator</h1>
         <p className="mt-1 text-sm text-muted">
-          Compute SHA-1, SHA-256, SHA-384, and SHA-512 hashes of any text.
+          テキストのSHA-1・SHA-256・SHA-384・SHA-512ハッシュ値を計算します。
         </p>
       </div>
 
       {/* Input */}
       <div className="mb-6">
-        <label className="mb-1.5 block font-mono text-xs text-muted">Input</label>
+        <label className="mb-1.5 block font-mono text-xs text-muted">入力</label>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Enter text to hash..."
+          placeholder="ハッシュ化するテキストを入力..."
           rows={5}
           className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none"
           style={{

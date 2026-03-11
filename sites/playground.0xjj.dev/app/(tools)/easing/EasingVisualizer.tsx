@@ -48,7 +48,7 @@ function CopyButton({ text }: { text: string }) {
         color: 'var(--color-muted)',
       }}
     >
-      {copied ? 'copied!' : 'copy'}
+      {copied ? 'コピー済み!' : 'コピー'}
     </button>
   );
 }
@@ -116,7 +116,7 @@ export default function EasingVisualizer() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Easing Visualizer</h1>
         <p className="mt-1 text-sm text-muted">
-          Visualize and preview cubic-bezier easing curves for CSS.
+          CSS用のcubic-bezierイージングカーブを視覚的にプレビューします。
         </p>
       </div>
 
@@ -161,7 +161,7 @@ export default function EasingVisualizer() {
       <div className="mb-6 flex flex-wrap items-start gap-8">
         {/* SVG curve */}
         <div>
-          <p className="mb-2 font-mono text-xs text-muted">Curve</p>
+          <p className="mb-2 font-mono text-xs text-muted">カーブ</p>
           <svg
             width={200}
             height={200}
@@ -199,7 +199,7 @@ export default function EasingVisualizer() {
 
         {/* Animation preview */}
         <div>
-          <p className="mb-2 font-mono text-xs text-muted">Preview</p>
+          <p className="mb-2 font-mono text-xs text-muted">プレビュー</p>
           <div
             className="relative flex items-start justify-center rounded-lg border"
             style={{
@@ -223,7 +223,7 @@ export default function EasingVisualizer() {
               color: playing ? 'var(--color-muted)' : 'var(--color-fg)',
             }}
           >
-            {playing ? 'Playing...' : 'Play'}
+            {playing ? '再生中...' : '再生'}
           </button>
         </div>
       </div>

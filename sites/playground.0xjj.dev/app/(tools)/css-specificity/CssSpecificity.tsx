@@ -113,7 +113,7 @@ export default function CssSpecificity() {
         CSS Specificity Calculator
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Enter CSS selectors to calculate their specificity (a, b, c).
+        CSSセレクタを入力して詳細度 (a, b, c) を計算します。
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -141,7 +141,7 @@ export default function CssSpecificity() {
                 type="text"
                 value={row.selector}
                 onChange={(e) => updateRow(row.id, e.target.value)}
-                placeholder="CSS selector (e.g. #id .class > a)"
+                placeholder="CSSセレクタ (例: #id .class > a)"
                 style={{
                   flex: 1,
                   padding: '0.5rem 0.75rem',
@@ -165,13 +165,13 @@ export default function CssSpecificity() {
                     color: winner ? 'var(--color-accent)' : 'var(--color-fg)',
                   }}
                 >
-                  <span title="ID selectors" style={{ padding: '0.25rem 0.5rem', borderRadius: 4, background: 'color-mix(in srgb, var(--color-fg) 8%, transparent)' }}>
+                  <span title="IDセレクタ" style={{ padding: '0.25rem 0.5rem', borderRadius: 4, background: 'color-mix(in srgb, var(--color-fg) 8%, transparent)' }}>
                     {spec.a}
                   </span>
-                  <span title="Class/attr/pseudo-class" style={{ padding: '0.25rem 0.5rem', borderRadius: 4, background: 'color-mix(in srgb, var(--color-fg) 8%, transparent)' }}>
+                  <span title="クラス/属性/擬似クラス" style={{ padding: '0.25rem 0.5rem', borderRadius: 4, background: 'color-mix(in srgb, var(--color-fg) 8%, transparent)' }}>
                     {spec.b}
                   </span>
-                  <span title="Element/pseudo-element" style={{ padding: '0.25rem 0.5rem', borderRadius: 4, background: 'color-mix(in srgb, var(--color-fg) 8%, transparent)' }}>
+                  <span title="要素/擬似要素" style={{ padding: '0.25rem 0.5rem', borderRadius: 4, background: 'color-mix(in srgb, var(--color-fg) 8%, transparent)' }}>
                     {spec.c}
                   </span>
                   {winner && <span style={{ color: 'var(--color-accent)' }}>★</span>}
@@ -190,7 +190,7 @@ export default function CssSpecificity() {
                     fontSize: '1rem',
                     lineHeight: 1,
                   }}
-                  title="Remove"
+                  title="削除"
                 >
                   ✕
                 </button>
@@ -213,10 +213,10 @@ export default function CssSpecificity() {
             fontSize: '0.875rem',
           }}
         >
-          + Add selector
+          + セレクタを追加
         </button>
         <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>
-          Columns: a (ID) · b (class/attr/pseudo-class) · c (element/pseudo-element)
+          列: a (ID) ・ b (クラス/属性/擬似クラス) ・ c (要素/擬似要素)
         </span>
       </div>
     </div>

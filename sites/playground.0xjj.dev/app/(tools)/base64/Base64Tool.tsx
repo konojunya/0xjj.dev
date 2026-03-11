@@ -36,7 +36,7 @@ function CopyButton({ text }: { text: string }) {
         color: 'var(--color-muted)',
       }}
     >
-      {copied ? 'copied!' : 'copy'}
+      {copied ? 'コピー済み!' : 'コピー'}
     </button>
   );
 }
@@ -69,7 +69,7 @@ export default function Base64Tool() {
           Base64 Encoder / Decoder
         </h1>
         <p className="mt-1 text-sm text-muted">
-          Encode text to Base64 or decode Base64 back to text.
+          テキストをBase64にエンコード、またはBase64をテキストにデコードします。
         </p>
       </div>
 
@@ -109,15 +109,15 @@ export default function Base64Tool() {
       {/* Input */}
       <div className="mb-4">
         <label className="mb-1.5 block font-mono text-xs text-muted">
-          {mode === 'encode' ? 'Text' : 'Base64'}
+          {mode === 'encode' ? 'テキスト' : 'Base64'}
         </label>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={
             mode === 'encode'
-              ? 'Enter text to encode...'
-              : 'Enter Base64 to decode...'
+              ? 'エンコードするテキストを入力...'
+              : 'デコードするBase64を入力...'
           }
           rows={6}
           className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none transition-colors"
@@ -138,7 +138,7 @@ export default function Base64Tool() {
       <div>
         <div className="mb-1.5 flex items-center justify-between">
           <label className="font-mono text-xs text-muted">
-            {mode === 'encode' ? 'Base64' : 'Text'}
+            {mode === 'encode' ? 'Base64' : 'テキスト'}
           </label>
           {output && <CopyButton text={output} />}
         </div>
@@ -146,7 +146,7 @@ export default function Base64Tool() {
           value={output}
           readOnly
           rows={6}
-          placeholder="Output will appear here..."
+          placeholder="出力がここに表示されます..."
           className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none"
           style={{
             borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)',
