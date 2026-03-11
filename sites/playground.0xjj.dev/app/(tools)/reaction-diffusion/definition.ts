@@ -1,8 +1,26 @@
 import type { WebGPUDefinition, WebGPUSetupContext, WebGPUSceneHandle } from '@/components/shader-lab/types';
 
 // ── Gray-Scott Reaction-Diffusion ──
-// Standard Pearson convention: dA≈0.21, dB≈0.105, dt=1.0
+// Standard Pearson convention: dA=0.21, dB=0.105
 // CFL stability: dt × dA × 4 = 0.84 < 1 ✓
+
+// Named presets: known (feed, kill) pairs that produce distinct patterns
+const PRESETS: [string, number, number][] = [
+  // [name, feed, kill]
+  ['Coral',       0.055, 0.062],
+  ['Mitosis',     0.028, 0.062],
+  ['Spots',       0.035, 0.065],
+  ['Stripes',     0.025, 0.060],
+  ['Worms',       0.078, 0.061],
+  ['Bubbles',     0.020, 0.055],
+  ['Waves',       0.014, 0.054],
+  ['Fingerprint', 0.040, 0.063],
+];
+
+function getPreset(index: number): { feed: number; kill: number } {
+  const i = Math.max(0, Math.min(PRESETS.length - 1, Math.round(index) - 1));
+  return { feed: PRESETS[i][1], kill: PRESETS[i][2] };
+}
 
 const COMPUTE_WGSL = /* wgsl */ `
 struct Params {
@@ -53,7 +71,7 @@ fn main(@builtin(global_invocation_id) gid : vec3u) {
     let dx = f32(gid.x) - px;
     let dy = f32(gid.y) - py;
     let dist2 = dx * dx + dy * dy;
-    let radius = f32(max(params.w, params.h)) * 0.02;
+    let radius = f32(max(params.w, params.h)) * 0.025;
     if (dist2 < radius * radius) {
       b = 1.0;
       a = 0.0;
@@ -118,7 +136,7 @@ fn fs(in : VSOut) -> @location(0) vec4f {
   let ab = sampleGrid(in.uv);
   let v = clamp(ab.x - ab.y, 0.0, 1.0);
 
-  // Colour ramp: deep navy → teal → aqua → bright white
+  // Colour ramp: deep navy -> teal -> aqua -> bright white
   let c1 = vec3f(0.01, 0.03, 0.08);
   let c2 = vec3f(0.02, 0.20, 0.32);
   let c3 = vec3f(0.10, 0.52, 0.62);
@@ -149,27 +167,29 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
   const CELL_COUNT = SIM_W * SIM_H;
 
   // Initial state: A=1, B=0 everywhere, seed circles with B
-  const init = new Float32Array(CELL_COUNT * 2);
-  for (let i = 0; i < CELL_COUNT; i++) {
-    init[i * 2] = 1.0;
-    init[i * 2 + 1] = 0.0;
-  }
-  // Seed random circles
-  const seedCount = isMobile ? 10 : 18;
-  for (let s = 0; s < seedCount; s++) {
-    const cx = Math.floor(Math.random() * SIM_W);
-    const cy = Math.floor(Math.random() * SIM_H);
-    const r = 2 + Math.floor(Math.random() * 4);
-    for (let dy = -r; dy <= r; dy++) {
-      for (let dx = -r; dx <= r; dx++) {
-        if (dx * dx + dy * dy > r * r) continue;
-        const x = ((cx + dx) % SIM_W + SIM_W) % SIM_W;
-        const y = ((cy + dy) % SIM_H + SIM_H) % SIM_H;
-        const idx = (y * SIM_W + x) * 2;
-        init[idx] = 0.5;
-        init[idx + 1] = 0.25;
+  function buildInitData(): Float32Array {
+    const data = new Float32Array(CELL_COUNT * 2);
+    for (let i = 0; i < CELL_COUNT; i++) {
+      data[i * 2] = 1.0;
+      data[i * 2 + 1] = 0.0;
+    }
+    const seedCount = isMobile ? 10 : 18;
+    for (let s = 0; s < seedCount; s++) {
+      const cx = Math.floor(Math.random() * SIM_W);
+      const cy = Math.floor(Math.random() * SIM_H);
+      const r = 2 + Math.floor(Math.random() * 4);
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (dx * dx + dy * dy > r * r) continue;
+          const x = ((cx + dx) % SIM_W + SIM_W) % SIM_W;
+          const y = ((cy + dy) % SIM_H + SIM_H) % SIM_H;
+          const idx = (y * SIM_W + x) * 2;
+          data[idx] = 0.5;
+          data[idx + 1] = 0.25;
+        }
       }
     }
+    return data;
   }
 
   // Buffers
@@ -179,10 +199,14 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     }),
   );
-  device.queue.writeBuffer(gridBufs[0], 0, init);
-  device.queue.writeBuffer(gridBufs[1], 0, init);
+  const initData = buildInitData();
+  device.queue.writeBuffer(gridBufs[0], 0, initData);
+  device.queue.writeBuffer(gridBufs[1], 0, initData);
 
-  // Params uniform: 12 × 4 = 48 bytes
+  // Track current preset to re-seed on change
+  let currentPreset = 1;
+
+  // Params uniform: 12 x 4 = 48 bytes
   const PARAM_SIZE = 48;
   const paramBuf = device.createBuffer({
     size: PARAM_SIZE,
@@ -249,12 +273,19 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
 
   function render() {
     const vals = ctx.getValues();
-    const feed = vals.feed ?? 0.055;
-    const kill = vals.kill ?? 0.062;
-    const dA = vals.dA ?? 0.21;
-    const dB = vals.dB ?? 0.105;
+    const presetIdx = Math.round(vals.pattern ?? 1);
     const speed = Math.round(vals.speed ?? 10);
 
+    // Re-seed grid when preset changes
+    if (presetIdx !== currentPreset) {
+      currentPreset = presetIdx;
+      const fresh = buildInitData();
+      device.queue.writeBuffer(gridBufs[0], 0, fresh);
+      device.queue.writeBuffer(gridBufs[1], 0, fresh);
+      ping = 0;
+    }
+
+    const { feed, kill } = getPreset(presetIdx);
     const pointer = ctx.getPointer();
 
     // Upload params
@@ -263,14 +294,13 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
     const u32 = new Uint32Array(paramData);
     f32[0] = feed;
     f32[1] = kill;
-    f32[2] = dA;
-    f32[3] = dB;
+    f32[2] = 0.21;  // dA (fixed)
+    f32[3] = 0.105;  // dB (fixed)
     u32[4] = SIM_W;
     u32[5] = SIM_H;
     f32[6] = pointer.x;
     f32[7] = pointer.y;
     u32[8] = pointerDown ? 1 : 0;
-    // [9..11] = padding
     device.queue.writeBuffer(paramBuf, 0, paramData);
 
     const encoder = device.createCommandEncoder();
@@ -329,40 +359,14 @@ export const reactionDiffusionDefinition: WebGPUDefinition = {
   canvasHeight: 480,
   controls: [
     {
-      key: 'feed',
-      label: 'Feed Rate',
-      description: 'How fast chemical A is replenished — determines pattern type',
-      min: 0.01,
-      max: 0.1,
-      step: 0.001,
-      defaultValue: 0.055,
-    },
-    {
-      key: 'kill',
-      label: 'Kill Rate',
-      description: 'How fast chemical B is removed — determines pattern type',
-      min: 0.03,
-      max: 0.08,
-      step: 0.001,
-      defaultValue: 0.062,
-    },
-    {
-      key: 'dA',
-      label: 'Diffusion A',
-      description: 'Diffusion speed of chemical A',
-      min: 0.1,
-      max: 0.24,
-      step: 0.005,
-      defaultValue: 0.21,
-    },
-    {
-      key: 'dB',
-      label: 'Diffusion B',
-      description: 'Diffusion speed of chemical B',
-      min: 0.04,
-      max: 0.14,
-      step: 0.005,
-      defaultValue: 0.105,
+      key: 'pattern',
+      label: 'Pattern',
+      description: '1 Coral / 2 Mitosis / 3 Spots / 4 Stripes / 5 Worms / 6 Bubbles / 7 Waves / 8 Fingerprint',
+      min: 1,
+      max: 8,
+      step: 1,
+      defaultValue: 1,
+      precision: 0,
     },
     {
       key: 'speed',
