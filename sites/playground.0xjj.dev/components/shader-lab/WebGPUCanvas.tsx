@@ -42,7 +42,7 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
 
     async function init() {
       if (!navigator.gpu) {
-        setError('[Step 1] navigator.gpu is undefined. WebGPU is not available in this browser.');
+        setError('WebGPU is not available. Requires HTTPS and a supported browser (Chrome, Edge, Safari 17+).');
         return;
       }
 
@@ -51,11 +51,11 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
         // Try without powerPreference first (Safari may reject options)
         adapter = await navigator.gpu.requestAdapter();
       } catch (e) {
-        setError(`[Step 2] requestAdapter() threw: ${e instanceof Error ? e.message : String(e)}`);
+        setError('Failed to initialize WebGPU adapter.');
         return;
       }
       if (!adapter) {
-        setError('[Step 2] requestAdapter() returned null. WebGPU adapter not available.');
+        setError('WebGPU adapter not available.');
         return;
       }
 
@@ -63,13 +63,13 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
       try {
         device = await adapter.requestDevice({});
       } catch (e) {
-        setError(`[Step 3] requestDevice() failed: ${e instanceof Error ? e.message : String(e)}`);
+        setError('Failed to get WebGPU device.');
         return;
       }
 
       const context = canvas.getContext('webgpu');
       if (!context) {
-        setError('[Step 4] canvas.getContext("webgpu") returned null.');
+        setError('Failed to get WebGPU canvas context.');
         return;
       }
 
@@ -109,7 +109,7 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
           getPointer: () => pointerRef.current,
         });
       } catch (e) {
-        setError(`[Step 5] setup() failed: ${e instanceof Error ? e.message : String(e)}`);
+        setError(e instanceof Error ? e.message : 'Failed to initialize WebGPU scene.');
         return;
       }
 
@@ -158,7 +158,7 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
         cleanup = fn;
       })
       .catch((e) => {
-        setError(`[Uncaught] ${e instanceof Error ? e.message : String(e)}`);
+        setError(e instanceof Error ? e.message : 'An unexpected error occurred.');
       });
 
     return () => {
