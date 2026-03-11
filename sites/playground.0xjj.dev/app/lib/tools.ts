@@ -214,6 +214,13 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'l-system',
+    name: 'L-System',
+    description: 'Procedural fractal generation through Lindenmayer rewriting grammars and turtle graphics.',
+    href: '/l-system/',
+    category: 'ui',
+  },
+  {
     slug: 'lorenz-attractor',
     name: 'Lorenz Attractor',
     description: 'Interactive 3D Lorenz attractor rendered as flowing colored lines in a WebGL2 fragment shader.',

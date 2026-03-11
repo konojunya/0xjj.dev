@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { ShaderControlValues, ShaderDefinition } from './types';
+import type { FragmentShaderDefinition, ShaderControlValues } from './types';
 
 const VERTEX_SHADER_SOURCE = `#version 300 es
 precision highp float;
@@ -20,7 +20,7 @@ void main() {
 type Capability = 'ready' | 'unsupported' | 'error';
 
 interface ShaderCanvasProps {
-  definition: ShaderDefinition;
+  definition: FragmentShaderDefinition;
   values: ShaderControlValues;
   isRunning: boolean;
 }
@@ -114,14 +114,6 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
     let lastRenderTime = 0;
 
     try {
-      if (definition.renderer.graphics !== 'webgl2') {
-        throw new Error('Only WebGL2 is supported in the current shader runtime.');
-      }
-
-      if (definition.renderer.render !== 'raw') {
-        throw new Error('This shader is currently using the raw WebGL2 renderer.');
-      }
-
       const gl = canvas.getContext('webgl2', {
         alpha: false,
         antialias: false,

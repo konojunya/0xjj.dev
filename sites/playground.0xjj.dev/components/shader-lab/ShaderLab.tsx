@@ -13,10 +13,11 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Slider } from '@/components/ui/slider';
+import { OGLCanvas } from './OGLCanvas';
 import { ShaderCanvas } from './ShaderCanvas';
-import type { ShaderControlValues, ShaderDefinition, ShaderSliderControl } from './types';
+import type { LabDefinition, ShaderControlValues, ShaderSliderControl } from './types';
 
-function buildDefaultValues(definition: ShaderDefinition): ShaderControlValues {
+function buildDefaultValues(definition: LabDefinition): ShaderControlValues {
   return Object.fromEntries(
     definition.controls.map((control) => [control.key, control.defaultValue]),
   );
@@ -33,7 +34,7 @@ function ShaderControls({
   onChange,
   columns = 'responsive',
 }: {
-  definition: ShaderDefinition;
+  definition: LabDefinition;
   values: ShaderControlValues;
   onChange: (key: string, value: number) => void;
   columns?: 'responsive' | 'two' | 'three';
@@ -90,7 +91,7 @@ function ShaderControls({
   );
 }
 
-export function ShaderLab({ definition }: { definition: ShaderDefinition }) {
+export function ShaderLab({ definition }: { definition: LabDefinition }) {
   const [values, setValues] = useState<ShaderControlValues>(() => buildDefaultValues(definition));
   const [isRunning, setIsRunning] = useState(true);
   const [mobileControlsOpen, setMobileControlsOpen] = useState(false);
@@ -131,7 +132,11 @@ export function ShaderLab({ definition }: { definition: ShaderDefinition }) {
           </button>
         </div>
 
-        <ShaderCanvas definition={definition} values={values} isRunning={isRunning} />
+        {definition.kind === 'fragment' ? (
+          <ShaderCanvas definition={definition} values={values} isRunning={isRunning} />
+        ) : (
+          <OGLCanvas definition={definition} values={values} isRunning={isRunning} />
+        )}
 
         <div className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-between gap-3 px-4 py-4 md:hidden">
           <button

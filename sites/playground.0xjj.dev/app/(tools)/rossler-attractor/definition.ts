@@ -1,14 +1,11 @@
-import type { ShaderDefinition } from '@/components/shader-lab/types';
+import type { FragmentShaderDefinition } from '@/components/shader-lab/types';
 
-export const rosslerAttractorDefinition: ShaderDefinition = {
+export const rosslerAttractorDefinition: FragmentShaderDefinition = {
+  kind: 'fragment',
   id: 'rossler-attractor',
   name: 'Rössler Attractor',
   summary:
     'The Rössler attractor is a chaotic system that traces a flat spiral band with a characteristic fold — mostly confined to the x-y plane with occasional excursions in z, rendered as flowing colored lines.',
-  renderer: {
-    graphics: 'webgl2',
-    render: 'raw',
-  },
   renderScale: 0.82,
   canvasHeight: 'clamp(320px, 52vh, 560px)',
   notes: [

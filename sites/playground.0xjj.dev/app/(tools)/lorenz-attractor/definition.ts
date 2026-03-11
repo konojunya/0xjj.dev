@@ -1,14 +1,11 @@
-import type { ShaderDefinition } from '@/components/shader-lab/types';
+import type { FragmentShaderDefinition } from '@/components/shader-lab/types';
 
-export const lorenzAttractorDefinition: ShaderDefinition = {
+export const lorenzAttractorDefinition: FragmentShaderDefinition = {
+  kind: 'fragment',
   id: 'lorenz-attractor',
   name: 'Lorenz Attractor',
   summary:
     'The Lorenz attractor is a chaotic system of three coupled differential equations that traces an endlessly evolving butterfly-shaped trajectory, rendered as flowing colored lines.',
-  renderer: {
-    graphics: 'webgl2',
-    render: 'raw',
-  },
   renderScale: 0.82,
   canvasHeight: 'clamp(320px, 52vh, 560px)',
   notes: [
