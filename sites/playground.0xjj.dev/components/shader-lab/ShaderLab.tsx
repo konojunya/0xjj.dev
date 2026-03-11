@@ -113,6 +113,13 @@ export function ShaderLab({ definition }: { definition: ShaderDefinition }) {
           </button>
           <button
             type="button"
+            onClick={() => setValues(buildDefaultValues(definition))}
+            className="rounded-full border border-white/12 bg-black/20 px-4 py-2 font-mono text-xs text-white/70 backdrop-blur-md transition-colors hover:bg-black/34"
+          >
+            Reset
+          </button>
+          <button
+            type="button"
             onClick={() => setDesktopControlsOpen(true)}
             className="rounded-full border border-white/12 bg-black/20 px-4 py-2 font-mono text-xs text-white/70 backdrop-blur-md transition-colors hover:bg-black/34"
           >
@@ -167,17 +174,9 @@ export function ShaderLab({ definition }: { definition: ShaderDefinition }) {
                     }}
                   />
                 </div>
-                <DrawerFooter className="shrink-0 grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    onClick={() => setValues(buildDefaultValues(definition))}
-                    variant="outline"
-                    className="font-mono text-xs"
-                  >
-                    Reset
-                  </Button>
+                <DrawerFooter className="shrink-0">
                   <DrawerClose asChild>
-                    <Button variant="outline" className="font-mono text-xs">
+                    <Button variant="outline" className="w-full font-mono text-xs">
                       Close
                     </Button>
                   </DrawerClose>
@@ -207,17 +206,9 @@ export function ShaderLab({ definition }: { definition: ShaderDefinition }) {
                 }}
               />
             </div>
-            <DrawerFooter className="grid grid-cols-2 gap-2 px-5">
-              <Button
-                type="button"
-                onClick={() => setValues(buildDefaultValues(definition))}
-                variant="outline"
-                className="font-mono text-xs"
-              >
-                Reset
-              </Button>
+            <DrawerFooter className="px-5">
               <DrawerClose asChild>
-                <Button variant="outline" className="font-mono text-xs">
+                <Button variant="outline" className="w-full font-mono text-xs">
                   Close
                 </Button>
               </DrawerClose>
