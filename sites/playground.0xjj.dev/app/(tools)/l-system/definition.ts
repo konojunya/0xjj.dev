@@ -13,93 +13,81 @@ function mulberry32(seed: number) {
   };
 }
 
-// ── Random L-System rule generation ──
+// ── Tree-constrained random L-System generation ──
 
-interface LSystemGrammar {
+interface TreeGrammar {
   axiom: string;
   rules: Record<string, string>;
   angle: number;
 }
 
-function generateRandomGrammar(seed: number, complexity: number): LSystemGrammar {
+function generateTreeGrammar(seed: number, density: number): TreeGrammar {
   const rng = mulberry32(seed);
   const pick = <T>(arr: T[]): T => arr[Math.floor(rng() * arr.length)];
   const chance = (p: number) => rng() < p;
 
-  // Decide structure type
-  const useBranching = chance(0.6 + complexity * 0.2);
-  const useSecondSymbol = chance(0.4);
+  // Tree-appropriate angles (15–45°)
+  const angle = pick([15, 18, 20, 22, 25, 28, 30, 35]);
 
-  // Rule length scales with complexity (4–14 tokens)
-  const ruleLen = Math.floor(4 + complexity * 10);
+  // Build tree-like rule for F using structural templates
+  // Core idea: trunk grows (F or FF), then branches split off with [±F...]
+  const trunkGrow = chance(0.5) ? 'FF' : 'F';
 
-  // Generate angle from a set of "nice" angles
-  const niceAngles = [15, 20, 22.5, 25, 30, 36, 45, 60, 72, 90, 120];
-  const angle = pick(niceAngles);
+  // Number of branch pairs (1–3 depending on density)
+  const branchCount = 1 + Math.floor(density * 2.2);
 
-  function generateRule(length: number, branchProb: number): string {
-    const tokens: string[] = [];
-    let bracketDepth = 0;
+  // Build the rule
+  const parts: string[] = [];
 
-    for (let i = 0; i < length; i++) {
-      const r = rng();
+  // Optionally start with trunk growth
+  if (chance(0.6)) parts.push(trunkGrow);
 
-      if (bracketDepth > 0 && r < 0.15 && i > 0) {
-        // Close bracket
-        tokens.push(']');
-        bracketDepth--;
-      } else if (useBranching && r < branchProb && bracketDepth < 2 && i < length - 2) {
-        // Open bracket
-        tokens.push('[');
-        bracketDepth++;
-      } else if (r < 0.35 + branchProb * 0.2) {
-        tokens.push('+');
-      } else if (r < 0.55 + branchProb * 0.2) {
-        tokens.push('-');
-      } else {
-        tokens.push(useSecondSymbol && chance(0.3) ? 'G' : 'F');
-      }
+  for (let i = 0; i < branchCount; i++) {
+    // Each branch pair: [+F...] and [-F...]
+    const branchContent = chance(0.4 + density * 0.3)
+      ? pick(['F', 'FF', 'F+F', 'F-F'])
+      : 'F';
+
+    // Left branch
+    const leftTurns = chance(0.3) ? '++' : '+';
+    parts.push(`[${leftTurns}${branchContent}]`);
+
+    // Sometimes add trunk between branch pairs
+    if (i < branchCount - 1 && chance(0.7)) {
+      parts.push('F');
     }
 
-    // Close any remaining brackets
-    while (bracketDepth > 0) {
-      tokens.push(']');
-      bracketDepth--;
-    }
+    // Right branch
+    const rightTurns = chance(0.3) ? '--' : '-';
+    parts.push(`[${rightTurns}${branchContent}]`);
 
-    // Ensure at least one F
-    if (!tokens.includes('F') && !tokens.includes('G')) {
-      tokens[Math.floor(rng() * tokens.length)] = 'F';
-    }
-
-    return tokens.join('');
+    // Trunk continuation
+    if (chance(0.5)) parts.push('F');
   }
 
-  const branchProb = useBranching ? 0.15 + complexity * 0.15 : 0;
-  const rules: Record<string, string> = {
-    F: generateRule(ruleLen, branchProb),
-  };
+  // End with upward growth
+  if (chance(0.4)) parts.push(trunkGrow);
 
+  const fRule = parts.join('');
+
+  // Optionally add an X symbol for extra branching variety
+  const rules: Record<string, string> = { F: fRule };
   let axiom: string;
 
-  if (useSecondSymbol) {
-    rules.G = generateRule(Math.max(3, ruleLen - 2), branchProb * 0.7);
-    axiom = chance(0.5) ? 'F-G-G' : 'F+G+F';
-  } else if (useBranching) {
-    axiom = pick(['F', 'X']);
-    if (axiom === 'X') {
-      // X is a non-drawing symbol that expands into branching structure
-      rules.X = generateRule(Math.max(4, ruleLen), branchProb * 1.3);
+  if (chance(0.4)) {
+    // X-based: X doesn't draw, just structures branching
+    const xParts: string[] = ['F'];
+    const xBranches = 1 + Math.floor(density * 1.5);
+    for (let i = 0; i < xBranches; i++) {
+      xParts.push(`[+X]`);
+      if (chance(0.6)) xParts.push('F');
+      xParts.push(`[-X]`);
     }
+    if (chance(0.5)) xParts.push('X');
+    rules.X = xParts.join('');
+    axiom = 'X';
   } else {
-    // Geometric / tiling patterns
-    const sides = pick([3, 4, 5, 6]);
-    const parts: string[] = [];
-    for (let i = 0; i < sides; i++) {
-      parts.push('F');
-      if (i < sides - 1) parts.push('-');
-    }
-    axiom = parts.join('');
+    axiom = 'F';
   }
 
   return { axiom, rules, angle };
@@ -126,13 +114,15 @@ interface TurtleSegment {
   x1: number; y1: number;
   x2: number; y2: number;
   depth: number;
+  branchDepth: number;
 }
 
 function interpretTurtle(lstr: string, angleDeg: number): TurtleSegment[] {
   const segments: TurtleSegment[] = [];
   const angleRad = (angleDeg * Math.PI) / 180;
-  let x = 0, y = 0, a = Math.PI / 2;
-  const stack: { x: number; y: number; a: number }[] = [];
+  let x = 0, y = 0, a = Math.PI / 2; // facing up
+  let bracketDepth = 0;
+  const stack: { x: number; y: number; a: number; d: number }[] = [];
   let step = 0;
   const totalDrawable = [...lstr].filter(c => c === 'F' || c === 'G').length;
 
@@ -142,7 +132,11 @@ function interpretTurtle(lstr: string, angleDeg: number): TurtleSegment[] {
       case 'G': {
         const nx = x + Math.cos(a);
         const ny = y + Math.sin(a);
-        segments.push({ x1: x, y1: y, x2: nx, y2: ny, depth: step / Math.max(totalDrawable, 1) });
+        segments.push({
+          x1: x, y1: y, x2: nx, y2: ny,
+          depth: step / Math.max(totalDrawable, 1),
+          branchDepth: bracketDepth,
+        });
         x = nx;
         y = ny;
         step++;
@@ -155,12 +149,14 @@ function interpretTurtle(lstr: string, angleDeg: number): TurtleSegment[] {
         a -= angleRad;
         break;
       case '[':
-        stack.push({ x, y, a });
+        stack.push({ x, y, a, d: bracketDepth });
+        bracketDepth++;
         break;
       case ']':
         if (stack.length > 0) {
           const s = stack.pop()!;
           x = s.x; y = s.y; a = s.a;
+          bracketDepth = s.d;
         }
         break;
     }
@@ -183,7 +179,7 @@ function normalizeSegments(segments: TurtleSegment[]): TurtleSegment[] {
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
   const range = Math.max(maxX - minX, maxY - minY, 0.001);
-  const scale = 1.8 / range;
+  const scale = 1.7 / range;
 
   return segments.map(s => ({
     x1: (s.x1 - cx) * scale,
@@ -191,6 +187,7 @@ function normalizeSegments(segments: TurtleSegment[]): TurtleSegment[] {
     x2: (s.x2 - cx) * scale,
     y2: (s.y2 - cy) * scale,
     depth: s.depth,
+    branchDepth: s.branchDepth,
   }));
 }
 
@@ -220,7 +217,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
   id: 'l-system',
   name: 'L-System',
   summary:
-    'Lindenmayer systems are parallel rewriting grammars that produce fractal plant-like structures, space-filling curves, and other self-similar patterns.',
+    'Lindenmayer systems are parallel rewriting grammars that produce fractal plant-like structures. Each page load grows a unique tree from a time-based seed.',
   canvasHeight: 'clamp(320px, 52vh, 560px)',
   notes: [
     'L-System (Aristid Lindenmayer, 1968). A string-rewriting grammar where each iteration replaces symbols according to production rules, producing fractal growth.',
@@ -230,17 +227,17 @@ export const lSystemDefinition: OGLSceneDefinition = {
     {
       key: 'spread',
       label: 'Seed',
-      description: 'Random seed — each value generates a unique L-System grammar.',
+      description: 'Random seed — each value grows a unique tree. Seeded from current time on load.',
       min: 0,
-      max: 999,
+      max: 9999,
       step: 1,
-      defaultValue: Math.floor(Math.random() * 1000),
+      defaultValue: Math.floor(Date.now() / 1000) % 10000,
       precision: 0,
     },
     {
       key: 'twist',
-      label: 'Complexity',
-      description: 'Rule length and branching probability.',
+      label: 'Density',
+      description: 'Branch density — sparse sapling to lush canopy.',
       min: 0,
       max: 100,
       step: 1,
@@ -250,18 +247,18 @@ export const lSystemDefinition: OGLSceneDefinition = {
     },
     {
       key: 'detail',
-      label: 'Iterations',
-      description: 'Number of rewriting iterations — more iterations reveal finer fractal detail.',
+      label: 'Growth',
+      description: 'Growth stage — how many generations the tree has developed.',
       min: 1,
       max: 7,
       step: 1,
-      defaultValue: 4,
+      defaultValue: 1,
       precision: 0,
     },
     {
       key: 'bloom',
       label: 'Line Width',
-      description: 'Thickness of the rendered lines.',
+      description: 'Thickness of the branches.',
       min: 1,
       max: 5,
       step: 0.5,
@@ -271,19 +268,19 @@ export const lSystemDefinition: OGLSceneDefinition = {
     },
     {
       key: 'motion',
-      label: 'Draw Speed',
-      description: 'Speed of the progressive drawing animation.',
+      label: 'Growth Speed',
+      description: 'Speed of automatic growth animation.',
       min: 0,
       max: 100,
       step: 1,
-      defaultValue: 50,
+      defaultValue: 40,
       precision: 0,
       unit: '%',
     },
     {
       key: 'symmetry',
       label: 'Hue Shift',
-      description: 'Shift the rainbow color palette along the path.',
+      description: 'Shift the color palette along branches.',
       min: 0,
       max: 100,
       step: 1,
@@ -332,16 +329,28 @@ export const lSystemDefinition: OGLSceneDefinition = {
 
     let mesh: Mesh | null = null;
     let prevSeed = -1;
-    let prevComplexity = -1;
-    let prevIter = -1;
-    let cachedSegments: TurtleSegment[] = [];
+    let prevDensity = -1;
+    let prevGrowth = -1;
+    // Cache segments per growth level for smooth animation
+    let grammarCache: TreeGrammar | null = null;
+    let segmentsByLevel: TurtleSegment[][] = [];
 
-    function rebuildGeometry(segments: TurtleSegment[], lineWidth: number, drawRatio: number, hueShift: number) {
+    function buildAllLevels(seed: number, density: number, maxLevel: number) {
+      const grammar = generateTreeGrammar(seed, density);
+      grammarCache = grammar;
+      segmentsByLevel = [];
+      for (let i = 1; i <= maxLevel; i++) {
+        const lstr = expandLSystem(grammar.axiom, grammar.rules, i);
+        const raw = interpretTurtle(lstr, grammar.angle);
+        segmentsByLevel.push(normalizeSegments(raw));
+      }
+    }
+
+    function rebuildGeometry(segments: TurtleSegment[], lineWidth: number, drawRatio: number, hueShift: number, maxBranchDepth: number) {
       const drawCount = Math.max(1, Math.floor(segments.length * drawRatio));
 
       const positions: number[] = [];
       const colors: number[] = [];
-      const hw = lineWidth * 0.001;
 
       for (let i = 0; i < drawCount; i++) {
         const s = segments[i];
@@ -349,6 +358,10 @@ export const lSystemDefinition: OGLSceneDefinition = {
         const dy = s.y2 - s.y1;
         const len = Math.sqrt(dx * dx + dy * dy);
         if (len < 1e-8) continue;
+
+        // Thicker trunk, thinner branches
+        const depthFade = Math.max(0.3, 1.0 - s.branchDepth * 0.15);
+        const hw = lineWidth * 0.001 * depthFade;
 
         const nx = (-dy / len) * hw;
         const ny = (dx / len) * hw;
@@ -361,8 +374,14 @@ export const lSystemDefinition: OGLSceneDefinition = {
         positions.push(ax, ay, 0, bx, by, 0, cx, cy, 0);
         positions.push(bx, by, 0, ddx, ddy, 0, cx, cy, 0);
 
-        const hue = (s.depth + hueShift) % 1.0;
-        const [r, g, b] = hsv2rgb(hue, 0.7, 0.95);
+        // Tree coloring: trunk = brown, tips = green, with hue shift
+        const branchRatio = maxBranchDepth > 0 ? s.branchDepth / maxBranchDepth : 0;
+        // Brown (hue ~0.08) → Green (hue ~0.33)
+        const baseHue = 0.08 + branchRatio * 0.25;
+        const hue = (baseHue + hueShift) % 1.0;
+        const sat = 0.5 + branchRatio * 0.3;
+        const val = 0.9 - branchRatio * 0.15;
+        const [r, g, b] = hsv2rgb(hue, sat, val);
         for (let j = 0; j < 6; j++) {
           colors.push(r, g, b);
         }
@@ -397,35 +416,57 @@ export const lSystemDefinition: OGLSceneDefinition = {
     resizeObserver.observe(canvas);
     resize();
 
+    // Auto-growth state
+    let autoGrowthLevel = 1;
+    let lastGrowthTime = 0;
+
     return {
       render(time) {
         const values = getValues();
         const seed = Math.round(values.spread ?? 0);
-        const complexity = (values.twist ?? 50) / 100;
-        const iterations = Math.round(Math.min(Math.max(values.detail ?? 4, 1), 7));
+        const density = (values.twist ?? 50) / 100;
+        const manualGrowth = Math.round(values.detail ?? 1);
         const lineWidth = values.bloom ?? 1.5;
-        const speedN = (values.motion ?? 50) / 100;
+        const speedN = (values.motion ?? 40) / 100;
         const hueShift = (values.symmetry ?? 0) / 100;
 
-        // Rebuild segments if generation params changed
-        if (seed !== prevSeed || complexity !== prevComplexity || iterations !== prevIter) {
-          prevSeed = seed;
-          prevComplexity = complexity;
-          prevIter = iterations;
+        const maxGrowth = 7;
 
-          const grammar = generateRandomGrammar(seed, complexity);
-          const lstr = expandLSystem(grammar.axiom, grammar.rules, iterations);
-          const raw = interpretTurtle(lstr, grammar.angle);
-          cachedSegments = normalizeSegments(raw);
+        // Auto-growth: increment level over time
+        const growthInterval = Math.max(0.5, 4 - speedN * 3.5); // 0.5s – 4s per level
+        if (time - lastGrowthTime > growthInterval && autoGrowthLevel < maxGrowth) {
+          autoGrowthLevel++;
+          lastGrowthTime = time;
         }
 
-        // Progressive draw animation
-        const drawSpeed = Math.max(0.01, speedN);
-        const cycleTime = 10 / drawSpeed;
-        const progress = Math.min((time % cycleTime) / (cycleTime * 0.8), 1.0);
-        const eased = progress < 1 ? progress * progress * (3 - 2 * progress) : 1;
+        // Use the higher of manual slider and auto-growth
+        const effectiveGrowth = Math.max(manualGrowth, autoGrowthLevel);
 
-        rebuildGeometry(cachedSegments, lineWidth, eased, hueShift);
+        // Rebuild if generation params changed
+        if (seed !== prevSeed || density !== prevDensity || effectiveGrowth !== prevGrowth) {
+          // Reset auto-growth if seed or density changed
+          if (seed !== prevSeed || density !== prevDensity) {
+            autoGrowthLevel = 1;
+            lastGrowthTime = time;
+          }
+          prevSeed = seed;
+          prevDensity = density;
+          prevGrowth = effectiveGrowth;
+
+          buildAllLevels(seed, density, effectiveGrowth);
+        }
+
+        const currentSegments = segmentsByLevel[segmentsByLevel.length - 1] ?? [];
+        const maxBranchDepth = currentSegments.reduce((m, s) => Math.max(m, s.branchDepth), 0);
+
+        // Draw progress within current growth level
+        const levelProgress = Math.min((time - lastGrowthTime) / growthInterval, 1.0);
+        const eased = levelProgress < 1 ? levelProgress * levelProgress * (3 - 2 * levelProgress) : 1;
+
+        // If at max growth, show everything; otherwise progressive draw
+        const drawRatio = effectiveGrowth >= maxGrowth ? 1.0 : eased;
+
+        rebuildGeometry(currentSegments, lineWidth, drawRatio, hueShift, maxBranchDepth);
 
         resize();
         gl.clear(gl.COLOR_BUFFER_BIT);
