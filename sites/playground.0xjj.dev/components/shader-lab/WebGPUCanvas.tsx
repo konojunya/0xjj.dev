@@ -61,7 +61,7 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
 
       let device: GPUDevice;
       try {
-        device = await adapter.requestDevice();
+        device = await adapter.requestDevice({});
       } catch (e) {
         setError(`[Step 3] requestDevice() failed: ${e instanceof Error ? e.message : String(e)}`);
         return;
@@ -153,9 +153,13 @@ export function WebGPUCanvas({ definition, values, isRunning }: WebGPUCanvasProp
     }
 
     let cleanup: (() => void) | undefined;
-    init().then((fn) => {
-      cleanup = fn;
-    });
+    init()
+      .then((fn) => {
+        cleanup = fn;
+      })
+      .catch((e) => {
+        setError(`[Uncaught] ${e instanceof Error ? e.message : String(e)}`);
+      });
 
     return () => {
       disposed = true;
