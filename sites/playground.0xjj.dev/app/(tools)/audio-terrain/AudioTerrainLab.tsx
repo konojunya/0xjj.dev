@@ -209,7 +209,7 @@ export function AudioTerrainLab() {
   const smoothTrebleRef = useRef(0);
 
   // Orbit (desktop only)
-  const orbitRef = useRef({ rotX: -0.4, rotY: 0, dragging: false, lastX: 0, lastY: 0 });
+  const orbitRef = useRef({ rotX: -0.85, rotY: 0.4, dragging: false, lastX: 0, lastY: 0 });
 
   const [isStarting, setIsStarting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -465,11 +465,11 @@ export function AudioTerrainLab() {
     const orbit = orbitRef.current;
     const cosX = Math.cos(orbit.rotX), sinX = Math.sin(orbit.rotX);
     const cosY = Math.cos(orbit.rotY), sinY = Math.sin(orbit.rotY);
-    const dist = 5.0;
+    const dist = 6.0;
     const eyeX = dist * sinY * cosX;
-    const eyeY = dist * sinX + 2.0;
-    const eyeZ = dist * cosY * cosX + 1.0;
-    const view = lookAt([eyeX, eyeY, eyeZ], [0, 0, -1], [0, 1, 0]);
+    const eyeY = dist * -sinX + 0.5;
+    const eyeZ = dist * cosY * cosX;
+    const view = lookAt([eyeX, eyeY, eyeZ], [0, 0, 0], [0, 1, 0]);
     const model = identity();
 
     gl.viewport(0, 0, canvas.width, canvas.height);
