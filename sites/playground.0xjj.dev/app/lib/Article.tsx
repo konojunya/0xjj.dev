@@ -13,8 +13,8 @@ interface Props {
 
 export default function Article({ ja, en }: Props) {
   const available = [
-    en ? 'en' : null,
     ja ? 'ja' : null,
+    en ? 'en' : null,
   ].filter(Boolean) as Lang[];
 
   const [lang, setLang] = useState<Lang>(available[0]);
