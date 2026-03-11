@@ -306,7 +306,7 @@ function SecurityAudit({ headers }: { headers: Array<{ key: string; value: strin
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   return (
-    <Section label="Header Security Audit">
+    <Section label="ヘッダーセキュリティ監査">
       <div className="px-4 py-4">
         {/* Grade + Score */}
         <div className="flex items-center gap-4 mb-4">
@@ -317,7 +317,7 @@ function SecurityAudit({ headers }: { headers: Array<{ key: string; value: strin
             <div className="text-lg font-semibold text-fg">
               {audit.score} <span className="text-sm font-normal text-muted">/ 100</span>
             </div>
-            <p className="text-xs text-muted">This audit evaluates HTTP response headers only.</p>
+            <p className="text-xs text-muted">この監査はHTTPレスポンスヘッダーのみを評価します。</p>
           </div>
         </div>
 
@@ -395,7 +395,7 @@ function StatusBadge({ status }: { status: number }) {
 
 function RequestInfo({ result }: { result: Result }) {
   return (
-    <Section label="Request">
+    <Section label="リクエスト">
       <div className="space-y-2 px-4 py-3 text-sm">
         <div className="flex items-start gap-3">
           <span className="w-28 shrink-0 font-mono text-xs text-muted">URL</span>
@@ -403,12 +403,12 @@ function RequestInfo({ result }: { result: Result }) {
         </div>
         {result.resolvedUrl !== result.url && (
           <div className="flex items-start gap-3">
-            <span className="w-28 shrink-0 font-mono text-xs text-muted">Redirect</span>
+            <span className="w-28 shrink-0 font-mono text-xs text-muted">リダイレクト</span>
             <span className="break-all font-mono text-xs text-fg">{result.resolvedUrl}</span>
           </div>
         )}
         <div className="flex items-center gap-3">
-          <span className="w-28 shrink-0 font-mono text-xs text-muted">Status</span>
+          <span className="w-28 shrink-0 font-mono text-xs text-muted">ステータス</span>
           <span className="flex items-center gap-2">
             <StatusBadge status={result.status} />
             <span className="text-xs text-muted">{result.statusText}</span>
@@ -426,17 +426,17 @@ function RequestInfo({ result }: { result: Result }) {
 }
 
 const CATEGORY_LABEL: Record<TechDetection['category'], string> = {
-  framework: 'Framework',
-  language: 'Language',
-  server: 'Server',
-  platform: 'Platform',
+  framework: 'フレームワーク',
+  language: '言語',
+  server: 'サーバー',
+  platform: 'プラットフォーム',
   cms: 'CMS',
 };
 
 function Technologies({ technologies }: { technologies: TechDetection[] }) {
   if (technologies.length === 0) return null;
   return (
-    <Section label="Detected Technologies">
+    <Section label="検出された技術">
       <div className="flex flex-wrap gap-2 px-4 py-3">
         {technologies.map((t) => (
           <span
@@ -459,7 +459,7 @@ function Technologies({ technologies }: { technologies: TechDetection[] }) {
 const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string; description: string }> }> = [
 
   {
-    category: 'Content',
+    category: 'コンテンツ',
     headers: [
       { key: 'content-type', description: 'MIME type of the response' },
       { key: 'content-language', description: 'Language of the content' },
@@ -468,7 +468,7 @@ const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string;
     ],
   },
   {
-    category: 'Caching',
+    category: 'キャッシュ',
     headers: [
       { key: 'cache-control', description: 'Caching directives' },
       { key: 'vary', description: 'Headers that affect caching' },
@@ -480,7 +480,7 @@ const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string;
   },
 
   {
-    category: 'Security',
+    category: 'セキュリティ',
     headers: [
       { key: 'x-content-type-options', description: 'Prevent MIME-type sniffing' },
       { key: 'x-frame-options', description: 'Controls iframe embedding' },
@@ -514,14 +514,14 @@ const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string;
   },
 
   {
-    category: 'Redirect',
+    category: 'リダイレクト',
     headers: [
       { key: 'location', description: 'Redirect target URL' },
       { key: 'x-redirect-by', description: 'Redirect origin hint' },
     ],
   },
   {
-    category: 'Hints & Preload',
+    category: 'ヒント & プリロード',
     headers: [
       { key: 'link', description: 'Preload / preconnect hints' },
       { key: 'x-dns-prefetch-control', description: 'DNS prefetch toggle' },
@@ -530,7 +530,7 @@ const HEADER_CATEGORIES: Array<{ category: string; headers: Array<{ key: string;
     ],
   },
   {
-    category: 'Auth',
+    category: '認証',
     headers: [
       { key: 'www-authenticate', description: 'Authentication challenge' },
     ],
@@ -569,7 +569,7 @@ function ResponseHeaders({ headers }: { headers: Array<{ key: string; value: str
   }
 
   return (
-    <Section label={`Response Headers (${headers.length})`}>
+    <Section label={`レスポンスヘッダー (${headers.length})`}>
       <div className="divide-y divide-[color-mix(in_srgb,var(--color-fg)_6%,transparent)]">
         {HEADER_CATEGORIES.map((cat) => {
           // Skip categories that have zero present headers
@@ -619,7 +619,7 @@ function ResponseHeaders({ headers }: { headers: Array<{ key: string; value: str
         {otherHeaders.length > 0 && (
           <div className="px-4 py-3">
             <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
-              Other
+              その他
             </h3>
             <div className="space-y-1.5">
               {otherHeaders.map((h) => (
@@ -657,11 +657,11 @@ function BodyPreview({ preview, truncated, bodySize }: { preview: string; trunca
         : `${bodySize} B`;
 
   return (
-    <Section label={`Body Preview (${sizeLabel}${truncated ? ', truncated' : ''})`}>
+    <Section label={`ボディプレビュー (${sizeLabel}${truncated ? ', truncated' : ''})`}>
       <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-all px-4 py-3 font-mono text-xs text-fg">
         {preview}
         {truncated && (
-          <span className="text-muted">{'\n\n'}… truncated at 256 KB</span>
+          <span className="text-muted">{'\n\n'}... 256 KBで切り詰め</span>
         )}
       </pre>
     </Section>
@@ -671,7 +671,7 @@ function BodyPreview({ preview, truncated, bodySize }: { preview: string; trunca
 function DnsTable({ records }: { records: DnsRecord[] }) {
   if (records.length === 0) return null;
   return (
-    <Section label={`DNS Records (${records.length})`}>
+    <Section label={`DNSレコード (${records.length})`}>
       {/* Mobile: card layout */}
       <div className="divide-y divide-[color-mix(in_srgb,var(--color-fg)_6%,transparent)] sm:hidden">
         {records.map((r, i) => (
@@ -785,12 +785,12 @@ export default function UrlInspector() {
           : await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
         const json: Result & { error?: string } = await res.json();
         if (!res.ok || json.error) {
-          setError(json.error ?? 'Something went wrong');
+          setError(json.error ?? 'エラーが発生しました');
         } else {
           setResult(json);
         }
       } catch {
-        setError('Network error — could not reach the server');
+        setError('ネットワークエラー — サーバーに接続できませんでした');
       }
     });
   }
@@ -814,7 +814,7 @@ export default function UrlInspector() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">HTTP Inspector</h1>
         <p className="mt-1 text-sm text-muted">
-          Inspect HTTP response headers, body preview, and DNS records for any URL.
+          任意のURLのHTTPレスポンスヘッダー・ボディプレビュー・DNSレコードを確認します。
         </p>
       </div>
 
@@ -839,7 +839,7 @@ export default function UrlInspector() {
             disabled={isPending}
             className="shrink-0 rounded-lg bg-fg px-5 py-2.5 font-mono text-sm font-medium text-bg shadow-sm transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {isPending ? 'Inspecting…' : 'Inspect'}
+            {isPending ? '検査中...' : '検査'}
           </button>
         </div>
       </form>
@@ -849,7 +849,7 @@ export default function UrlInspector() {
       {isPending && (
         <div className="flex items-center gap-3 text-sm text-muted">
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-[color-mix(in_srgb,var(--color-fg)_20%,transparent)] border-t-muted" />
-          Fetching HTTP response and DNS records…
+          HTTPレスポンスとDNSレコードを取得中...
         </div>
       )}
 
@@ -865,7 +865,7 @@ export default function UrlInspector() {
           <Technologies technologies={result.technologies} />
           {result.httpError && (
             <div className="rounded-xl border border-yellow-400/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-600 dark:text-yellow-400">
-              HTTP fetch failed: {result.httpError}
+              HTTPフェッチに失敗: {result.httpError}
             </div>
           )}
           <SecurityAudit headers={result.headers} />
@@ -873,7 +873,7 @@ export default function UrlInspector() {
           <BodyPreview preview={result.bodyPreview} truncated={result.truncated} bodySize={result.bodySize} />
           <DnsTable records={result.dns} />
           {result.dns.length === 0 && result.headers.length === 0 && (
-            <p className="text-sm text-muted">No data returned.</p>
+            <p className="text-sm text-muted">データが返されませんでした。</p>
           )}
         </div>
       )}

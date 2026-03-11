@@ -112,7 +112,7 @@ export default function HttpStatus() {
         HTTP Status Codes
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Browse and search {STATUS_CODES.length} HTTP status codes by number or keyword.
+        {STATUS_CODES.length}件のHTTPステータスコードを番号やキーワードで検索できます。
       </p>
 
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -120,7 +120,7 @@ export default function HttpStatus() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by code, name, or description…"
+          placeholder="コード・名前・説明で検索..."
           style={{
             flex: 1,
             minWidth: 200,
@@ -164,7 +164,7 @@ export default function HttpStatus() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {filtered.length === 0 ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-muted)' }}>
-            No results for &quot;{search}&quot;
+            「{search}」に一致する結果はありません
           </div>
         ) : (
           filtered.map((s) => {

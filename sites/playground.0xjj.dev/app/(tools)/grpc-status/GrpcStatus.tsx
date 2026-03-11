@@ -143,8 +143,8 @@ const CATEGORY_COLORS: Record<Category | 'all', string> = {
 
 const CATEGORY_LABELS: Record<Category, string> = {
   ok: 'OK',
-  client: 'Client error',
-  server: 'Server error',
+  client: 'クライアントエラー',
+  server: 'サーバーエラー',
 };
 
 type Filter = 'all' | Category;
@@ -170,7 +170,7 @@ export default function GrpcStatus() {
         gRPC Status Codes
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Browse all {GRPC_CODES.length} gRPC status codes with HTTP equivalents.
+        全{GRPC_CODES.length}件のgRPCステータスコードをHTTP対応表付きで一覧できます。
       </p>
 
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -178,7 +178,7 @@ export default function GrpcStatus() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by code, name, or description…"
+          placeholder="コード・名前・説明で検索..."
           style={{
             flex: 1,
             minWidth: 200,
@@ -208,7 +208,7 @@ export default function GrpcStatus() {
                 whiteSpace: 'nowrap',
               }}
             >
-              {f === 'all' ? 'All' : f === 'ok' ? 'OK' : f === 'client' ? 'Client' : 'Server'}
+              {f === 'all' ? 'すべて' : f === 'ok' ? 'OK' : f === 'client' ? 'クライアント' : 'サーバー'}
             </button>
           ))}
         </div>
@@ -217,7 +217,7 @@ export default function GrpcStatus() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {filtered.length === 0 ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-muted)' }}>
-            No results for &quot;{search}&quot;
+            「{search}」に一致する結果はありません
           </div>
         ) : (
           filtered.map((s) => {
