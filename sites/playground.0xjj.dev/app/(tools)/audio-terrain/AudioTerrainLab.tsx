@@ -19,10 +19,10 @@ const AUTO_ROTATE_SPEED = 0.06;
 const NOISE_GATE = 0.06; // FFT values below this threshold are silenced
 
 // ── Beat detection / BPM ──
-const BEAT_THRESHOLD = 1.4; // bass must exceed recent average by this factor
-const MIN_BEAT_INTERVAL_S = 0.25; // max ~240 BPM
+const BEAT_THRESHOLD = 1.2; // bass must exceed recent average by this factor
+const MIN_BEAT_INTERVAL_S = 0.2; // max ~300 BPM
 const MAX_BEAT_HISTORY = 12;
-const BASS_HISTORY_LEN = 30; // ~0.5 s window at 60 fps
+const BASS_HISTORY_LEN = 45; // ~0.75 s window at 60 fps
 
 function isMobile() {
   return typeof window !== 'undefined' && window.innerWidth < 768;
@@ -448,7 +448,7 @@ export function AudioTerrainLab() {
     if (bassHist.length > BASS_HISTORY_LEN) bassHist.shift();
     const bassAvg = bassHist.reduce((s, v) => s + v, 0) / bassHist.length;
 
-    if (rawBass > bassAvg * BEAT_THRESHOLD && rawBass > 0.05 && now - lastBeatTimeRef.current > MIN_BEAT_INTERVAL_S) {
+    if (rawBass > bassAvg * BEAT_THRESHOLD && rawBass > 0.02 && now - lastBeatTimeRef.current > MIN_BEAT_INTERVAL_S) {
       lastBeatTimeRef.current = now;
       const beats = beatTimesRef.current;
       beats.push(now);
