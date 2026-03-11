@@ -121,7 +121,7 @@ function expandLSystem(axiom: string, rules: Record<string, string>, iterations:
       next += rules[ch] ?? ch;
     }
     str = next;
-    if (str.length > 500_000) break;
+    if (str.length > 2_000_000) break;
   }
   return str;
 }
@@ -255,11 +255,11 @@ export const lSystemDefinition: OGLSceneDefinition = {
     {
       key: 'detail',
       label: 'Max Iterations',
-      description: 'Maximum growth depth — higher values reveal finer vein detail.',
+      description: 'Maximum growth depth — higher values reveal finer vein detail. 10+ may be slow.',
       min: 2,
-      max: 8,
+      max: 12,
       step: 1,
-      defaultValue: 6,
+      defaultValue: 7,
       precision: 0,
     },
     {
