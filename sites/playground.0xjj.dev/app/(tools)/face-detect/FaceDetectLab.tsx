@@ -9,9 +9,9 @@ const OPENCV_WORKER_PATH = '/opencv/opencv.worker.js';
 const OPENCV_LOAD_TIMEOUT_MS = 30_000;
 
 // Zoom parameters
-const ZOOM_PADDING = 0.8; // face overflows viewport slightly for dramatic zoom
+const ZOOM_PADDING = 1.43; // face fills ~70% of viewport
 const LERP_SPEED = 0.06;
-const MIN_VIEWPORT = 0.025; // max 40x zoom
+const MIN_VIEWPORT = 0.05; // max 20x zoom
 const NO_FACE_ZOOM_OUT_FRAMES = 60; // ~1 sec at 60fps
 
 type FaceRect = { x: number; y: number; w: number; h: number };
