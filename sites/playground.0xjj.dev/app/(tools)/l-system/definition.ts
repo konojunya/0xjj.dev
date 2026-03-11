@@ -327,6 +327,8 @@ export const lSystemDefinition: OGLSceneDefinition = {
     let mesh: Mesh | null = null;
     let prevSeed = -1;
     let prevGrowth = -1;
+    let prevDrawCount = -1;
+    let prevLineWidth = -1;
     let grammarCache: TreeGrammar | null = null;
     let segmentsByLevel: TurtleSegment[][] = [];
 
@@ -458,9 +460,14 @@ export const lSystemDefinition: OGLSceneDefinition = {
         const eased = levelProgress < 1 ? levelProgress * levelProgress * (3 - 2 * levelProgress) : 1;
         const drawRatio = effectiveGrowth >= maxIter ? 1.0 : eased;
 
-        rebuildGeometry(currentSegments, lineWidth, drawRatio, maxBranchDepth);
+        // Only rebuild geometry when something actually changed
+        const drawCount = Math.max(1, Math.floor(currentSegments.length * drawRatio));
+        if (drawCount !== prevDrawCount || lineWidth !== prevLineWidth) {
+          prevDrawCount = drawCount;
+          prevLineWidth = lineWidth;
+          rebuildGeometry(currentSegments, lineWidth, drawRatio, maxBranchDepth);
+        }
 
-        resize();
         gl.clear(gl.COLOR_BUFFER_BIT);
         if (mesh) {
           renderer.render({ scene, camera });
