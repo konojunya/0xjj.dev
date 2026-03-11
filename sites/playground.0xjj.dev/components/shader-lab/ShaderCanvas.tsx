@@ -108,7 +108,7 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
     let vao: WebGLVertexArrayObject | null = null;
     let visible = true;
 
-    const TARGET_FPS = 30;
+    const TARGET_FPS = isMobile ? 30 : 60;
     const FRAME_INTERVAL = 1000 / TARGET_FPS;
     let lastRenderTime = 0;
 
