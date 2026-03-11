@@ -221,6 +221,13 @@ export const tools: Tool[] = [
     category: 'ui',
   },
   {
+    slug: 'physarum',
+    name: 'Physarum',
+    description: 'Slime mold simulation — agents deposit and follow chemical trails via WebGPU compute shaders.',
+    href: '/physarum/',
+    category: 'ui',
+  },
+  {
     slug: 'reaction-diffusion',
     name: 'Reaction-Diffusion',
     description: 'Gray-Scott reaction-diffusion simulation running on the GPU via WebGPU compute shaders.',
