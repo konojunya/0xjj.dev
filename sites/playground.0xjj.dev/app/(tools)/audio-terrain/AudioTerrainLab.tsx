@@ -709,7 +709,7 @@ export function AudioTerrainLab() {
                       : 'border-white/10 bg-transparent text-white/40 hover:text-white/60'
                   }`}
                 >
-                  {bpmSync ? `BPM SYNC${detectedBpm ? ` — ${detectedBpm} BPM` : ' (検出中...)'}` : 'BPM SYNC OFF'}
+                  {bpmSync ? (detectedBpm ? `${detectedBpm} BPM` : '検出中...') : 'BPM SYNC OFF'}
                 </button>
                 {!bpmSync && (
                 <div className="space-y-2">
