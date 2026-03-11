@@ -21,7 +21,7 @@ function CopyButton({ text }: { text: string }) {
         color: 'var(--color-muted)',
       }}
     >
-      {copied ? 'copied!' : 'copy'}
+      {copied ? 'コピー済み!' : 'コピー'}
     </button>
   );
 }
@@ -45,9 +45,9 @@ export default function JsonFormatter() {
   }, [input, indent, minify]);
 
   const indentOptions: { label: string; value: Indent }[] = [
-    { label: '2 spaces', value: 2 },
-    { label: '4 spaces', value: 4 },
-    { label: 'Tab', value: '\t' },
+    { label: '2スペース', value: 2 },
+    { label: '4スペース', value: 4 },
+    { label: 'タブ', value: '\t' },
   ];
 
   return (
@@ -55,7 +55,7 @@ export default function JsonFormatter() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">JSON Formatter</h1>
         <p className="mt-1 text-sm text-muted">
-          Format and validate JSON with syntax error reporting.
+          JSONの整形・バリデーションを行い、構文エラーを表示します。
         </p>
       </div>
 
@@ -86,17 +86,17 @@ export default function JsonFormatter() {
               : { borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)', color: 'var(--color-muted)' }
           }
         >
-          Minify
+          圧縮
         </button>
       </div>
 
       {/* Input */}
       <div className="mb-4">
-        <label className="mb-1.5 block font-mono text-xs text-muted">Input</label>
+        <label className="mb-1.5 block font-mono text-xs text-muted">入力</label>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder='Paste JSON here...'
+          placeholder='JSONをここに貼り付け...'
           rows={10}
           className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none transition-colors"
           style={{
@@ -120,7 +120,7 @@ export default function JsonFormatter() {
       {output && (
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="font-mono text-xs text-muted">Output</span>
+            <span className="font-mono text-xs text-muted">出力</span>
             <CopyButton text={output} />
           </div>
           <pre

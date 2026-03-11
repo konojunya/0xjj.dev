@@ -79,13 +79,13 @@ export default function RegexTester() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">RegEx Tester</h1>
         <p className="mt-1 text-sm text-muted">
-          Test regular expressions with live match highlighting.
+          正規表現をリアルタイムでテストし、マッチ箇所をハイライト表示します。
         </p>
       </div>
 
       {/* Pattern input + flags */}
       <div className="mb-4">
-        <label className="mb-1.5 block font-mono text-xs text-muted">Pattern</label>
+        <label className="mb-1.5 block font-mono text-xs text-muted">パターン</label>
         <div className="flex items-center gap-2">
           <div
             className="flex flex-1 items-center rounded-lg border px-3 py-2"
@@ -100,7 +100,7 @@ export default function RegexTester() {
               type="text"
               value={pattern}
               onChange={(e) => setPattern(e.target.value)}
-              placeholder="pattern"
+              placeholder="パターン"
               className="flex-1 bg-transparent px-1 font-mono text-base text-fg outline-none"
               spellCheck={false}
             />
@@ -136,11 +136,11 @@ export default function RegexTester() {
 
       {/* Test string */}
       <div className="mb-6">
-        <label className="mb-1.5 block font-mono text-xs text-muted">Test string</label>
+        <label className="mb-1.5 block font-mono text-xs text-muted">テスト文字列</label>
         <textarea
           value={testStr}
           onChange={(e) => setTestStr(e.target.value)}
-          placeholder="Enter test string..."
+          placeholder="テスト文字列を入力..."
           rows={6}
           className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none"
           style={{ borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)', resize: 'vertical' }}
@@ -155,9 +155,9 @@ export default function RegexTester() {
             className="mb-3 border-b pb-2"
             style={{ borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)' }}
           >
-            <span className="font-mono text-xs font-semibold text-fg">Result</span>
+            <span className="font-mono text-xs font-semibold text-fg">結果</span>
             <span className="ml-3 font-mono text-xs text-muted">
-              {matches.length} match{matches.length !== 1 ? 'es' : ''}
+              {matches.length}件のマッチ
             </span>
           </div>
 
@@ -198,8 +198,8 @@ export default function RegexTester() {
                   style={{ borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)' }}
                 >
                   <div className="flex items-center gap-3 font-mono text-xs">
-                    <span className="text-muted">Match {i + 1}</span>
-                    <span className="text-muted">index: {m.index}</span>
+                    <span className="text-muted">マッチ {i + 1}</span>
+                    <span className="text-muted">位置: {m.index}</span>
                     <span
                       className="rounded px-1 py-0.5"
                       style={{ background: 'color-mix(in srgb, var(--color-accent) 20%, transparent)', color: 'var(--color-fg)' }}
@@ -209,7 +209,7 @@ export default function RegexTester() {
                   </div>
                   {m.groups.length > 0 && m.groups.some((g) => g !== undefined) && (
                     <div className="mt-1 font-mono text-xs text-muted">
-                      Groups: {m.groups.map((g, gi) => (
+                      グループ: {m.groups.map((g, gi) => (
                         <span key={gi} className="mr-2">
                           [{gi + 1}]: {g === undefined ? 'undefined' : `"${g}"`}
                         </span>

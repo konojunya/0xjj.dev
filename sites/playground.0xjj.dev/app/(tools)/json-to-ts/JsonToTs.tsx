@@ -75,7 +75,7 @@ export default function JsonToTs() {
   try {
     output = input.trim() ? jsonToTs(input) : '';
   } catch (e) {
-    error = e instanceof Error ? e.message : 'Invalid JSON';
+    error = e instanceof Error ? e.message : '無効なJSON';
   }
 
   const copy = async () => {
@@ -91,13 +91,13 @@ export default function JsonToTs() {
         JSON to TypeScript
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Paste JSON to generate TypeScript interfaces. Handles nested objects and arrays.
+        JSONを貼り付けてTypeScriptの型定義を生成します。ネストしたオブジェクトや配列にも対応。
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '1rem' }}>
         <div>
           <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-muted)', marginBottom: '0.4rem' }}>
-            JSON input
+            JSON入力
           </label>
           <textarea
             value={input}
@@ -125,7 +125,7 @@ export default function JsonToTs() {
 
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-            <label style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>TypeScript output</label>
+            <label style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>TypeScript出力</label>
             {output && (
               <button
                 onClick={copy}
@@ -139,14 +139,14 @@ export default function JsonToTs() {
                   fontSize: '0.75rem',
                 }}
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? 'コピー済み!' : 'コピー'}
               </button>
             )}
           </div>
           <textarea
             readOnly
             value={output}
-            placeholder="TypeScript interfaces will appear here…"
+            placeholder="TypeScriptの型定義がここに表示されます..."
             style={{
               width: '100%',
               height: 420,

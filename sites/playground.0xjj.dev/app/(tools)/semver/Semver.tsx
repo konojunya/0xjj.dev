@@ -27,19 +27,19 @@ export default function Semver() {
         Semver Range Checker
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Check if version strings satisfy a semver range.
+        バージョン番号がsemver範囲を満たすか判定します。
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <div>
           <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-muted)', marginBottom: '0.4rem' }}>
-            Range
+            範囲
           </label>
           <input
             type="text"
             value={range}
             onChange={(e) => setRange(e.target.value)}
-            placeholder="e.g. ^1.2.3, >=2.0.0 <3.0.0, ~1.5"
+            placeholder="例: ^1.2.3, >=2.0.0 <3.0.0, ~1.5"
             style={{
               width: '100%',
               padding: '0.65rem 0.75rem',
@@ -55,19 +55,19 @@ export default function Semver() {
           />
           {!rangeValid && range && (
             <div style={{ marginTop: '0.3rem', fontSize: '0.8rem', color: '#ef4444' }}>
-              Invalid semver range
+              無効なsemver範囲
             </div>
           )}
           {rangeValid && (
             <div style={{ marginTop: '0.3rem', fontSize: '0.8rem', color: 'var(--color-muted)' }}>
-              Parsed: <code style={{ fontFamily: 'monospace' }}>{rangeValid}</code>
+              解析結果: <code style={{ fontFamily: 'monospace' }}>{rangeValid}</code>
             </div>
           )}
         </div>
 
         <div>
           <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-muted)', marginBottom: '0.4rem' }}>
-            Versions (one per line)
+            バージョン (1行に1つ)
           </label>
           <textarea
             value={versions}
@@ -93,7 +93,7 @@ export default function Semver() {
         {results.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--color-muted)', marginBottom: '0.25rem' }}>
-              Results ({results.filter((r) => r.status === 'match').length} / {results.length} match)
+              結果 ({results.filter((r) => r.status === 'match').length}/{results.length} 一致)
             </div>
             {results.map((r, i) => (
               <div
@@ -124,7 +124,7 @@ export default function Semver() {
                   {r.version}
                 </span>
                 <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>
-                  {r.status === 'match' ? 'satisfies' : r.status === 'no-match' ? 'no match' : r.status === 'invalid' ? 'invalid version' : 'invalid range'}
+                  {r.status === 'match' ? '一致' : r.status === 'no-match' ? '不一致' : r.status === 'invalid' ? '無効なバージョン' : '無効な範囲'}
                 </span>
               </div>
             ))}

@@ -343,7 +343,7 @@ export default function Unicode() {
         Unicode Character Search
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-        Search Unicode characters by name or code point. Click to copy.
+        Unicode文字を名前やコードポイントで検索。クリックでコピーできます。
       </p>
 
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -351,7 +351,7 @@ export default function Unicode() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, code point (U+0041), or character…"
+          placeholder="名前・コードポイント (U+0041)・文字で検索..."
           style={{
             flex: 1,
             minWidth: 220,
@@ -385,7 +385,7 @@ export default function Unicode() {
       </div>
 
       <div style={{ fontSize: '0.8rem', color: 'var(--color-muted)', marginBottom: '0.75rem' }}>
-        {filtered.length} characters{filtered.length === 500 ? ' (showing first 500)' : ''}
+        {filtered.length}文字{filtered.length === 500 ? ' (先頭500件を表示)' : ''}
       </div>
 
       <div

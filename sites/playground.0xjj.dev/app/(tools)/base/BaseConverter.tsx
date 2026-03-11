@@ -5,10 +5,10 @@ import { useState } from 'react';
 type Base = 2 | 8 | 10 | 16;
 
 const BASES: { base: Base; label: string; prefix: string; placeholder: string }[] = [
-  { base: 2,  label: 'Binary',      prefix: '0b', placeholder: '1010' },
-  { base: 8,  label: 'Octal',       prefix: '0o', placeholder: '12' },
-  { base: 10, label: 'Decimal',     prefix: '',   placeholder: '10' },
-  { base: 16, label: 'Hexadecimal', prefix: '0x', placeholder: 'a' },
+  { base: 2,  label: '2進数',      prefix: '0b', placeholder: '1010' },
+  { base: 8,  label: '8進数',       prefix: '0o', placeholder: '12' },
+  { base: 10, label: '10進数',     prefix: '',   placeholder: '10' },
+  { base: 16, label: '16進数', prefix: '0x', placeholder: 'a' },
 ];
 
 function toBase(value: bigint, base: Base): string {
@@ -33,7 +33,7 @@ function CopyButton({ text }: { text: string }) {
         color: 'var(--color-muted)',
       }}
     >
-      {copied ? 'copied!' : 'copy'}
+      {copied ? 'コピー済み!' : 'コピー'}
     </button>
   );
 }
@@ -49,7 +49,7 @@ export default function BaseConverter() {
     try {
       parsed = BigInt(activeBase === 16 ? '0x' + raw : activeBase === 8 ? '0o' + raw : activeBase === 2 ? '0b' + raw : raw);
     } catch {
-      error = `Invalid ${BASES.find(b => b.base === activeBase)?.label.toLowerCase()} number`;
+      error = `無効な${BASES.find(b => b.base === activeBase)?.label}です`;
     }
   }
 
@@ -69,7 +69,7 @@ export default function BaseConverter() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Number Base Converter</h1>
         <p className="mt-1 text-sm text-muted">
-          Convert numbers between binary, octal, decimal, and hexadecimal.
+          2進数・8進数・10進数・16進数を相互変換します。
         </p>
       </div>
 

@@ -44,9 +44,9 @@ function relativeTime(ts: number): string {
   const days = Math.floor(abs / 86400);
   const hours = Math.floor((abs % 86400) / 3600);
   const mins = Math.floor((abs % 3600) / 60);
-  if (days > 0) return `${days} day${days !== 1 ? 's' : ''}`;
-  if (hours > 0) return `${hours} hour${hours !== 1 ? 's' : ''}`;
-  return `${mins} minute${mins !== 1 ? 's' : ''}`;
+  if (days > 0) return `${days}日`;
+  if (hours > 0) return `${hours}時間`;
+  return `${mins}分`;
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -66,7 +66,7 @@ function CopyButton({ text }: { text: string }) {
         color: 'var(--color-muted)',
       }}
     >
-      {copied ? 'copied!' : 'copy'}
+      {copied ? 'コピー済み!' : 'コピー'}
     </button>
   );
 }
@@ -127,17 +127,17 @@ export default function JwtDecoder() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">JWT Decoder</h1>
         <p className="mt-1 text-sm text-muted">
-          Decode and inspect JWT header, payload, and expiry.
+          JWTのヘッダー・ペイロード・有効期限をデコードして確認します。
         </p>
       </div>
 
       {/* Input */}
       <div className="mb-6">
-        <label className="mb-1.5 block font-mono text-xs text-muted">JWT Token</label>
+        <label className="mb-1.5 block font-mono text-xs text-muted">JWTトークン</label>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Paste your JWT token here..."
+          placeholder="JWTトークンをここに貼り付け..."
           rows={4}
           className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-base text-fg outline-none transition-colors"
           style={{
@@ -150,7 +150,7 @@ export default function JwtDecoder() {
         />
         {input && !parsed && (
           <p className="mt-2 font-mono text-xs" style={{ color: '#ef4444' }}>
-            Invalid JWT format. Expected 3 base64url-encoded parts separated by dots.
+            無効なJWT形式です。ドットで区切られた3つのbase64urlエンコード部分が必要です。
           </p>
         )}
       </div>
@@ -159,12 +159,12 @@ export default function JwtDecoder() {
       {parsed && (
         <div>
           <Section
-            title="Header"
+            title="ヘッダー"
             content={JSON.stringify(parsed.header, null, 2)}
             copyText={JSON.stringify(parsed.header, null, 2)}
           />
           <Section
-            title="Payload"
+            title="ペイロード"
             content={JSON.stringify(parsed.payload, null, 2)}
             copyText={JSON.stringify(parsed.payload, null, 2)}
           >
@@ -177,7 +177,7 @@ export default function JwtDecoder() {
                     className="ml-2"
                     style={{ color: expInfo.expired ? '#ef4444' : '#22c55e' }}
                   >
-                    ({expInfo.expired ? `expired ${expInfo.relative} ago` : `expires in ${expInfo.relative}`})
+                    ({expInfo.expired ? `${expInfo.relative}前に期限切れ` : `${expInfo.relative}後に期限切れ`})
                   </span>
                 </p>
               )}
@@ -196,7 +196,7 @@ export default function JwtDecoder() {
             </div>
           </Section>
           <Section
-            title="Signature"
+            title="署名"
             content={parsed.signature}
             copyText={parsed.signature}
           />

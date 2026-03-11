@@ -49,7 +49,7 @@ export default function TimeCalc() {
   for (const row of rows) {
     const secs = parseSeconds(row.time);
     if (secs === null) {
-      rowErrors.set(row.id, 'Invalid format (use HH:MM:SS)');
+      rowErrors.set(row.id, '無効な形式です (HH:MM:SS を使用)');
     } else {
       totalSeconds += row.op === '+' ? secs : -secs;
     }
@@ -64,7 +64,7 @@ export default function TimeCalc() {
         Time Calculator
       </h1>
       <p style={{ color: 'var(--color-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Add or subtract HH:MM:SS durations and compute the total.
+        HH:MM:SS形式の時間を加算・減算して合計を計算します。
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
@@ -160,7 +160,7 @@ export default function TimeCalc() {
           fontSize: '0.875rem',
         }}
       >
-        + Add row
+        + 行を追加
       </button>
 
       <div
@@ -177,7 +177,7 @@ export default function TimeCalc() {
           justifyContent: 'space-between',
         }}
       >
-        <span style={{ fontSize: '0.875rem', color: 'var(--color-muted)' }}>Total</span>
+        <span style={{ fontSize: '0.875rem', color: 'var(--color-muted)' }}>合計</span>
         <span
           style={{
             fontFamily: 'monospace',
@@ -186,7 +186,7 @@ export default function TimeCalc() {
             color: hasErrors ? 'var(--color-muted)' : 'var(--color-fg)',
           }}
         >
-          {total ?? (hasErrors ? 'Error' : '—')}
+          {total ?? (hasErrors ? 'エラー' : '—')}
         </span>
       </div>
     </div>

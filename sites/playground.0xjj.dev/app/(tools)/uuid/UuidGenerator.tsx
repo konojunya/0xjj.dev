@@ -38,13 +38,13 @@ export default function UuidGenerator() {
     <main className=" py-10">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">UUID Generator</h1>
-        <p className="mt-1 text-sm text-muted">Generate v4 UUIDs instantly, in bulk.</p>
+        <p className="mt-1 text-sm text-muted">v4 UUIDを一括で即座に生成します。</p>
       </div>
 
       {/* Controls */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <label className="font-mono text-xs text-muted">Count</label>
+          <label className="font-mono text-xs text-muted">個数</label>
           <input
             type="number"
             min={1}
@@ -65,7 +65,7 @@ export default function UuidGenerator() {
               : { borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)', color: 'var(--color-muted)' }
           }
         >
-          UPPERCASE
+          大文字
         </button>
 
         <button
@@ -73,7 +73,7 @@ export default function UuidGenerator() {
           className={btnBase}
           style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
         >
-          Generate
+          生成
         </button>
 
         <button
@@ -81,7 +81,7 @@ export default function UuidGenerator() {
           className={btnBase}
           style={{ borderColor: 'color-mix(in srgb, var(--color-fg) 12%, transparent)', color: 'var(--color-muted)' }}
         >
-          {copiedAll ? 'copied!' : 'Copy all'}
+          {copiedAll ? 'コピー済み!' : 'すべてコピー'}
         </button>
       </div>
 
@@ -105,7 +105,7 @@ export default function UuidGenerator() {
                 color: 'var(--color-muted)',
               }}
             >
-              {copiedIndex === i ? 'copied!' : 'copy'}
+              {copiedIndex === i ? 'コピー済み!' : 'コピー'}
             </button>
           </li>
         ))}
