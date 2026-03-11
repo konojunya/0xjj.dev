@@ -12,8 +12,8 @@ const DESKTOP_FFT = 2048;
 const MOBILE_FFT = 1024;
 const DESKTOP_DPR_CAP = 2.0;
 const MOBILE_DPR_CAP = 1.5;
-const SMOOTHING = 0.8;
-const EMA_WEIGHT = 0.3; // raw weight
+const SMOOTHING = 0.75;
+const EMA_WEIGHT = 0.35;
 
 function isMobile() {
   return typeof window !== 'undefined' && window.innerWidth < 768;
@@ -41,14 +41,16 @@ const VERT = /* glsl */ `
   uniform mat4 uModel;
   varying float vHeight;
   varying float vFog;
+  varying vec2 vUv;
 
   void main() {
     vHeight = position.y;
+    // UV from XZ world position (terrain spans -3..3)
+    vUv = (position.xz + 3.0) / 6.0;
     vec4 worldPos = uModel * vec4(position, 1.0);
     vec4 viewPos = uView * worldPos;
     gl_Position = uProjection * viewPos;
-    // fog based on distance from camera
-    vFog = smoothstep(2.0, 8.0, -viewPos.z);
+    vFog = smoothstep(3.0, 10.0, -viewPos.z);
   }
 `;
 
@@ -56,23 +58,25 @@ const FRAG = /* glsl */ `
   precision mediump float;
   varying float vHeight;
   varying float vFog;
+  varying vec2 vUv;
+  uniform float uEnergy;
+  uniform float uTime;
 
-  vec3 terrainColor(float h) {
-    // deep blue -> green -> brown -> white snow
-    vec3 deepBlue = vec3(0.05, 0.1, 0.3);
-    vec3 green    = vec3(0.15, 0.45, 0.15);
-    vec3 brown    = vec3(0.45, 0.3, 0.15);
-    vec3 snow     = vec3(0.95, 0.97, 1.0);
-
-    float hn = clamp(h * 2.0 + 0.1, 0.0, 1.0);
-    if (hn < 0.25) return mix(deepBlue, green, hn / 0.25);
-    if (hn < 0.55) return mix(green, brown, (hn - 0.25) / 0.3);
-    return mix(brown, snow, (hn - 0.55) / 0.45);
+  vec3 hsl2rgb(float h, float s, float l) {
+    vec3 rgb = clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+    return l + s * (rgb - 0.5) * (1.0 - abs(2.0 * l - 1.0));
   }
 
   void main() {
-    vec3 color = terrainColor(vHeight);
-    vec3 fogColor = vec3(0.02, 0.02, 0.04);
+    float hn = clamp(vHeight * 2.5, 0.0, 1.0);
+    // Hue rotates slowly + shifts with energy
+    float hue = mod(0.55 + hn * 0.35 + uTime * 0.02 + uEnergy * 0.15, 1.0);
+    float sat = 0.6 + uEnergy * 0.3;
+    float lit = 0.15 + hn * 0.45 + uEnergy * 0.1;
+    // Peak glow
+    float glow = smoothstep(0.5, 1.0, hn) * (0.3 + uEnergy * 0.7);
+    vec3 color = hsl2rgb(hue, sat, lit) + vec3(glow);
+    vec3 fogColor = vec3(0.01, 0.01, 0.03);
     color = mix(color, fogColor, vFog);
     gl_FragColor = vec4(color, 1.0);
   }
@@ -82,17 +86,29 @@ const WIRE_FRAG = /* glsl */ `
   precision mediump float;
   varying float vHeight;
   varying float vFog;
+  varying vec2 vUv;
+  uniform float uEnergy;
+  uniform float uTime;
+
+  vec3 hsl2rgb(float h, float s, float l) {
+    vec3 rgb = clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+    return l + s * (rgb - 0.5) * (1.0 - abs(2.0 * l - 1.0));
+  }
 
   void main() {
-    float brightness = clamp(vHeight * 1.5 + 0.3, 0.15, 1.0);
-    vec3 color = vec3(0.3, 0.7, 1.0) * brightness;
-    vec3 fogColor = vec3(0.02, 0.02, 0.04);
+    float hn = clamp(vHeight * 2.5, 0.0, 1.0);
+    // X-position maps to frequency: low freq (left) = warm, high freq (right) = cool
+    float hue = mod(0.55 - vUv.x * 0.3 + uTime * 0.03 + uEnergy * 0.2, 1.0);
+    float brightness = 0.3 + hn * 0.7;
+    float glow = smoothstep(0.4, 1.0, hn) * (0.5 + uEnergy * 1.0);
+    vec3 color = hsl2rgb(hue, 0.7 + uEnergy * 0.3, brightness * 0.5) + vec3(glow * 0.4, glow * 0.6, glow);
+    vec3 fogColor = vec3(0.01, 0.01, 0.03);
     color = mix(color, fogColor, vFog);
     gl_FragColor = vec4(color, 1.0);
   }
 `;
 
-// ── Matrix helpers (no dependencies) ──
+// ── Matrix helpers ──
 
 function perspective(fov: number, aspect: number, near: number, far: number): Float32Array {
   const f = 1.0 / Math.tan(fov / 2);
@@ -139,7 +155,7 @@ function identity(): Float32Array {
   ]);
 }
 
-// ── Compile helpers ──
+// ── GL helpers ──
 
 function compileShader(gl: WebGLRenderingContext, type: number, src: string): WebGLShader {
   const s = gl.createShader(type)!;
@@ -148,26 +164,12 @@ function compileShader(gl: WebGLRenderingContext, type: number, src: string): We
   return s;
 }
 
-function createProgram(gl: WebGLRenderingContext, vert: string, frag: string): WebGLProgram {
+function createProgramGL(gl: WebGLRenderingContext, vert: string, frag: string): WebGLProgram {
   const p = gl.createProgram()!;
   gl.attachShader(p, compileShader(gl, gl.VERTEX_SHADER, vert));
   gl.attachShader(p, compileShader(gl, gl.FRAGMENT_SHADER, frag));
   gl.linkProgram(p);
   return p;
-}
-
-// ── High-freq noise ──
-
-function hash(x: number): number {
-  const s = Math.sin(x * 127.1 + 311.7) * 43758.5453123;
-  return s - Math.floor(s);
-}
-
-function noise1d(x: number): number {
-  const i = Math.floor(x);
-  const f = x - i;
-  const u = f * f * (3 - 2 * f);
-  return hash(i) * (1 - u) + hash(i + 1) * u;
 }
 
 // ── Component ──
@@ -203,13 +205,12 @@ export function AudioTerrainLab() {
   const lastFrameRef = useRef(0);
   const mobileRef = useRef(false);
 
-  // Smoothed bands
+  // Smoothed energy for camera sway & shader
+  const smoothEnergyRef = useRef(0);
   const smoothBassRef = useRef(0);
-  const smoothMidRef = useRef(0);
-  const smoothTrebleRef = useRef(0);
 
   // Orbit (desktop only)
-  const orbitRef = useRef({ rotX: -0.85, rotY: 0.4, dragging: false, lastX: 0, lastY: 0 });
+  const orbitRef = useRef({ rotX: -0.55, rotY: 0.3, dragging: false, lastX: 0, lastY: 0 });
 
   const [isStarting, setIsStarting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -217,12 +218,12 @@ export function AudioTerrainLab() {
 
   // Controls
   const scrollSpeedRef = useRef(1.0);
-  const bassSensRef = useRef(1.5);
+  const heightScaleRef = useRef(1.5);
   const trebleDetailRef = useRef(0.8);
   const wireframeRef = useRef(true);
 
   const [scrollSpeed, setScrollSpeed] = useState(1.0);
-  const [bassSens, setBassSens] = useState(1.5);
+  const [heightScale, setHeightScale] = useState(1.5);
   const [trebleDetail, setTrebleDetail] = useState(0.8);
   const [wireframe, setWireframe] = useState(true);
 
@@ -252,18 +253,17 @@ export function AudioTerrainLab() {
     const gridH = gridSize;
     const vertCount = (gridW + 1) * (gridH + 1);
 
-    // Generate plane positions: XZ plane, Y = 0
     const positions = new Float32Array(vertCount * 3);
     for (let iz = 0; iz <= gridH; iz++) {
       for (let ix = 0; ix <= gridW; ix++) {
         const idx = (iz * (gridW + 1) + ix) * 3;
-        positions[idx] = (ix / gridW - 0.5) * 6;    // X: -3 to 3
-        positions[idx + 1] = 0;                       // Y: height
-        positions[idx + 2] = (iz / gridH - 0.5) * 6; // Z: -3 to 3
+        positions[idx] = (ix / gridW - 0.5) * 6;
+        positions[idx + 1] = 0;
+        positions[idx + 2] = (iz / gridH - 0.5) * 6;
       }
     }
 
-    // Solid indices (triangles)
+    // Solid indices
     const solidIndices: number[] = [];
     for (let iz = 0; iz < gridH; iz++) {
       for (let ix = 0; ix < gridW; ix++) {
@@ -275,18 +275,14 @@ export function AudioTerrainLab() {
       }
     }
 
-    // Wireframe indices (lines)
+    // Wireframe indices
     const wireIndices: number[] = [];
     for (let iz = 0; iz < gridH; iz++) {
       for (let ix = 0; ix < gridW; ix++) {
         const a = iz * (gridW + 1) + ix;
-        const b = a + 1;
-        const c = a + (gridW + 1);
-        // horizontal + vertical lines
-        wireIndices.push(a, b, a, c);
+        wireIndices.push(a, a + 1, a, a + (gridW + 1));
       }
     }
-    // right and bottom edges
     for (let iz = 0; iz < gridH; iz++) {
       const a = iz * (gridW + 1) + gridW;
       wireIndices.push(a, a + (gridW + 1));
@@ -296,49 +292,37 @@ export function AudioTerrainLab() {
       wireIndices.push(a, a + 1);
     }
 
-    // Programs
-    const solidProgram = createProgram(gl, VERT, FRAG);
-    const wireProgram = createProgram(gl, VERT, WIRE_FRAG);
+    const solidProgram = createProgramGL(gl, VERT, FRAG);
+    const wireProgram = createProgramGL(gl, VERT, WIRE_FRAG);
 
-    // Buffers
     const posBuf = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
     gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
 
+    if (vertCount > 65535) gl.getExtension('OES_element_index_uint');
+
     const solidIdxBuf = gl.createBuffer()!;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, solidIdxBuf);
-    const solidArr = vertCount > 65535 ? new Uint32Array(solidIndices) : new Uint16Array(solidIndices);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, solidArr, gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+      vertCount > 65535 ? new Uint32Array(solidIndices) : new Uint16Array(solidIndices),
+      gl.STATIC_DRAW);
 
     const wireIdxBuf = gl.createBuffer()!;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, wireIdxBuf);
-    const wireArr = vertCount > 65535 ? new Uint32Array(wireIndices) : new Uint16Array(wireIndices);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, wireArr, gl.STATIC_DRAW);
-
-    // Enable OES_element_index_uint for 128x128 grid
-    if (vertCount > 65535) {
-      gl.getExtension('OES_element_index_uint');
-    }
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+      vertCount > 65535 ? new Uint32Array(wireIndices) : new Uint16Array(wireIndices),
+      gl.STATIC_DRAW);
 
     gl.enable(gl.DEPTH_TEST);
-    gl.clearColor(0.02, 0.02, 0.04, 1.0);
+    gl.clearColor(0.01, 0.01, 0.03, 1.0);
 
-    // Init heightmap ring buffer
     heightmapRef.current = new Float32Array((gridW + 1) * (gridH + 1));
     frontIndexRef.current = 0;
 
     const state: GLState = {
-      gl,
-      solidProgram,
-      wireProgram,
-      posBuf,
-      solidIdxBuf,
-      wireIdxBuf,
-      solidIdxCount: solidIndices.length,
-      wireIdxCount: wireIndices.length,
-      positions,
-      gridW,
-      gridH,
+      gl, solidProgram, wireProgram, posBuf, solidIdxBuf, wireIdxBuf,
+      solidIdxCount: solidIndices.length, wireIdxCount: wireIndices.length,
+      positions, gridW, gridH,
     };
     glStateRef.current = state;
     return state;
@@ -373,14 +357,12 @@ export function AudioTerrainLab() {
   const renderLoop = useCallback((timestamp: number) => {
     if (!isRunningRef.current) return;
 
-    // Mobile: target 30fps
     if (mobileRef.current && timestamp - lastFrameRef.current < 33) {
       rafRef.current = requestAnimationFrame(renderLoop);
       return;
     }
     lastFrameRef.current = timestamp;
 
-    // Pause when hidden
     if (document.hidden) {
       rafRef.current = requestAnimationFrame(renderLoop);
       return;
@@ -396,80 +378,83 @@ export function AudioTerrainLab() {
       return;
     }
 
-    const { gl, solidProgram, wireProgram, posBuf, solidIdxBuf, wireIdxBuf, solidIdxCount, wireIdxCount, positions, gridW, gridH } = s;
+    const { gl, solidProgram, wireProgram, posBuf, solidIdxBuf, wireIdxBuf,
+      solidIdxCount, wireIdxCount, positions, gridW, gridH } = s;
 
     // Get frequency data
     analyser.getByteFrequencyData(freqData);
     const binCount = freqData.length;
 
-    // Band decomposition
-    const bassEnd = Math.floor(binCount * 0.1);
-    const midEnd = Math.floor(binCount * 0.4);
-
+    // Overall energy + bass energy
+    let totalSum = 0;
+    const bassEnd = Math.floor(binCount * 0.12);
     let bassSum = 0;
-    for (let i = 0; i < bassEnd; i++) bassSum += freqData[i];
-    let midSum = 0;
-    for (let i = bassEnd; i < midEnd; i++) midSum += freqData[i];
-    let trebleSum = 0;
-    for (let i = midEnd; i < binCount; i++) trebleSum += freqData[i];
-
+    for (let i = 0; i < binCount; i++) {
+      totalSum += freqData[i];
+      if (i < bassEnd) bassSum += freqData[i];
+    }
+    const rawEnergy = totalSum / (binCount * 255);
     const rawBass = bassEnd > 0 ? bassSum / (bassEnd * 255) : 0;
-    const rawMid = (midEnd - bassEnd) > 0 ? midSum / ((midEnd - bassEnd) * 255) : 0;
-    const rawTreble = (binCount - midEnd) > 0 ? trebleSum / ((binCount - midEnd) * 255) : 0;
 
-    // EMA smoothing
+    smoothEnergyRef.current = smoothEnergyRef.current * (1 - EMA_WEIGHT) + rawEnergy * EMA_WEIGHT;
     smoothBassRef.current = smoothBassRef.current * (1 - EMA_WEIGHT) + rawBass * EMA_WEIGHT;
-    smoothMidRef.current = smoothMidRef.current * (1 - EMA_WEIGHT) + rawMid * EMA_WEIGHT;
-    smoothTrebleRef.current = smoothTrebleRef.current * (1 - EMA_WEIGHT) + rawTreble * EMA_WEIGHT;
 
+    const energy = smoothEnergyRef.current;
     const bass = smoothBassRef.current;
-    const mid = smoothMidRef.current;
-    const treble = smoothTrebleRef.current;
 
     const dt = scrollSpeedRef.current * 0.016;
     timeRef.current += dt;
     const t = timeRef.current;
 
     const w = gridW + 1;
+    const scale = heightScaleRef.current;
+    const trebleK = trebleDetailRef.current;
 
-    // Ring buffer scroll: compute new front row
+    // ── Compute new front row: each column = interpolated FFT bin ──
     const frontRow = frontIndexRef.current;
     for (let ix = 0; ix <= gridW; ix++) {
-      const nx = ix / gridW;
-      const bassH = bass * Math.sin(nx * Math.PI * 1.5) * bassSensRef.current;
-      const midH = mid * Math.sin(nx * Math.PI * 4 + t) * 1.0;
-      const trebleH = treble * noise1d(nx * 20 + t * 3) * trebleDetailRef.current;
-      heightmap[frontRow * w + ix] = bassH + midH + trebleH;
+      const nx = ix / gridW; // 0..1 across columns
+      // Map column to frequency bin (log scale for perceptual frequency mapping)
+      const logMin = Math.log(1);
+      const logMax = Math.log(binCount);
+      const binF = Math.exp(logMin + nx * (logMax - logMin));
+      const bin0 = Math.min(Math.floor(binF), binCount - 1);
+      const bin1 = Math.min(bin0 + 1, binCount - 1);
+      const frac = binF - bin0;
+      const val = (freqData[bin0] * (1 - frac) + freqData[bin1] * frac) / 255;
+
+      // Low-freq bins contribute larger shapes, high-freq bins add detail
+      const freqFactor = 1.0 - nx * (1.0 - trebleK);
+      heightmap[frontRow * w + ix] = val * freqFactor * scale;
     }
     frontIndexRef.current = (frontRow + 1) % (gridH + 1);
 
-    // Write heightmap into position Y, mapping ring buffer rows to Z order
+    // Write heightmap → positions Y
     for (let iz = 0; iz <= gridH; iz++) {
       const ringRow = (frontIndexRef.current + iz) % (gridH + 1);
       for (let ix = 0; ix <= gridW; ix++) {
-        const posIdx = (iz * w + ix) * 3;
-        positions[posIdx + 1] = heightmap[ringRow * w + ix];
+        positions[(iz * w + ix) * 3 + 1] = heightmap[ringRow * w + ix];
       }
     }
 
-    // Upload positions
     gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions);
 
-    // Camera
+    // ── Camera with bass sway ──
     const canvas = canvasRef.current!;
     const aspect = canvas.width / canvas.height;
     const proj = perspective(Math.PI / 4, aspect, 0.1, 50.0);
 
-    // Orbit or fixed camera
     const orbit = orbitRef.current;
-    const cosX = Math.cos(orbit.rotX), sinX = Math.sin(orbit.rotX);
+    const bassSway = bass * 0.15;
+    const rotX = orbit.rotX - bassSway * 0.1;
+    const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
     const cosY = Math.cos(orbit.rotY), sinY = Math.sin(orbit.rotY);
-    const dist = 6.0;
+    const dist = 5.5;
     const eyeX = dist * sinY * cosX;
-    const eyeY = dist * -sinX + 0.5;
+    const eyeY = dist * -sinX + 0.8 + bassSway;
     const eyeZ = dist * cosY * cosX;
-    const view = lookAt([eyeX, eyeY, eyeZ], [0, 0, 0], [0, 1, 0]);
+    const view = lookAt([eyeX, eyeY, eyeZ], [0, 0, -0.5], [0, 1, 0]);
     const model = identity();
 
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -477,15 +462,15 @@ export function AudioTerrainLab() {
 
     const useWire = wireframeRef.current;
     const program = useWire ? wireProgram : solidProgram;
-
     gl.useProgram(program);
 
     // Uniforms
     gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uProjection'), false, proj);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uView'), false, view);
     gl.uniformMatrix4fv(gl.getUniformLocation(program, 'uModel'), false, model);
+    gl.uniform1f(gl.getUniformLocation(program, 'uEnergy'), energy);
+    gl.uniform1f(gl.getUniformLocation(program, 'uTime'), t);
 
-    // Position attribute
     const aPos = gl.getAttribLocation(program, 'position');
     gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
     gl.enableVertexAttribArray(aPos);
@@ -519,10 +504,8 @@ export function AudioTerrainLab() {
     const onMouseMove = (e: MouseEvent) => {
       const o = orbitRef.current;
       if (!o.dragging) return;
-      const dx = e.clientX - o.lastX;
-      const dy = e.clientY - o.lastY;
-      o.rotY += dx * 0.005;
-      o.rotX = Math.max(-1.2, Math.min(-0.1, o.rotX - dy * 0.005));
+      o.rotY += (e.clientX - o.lastX) * 0.005;
+      o.rotX = Math.max(-1.2, Math.min(-0.15, o.rotX - (e.clientY - o.lastY) * 0.005));
       o.lastX = e.clientX;
       o.lastY = e.clientY;
     };
@@ -546,13 +529,10 @@ export function AudioTerrainLab() {
       streamRef.current?.getTracks().forEach((t) => t.stop());
       audioCtxRef.current?.close();
       const s = glStateRef.current;
-      if (s) {
-        s.gl.getExtension('WEBGL_lose_context')?.loseContext();
-      }
+      if (s) s.gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
   }, []);
 
-  // ── Start ──
   const handleStart = async () => {
     if (isStarting || isRunning) return;
     setError(null);
@@ -568,9 +548,8 @@ export function AudioTerrainLab() {
       setIsRunning(true);
       timeRef.current = 0;
       lastFrameRef.current = 0;
+      smoothEnergyRef.current = 0;
       smoothBassRef.current = 0;
-      smoothMidRef.current = 0;
-      smoothTrebleRef.current = 0;
       rafRef.current = requestAnimationFrame(renderLoop);
     } catch (err) {
       streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -583,7 +562,6 @@ export function AudioTerrainLab() {
     }
   };
 
-  // ── Stop ──
   const handleStop = () => {
     isRunningRef.current = false;
     if (rafRef.current !== null) {
@@ -601,9 +579,7 @@ export function AudioTerrainLab() {
     setIsRunning(false);
 
     const s = glStateRef.current;
-    if (s) {
-      s.gl.clear(s.gl.COLOR_BUFFER_BIT | s.gl.DEPTH_BUFFER_BIT);
-    }
+    if (s) s.gl.clear(s.gl.COLOR_BUFFER_BIT | s.gl.DEPTH_BUFFER_BIT);
   };
 
   return (
@@ -642,22 +618,11 @@ export function AudioTerrainLab() {
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-black/10 bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.02]">
-          <Button
-            type="button"
-            onClick={handleStart}
-            disabled={isStarting || isRunning}
-            className="font-mono text-xs"
-          >
+          <Button type="button" onClick={handleStart} disabled={isStarting || isRunning} className="font-mono text-xs">
             {isStarting ? <LoaderCircle className="size-4 animate-spin" /> : <Mic className="size-4" />}
             開始
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleStop}
-            disabled={!isRunning && !isStarting}
-            className="font-mono text-xs"
-          >
+          <Button type="button" variant="outline" onClick={handleStop} disabled={!isRunning && !isStarting} className="font-mono text-xs">
             <MicOff className="size-4" />
             停止
           </Button>
@@ -670,66 +635,29 @@ export function AudioTerrainLab() {
         </div>
       )}
 
-      {/* Controls */}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-1">
           <span className="text-xs font-medium text-muted">Scroll Speed: {scrollSpeed.toFixed(1)}</span>
-          <input
-            type="range"
-            min="0.1"
-            max="3.0"
-            step="0.1"
-            value={scrollSpeed}
-            onChange={(e) => {
-              const v = parseFloat(e.target.value);
-              setScrollSpeed(v);
-              scrollSpeedRef.current = v;
-            }}
-            className="w-full accent-accent"
-          />
+          <input type="range" min="0.1" max="3.0" step="0.1" value={scrollSpeed}
+            onChange={(e) => { const v = parseFloat(e.target.value); setScrollSpeed(v); scrollSpeedRef.current = v; }}
+            className="w-full accent-accent" />
         </label>
         <label className="space-y-1">
-          <span className="text-xs font-medium text-muted">Bass Sensitivity: {bassSens.toFixed(1)}</span>
-          <input
-            type="range"
-            min="0.0"
-            max="3.0"
-            step="0.1"
-            value={bassSens}
-            onChange={(e) => {
-              const v = parseFloat(e.target.value);
-              setBassSens(v);
-              bassSensRef.current = v;
-            }}
-            className="w-full accent-accent"
-          />
+          <span className="text-xs font-medium text-muted">Height Scale: {heightScale.toFixed(1)}</span>
+          <input type="range" min="0.5" max="4.0" step="0.1" value={heightScale}
+            onChange={(e) => { const v = parseFloat(e.target.value); setHeightScale(v); heightScaleRef.current = v; }}
+            className="w-full accent-accent" />
         </label>
         <label className="space-y-1">
           <span className="text-xs font-medium text-muted">Treble Detail: {trebleDetail.toFixed(1)}</span>
-          <input
-            type="range"
-            min="0.0"
-            max="2.0"
-            step="0.1"
-            value={trebleDetail}
-            onChange={(e) => {
-              const v = parseFloat(e.target.value);
-              setTrebleDetail(v);
-              trebleDetailRef.current = v;
-            }}
-            className="w-full accent-accent"
-          />
+          <input type="range" min="0.0" max="2.0" step="0.1" value={trebleDetail}
+            onChange={(e) => { const v = parseFloat(e.target.value); setTrebleDetail(v); trebleDetailRef.current = v; }}
+            className="w-full accent-accent" />
         </label>
         <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={wireframe}
-            onChange={(e) => {
-              setWireframe(e.target.checked);
-              wireframeRef.current = e.target.checked;
-            }}
-            className="accent-accent"
-          />
+          <input type="checkbox" checked={wireframe}
+            onChange={(e) => { setWireframe(e.target.checked); wireframeRef.current = e.target.checked; }}
+            className="accent-accent" />
           <span className="text-xs font-medium text-muted">Wireframe</span>
         </label>
       </div>
