@@ -560,8 +560,18 @@ export function AirFlowLab() {
                 <p className="mt-4 text-sm leading-relaxed text-muted">
                   {isStarting
                     ? 'カメラと OpenCV を読み込んでいます...'
-                    : '開始を押すと、カメラ権限を要求しパーティクルの可視化を開始します。'}
+                    : 'カメラ権限を要求しパーティクルの可視化を開始します。'}
                 </p>
+                {!isStarting && (
+                  <Button
+                    type="button"
+                    onClick={handleStart}
+                    className="mt-4 font-mono text-xs"
+                  >
+                    <Camera className="size-4" />
+                    開始
+                  </Button>
+                )}
               </div>
             </div>
           )}
