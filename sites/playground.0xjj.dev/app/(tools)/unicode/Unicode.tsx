@@ -42,7 +42,6 @@ const NAMED: UnicodeChar[] = [
   { cp: 0x2211, name: 'N-ARY SUMMATION', cat: 'Symbols' },
   { cp: 0x220F, name: 'N-ARY PRODUCT', cat: 'Symbols' },
   { cp: 0x222B, name: 'INTEGRAL', cat: 'Symbols' },
-  { cp: 0x03C0, name: 'GREEK SMALL LETTER PI', cat: 'Symbols' },
   { cp: 0x2126, name: 'OHM SIGN', cat: 'Symbols' },
   { cp: 0x2103, name: 'DEGREE CELSIUS', cat: 'Symbols' },
   { cp: 0x2109, name: 'DEGREE FAHRENHEIT', cat: 'Symbols' },
