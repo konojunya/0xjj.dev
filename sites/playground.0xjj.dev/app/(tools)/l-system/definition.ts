@@ -425,8 +425,11 @@ export const lSystemDefinition: OGLSceneDefinition = {
     let autoGrowthLevel = 1;
     let lastGrowthTime = 0;
 
+    let disposed = false;
+
     return {
       render(time) {
+        if (disposed || gl.isContextLost()) return;
         const values = getValues();
         const seed = Math.round(values.spread ?? 0);
         const maxIter = Math.round(values.detail ?? 6);
@@ -476,6 +479,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
         }
       },
       dispose() {
+        disposed = true;
         resizeObserver.disconnect();
         gl.getExtension('WEBGL_lose_context')?.loseContext();
       },
