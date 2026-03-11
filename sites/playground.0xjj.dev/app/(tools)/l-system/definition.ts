@@ -481,7 +481,6 @@ export const lSystemDefinition: OGLSceneDefinition = {
       dispose() {
         disposed = true;
         resizeObserver.disconnect();
-        gl.getExtension('WEBGL_lose_context')?.loseContext();
       },
     };
   },
