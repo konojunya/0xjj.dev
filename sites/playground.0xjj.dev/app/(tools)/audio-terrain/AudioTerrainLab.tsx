@@ -16,6 +16,7 @@ const MOBILE_DPR_CAP = 1.5;
 const SMOOTHING = 0.72;
 const EMA_WEIGHT = 0.38;
 const AUTO_ROTATE_SPEED = 0.06;
+const NOISE_GATE = 0.06; // FFT values below this threshold are silenced
 
 function isMobile() {
   return typeof window !== 'undefined' && window.innerWidth < 768;
@@ -432,7 +433,8 @@ export function AudioTerrainLab() {
       const b0 = Math.min(Math.floor(binF), binCount - 1);
       const b1 = Math.min(b0 + 1, binCount - 1);
       const frac = binF - b0;
-      const val = (freqData[b0] * (1 - frac) + freqData[b1] * frac) / 255;
+      const raw = (freqData[b0] * (1 - frac) + freqData[b1] * frac) / 255;
+      const val = raw < NOISE_GATE ? 0 : raw;
       const freqFactor = 1.0 - nx * (1.0 - trebleK);
       // Power curve makes peaks more dramatic
       heightmap[frontRow * w + ix] = Math.pow(val, 1.3) * freqFactor * scale;
