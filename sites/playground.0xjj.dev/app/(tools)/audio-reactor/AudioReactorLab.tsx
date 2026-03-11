@@ -188,8 +188,8 @@ void main() {
   float fov = 1.2 - u_beat * 0.4 - u_energy * 0.2;
   vec3 rd = normalize(vec3(uv, fov));
 
-  // Kaleidoscope fold: bass increases folds
-  float folds = complexity + u_bass * 6.0;
+  // Kaleidoscope fold: all bands contribute — more sound = more fracture
+  float folds = complexity + u_bass * 4.0 + u_mid * 3.0 + u_treble * 2.0 + u_energy * 3.0;
   rd = kaleidoFold(rd, folds);
 
   // Camera rotation speed gated by energy
