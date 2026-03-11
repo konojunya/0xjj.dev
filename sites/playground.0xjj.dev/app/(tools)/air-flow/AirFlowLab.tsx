@@ -12,8 +12,8 @@ const FLOW_STRENGTH = 0.0008;
 const DAMPING = 0.96;
 const AMBIENT_DRIFT = 0.0002;
 const EMA_ALPHA = 0.3; // raw weight in exponential moving average
-const DESKTOP_PARTICLES = 12_000;
-const FULLSCREEN_PARTICLES = 30_000;
+const DESKTOP_PARTICLES = 25_000;
+const FULLSCREEN_PARTICLES = 50_000;
 const MOBILE_PARTICLES = 5_000;
 
 // Capture resolution
