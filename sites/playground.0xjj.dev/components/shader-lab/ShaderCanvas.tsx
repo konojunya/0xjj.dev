@@ -108,11 +108,10 @@ export function ShaderCanvas({ definition, values, isRunning }: ShaderCanvasProp
     let vao: WebGLVertexArrayObject | null = null;
     let visible = true;
 
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     const TARGET_FPS = isMobile ? 30 : 60;
     const FRAME_INTERVAL = 1000 / TARGET_FPS;
     let lastRenderTime = 0;
-
-    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
     try {
       if (definition.renderer.graphics !== 'webgl2') {
