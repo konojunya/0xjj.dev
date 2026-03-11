@@ -136,12 +136,12 @@ fn fs(in : VSOut) -> @location(0) vec4f {
   let ab = sampleGrid(in.uv);
   let v = clamp(ab.x - ab.y, 0.0, 1.0);
 
-  // Colour ramp: deep navy -> teal -> aqua -> bright white
-  let c1 = vec3f(0.01, 0.03, 0.08);
-  let c2 = vec3f(0.02, 0.20, 0.32);
-  let c3 = vec3f(0.10, 0.52, 0.62);
-  let c4 = vec3f(0.50, 0.88, 0.94);
-  let c5 = vec3f(0.92, 0.98, 1.0);
+  // Colour ramp: charcoal -> warm brown -> amber -> cream
+  let c1 = vec3f(0.04, 0.03, 0.03);
+  let c2 = vec3f(0.18, 0.10, 0.06);
+  let c3 = vec3f(0.52, 0.30, 0.12);
+  let c4 = vec3f(0.85, 0.65, 0.35);
+  let c5 = vec3f(0.98, 0.94, 0.88);
 
   var col : vec3f;
   if (v < 0.25) {
@@ -325,7 +325,7 @@ async function setup(ctx: WebGPUSetupContext): Promise<WebGPUSceneHandle> {
           view: tex.createView(),
           loadOp: 'clear' as GPULoadOp,
           storeOp: 'store' as GPUStoreOp,
-          clearValue: { r: 0.01, g: 0.03, b: 0.08, a: 1 },
+          clearValue: { r: 0.04, g: 0.03, b: 0.03, a: 1 },
         },
       ],
     });
