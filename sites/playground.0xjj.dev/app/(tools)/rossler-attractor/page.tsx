@@ -21,10 +21,7 @@ export default function Page() {
             Rössler Attractor
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            The Rössler attractor is a chaotic system that traces a flat spiral
-            band with a characteristic fold — mostly confined to the x-y plane
-            with occasional excursions in z. This demo renders it as flowing
-            colored lines in a fragment shader.
+            レスラーアトラクタは、x-y平面上の平らな螺旋と特徴的な折り返しを描くカオス系で、時折z方向に跳ね上がります。このデモではフラグメントシェーダーでカラフルな流線として描画しています。
           </p>
         </div>
 

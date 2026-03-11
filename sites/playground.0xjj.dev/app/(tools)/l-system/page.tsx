@@ -20,10 +20,7 @@ export default function Page() {
             L-System
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Lindenmayer systems are parallel rewriting grammars that produce
-            fractal plant-like structures, space-filling curves, and other
-            self-similar patterns through simple string-replacement rules and
-            turtle graphics.
+            リンデンマイヤーシステムは、単純な文字列置換規則とタートルグラフィクスにより、植物のようなフラクタル構造や空間充填曲線などの自己相似パターンを生成する並列書き換え文法です。
           </p>
         </div>
 

@@ -20,9 +20,7 @@ export default function Page() {
             Mandelbulb
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            3D Mandelbulb fractal rendered in real-time via GPU ray marching.
-            Move your pointer to orbit the camera. Adjust the power exponent to
-            morph the fractal shape.
+            GPUレイマーチングでリアルタイム描画する3Dマンデルバルブフラクタル。ポインターを動かしてカメラを回転、べき乗指数を調整してフラクタルの形状を変化させられます。
           </p>
         </div>
 

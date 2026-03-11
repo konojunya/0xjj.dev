@@ -21,9 +21,7 @@ export default function Page() {
             Lorenz Attractor
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            The Lorenz attractor is a chaotic system of three coupled differential
-            equations that traces an endlessly evolving butterfly-shaped trajectory.
-            This demo renders it as flowing colored lines in a fragment shader.
+            ローレンツアトラクタは、3つの連立微分方程式からなるカオス系で、蝶の形をした軌道を永遠に描き続けます。このデモではフラグメントシェーダーでカラフルな流線として描画しています。
           </p>
         </div>
 

@@ -20,10 +20,7 @@ export default function Page() {
             Curl Noise Flow Field
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Thousands of particles flowing through a divergence-free curl noise
-            vector field, creating fluid-like visuals. The simulation runs
-            entirely on the GPU via WebGPU compute shaders with a trail fade
-            effect for smooth, organic motion.
+            発散のないカールノイズベクトル場を流れる数千のパーティクルが、流体のようなビジュアルを生み出します。WebGPUコンピュートシェーダーでGPU上で動作し、トレイルフェードで滑らかな有機的な動きを実現しています。
           </p>
         </div>
 

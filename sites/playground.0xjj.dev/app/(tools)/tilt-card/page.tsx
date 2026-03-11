@@ -25,7 +25,7 @@ export default function Page() {
             <TiltCard
               src="https://assets.xross-stars.com/card/BP02/BP02-087_e065c07289840e4acafe8ee5cfa59ac8.png"
               backSrc="https://assets.xross-stars.com/card/BP02/BP02-087_84dec236315bfdac4acc02146ea507d6.png"
-              alt="Sample trading card"
+              alt="サンプルトレーディングカード"
             />
           </div>
         </div>

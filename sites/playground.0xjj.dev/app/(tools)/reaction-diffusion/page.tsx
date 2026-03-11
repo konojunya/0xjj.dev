@@ -20,10 +20,7 @@ export default function Page() {
             Reaction-Diffusion
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Gray-Scott reaction-diffusion simulation running entirely on the GPU
-            via WebGPU compute shaders. Two virtual chemicals react and diffuse,
-            producing organic patterns like spots, stripes, and coral-like
-            structures.
+            WebGPUコンピュートシェーダーでGPU上で動作するGray-Scott反応拡散シミュレーション。2つの仮想化学物質が反応・拡散し、斑点・縞模様・珊瑚のような有機的パターンを生み出します。
           </p>
         </div>
 
