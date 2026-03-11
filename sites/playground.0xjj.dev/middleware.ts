@@ -41,9 +41,13 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const pathname = request.nextUrl.pathname;
 
-  // Worker scripts in /opencv/ need unsafe-eval for asm.js execution.
+  // Worker scripts in /opencv/ need unsafe-eval for asm.js + COEP to satisfy
+  // the parent document's Cross-Origin-Embedder-Policy.
   if (pathname.startsWith('/opencv/')) {
     response.headers.set('Content-Security-Policy', faceDetectCsp);
+    for (const [key, value] of Object.entries(securityHeaders)) {
+      response.headers.set(key, value);
+    }
     return response;
   }
 

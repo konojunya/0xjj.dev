@@ -20,7 +20,7 @@ export default function Page() {
             Face Detect Camera
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            face detect の前段として、getUserMedia() で取得したカメラ映像を canvas に安定して描画します。
+            OpenCV.js (Haar Cascade) を使ったリアルタイム顔検出。処理はすべてブラウザ内で完結します。
           </p>
         </div>
 
