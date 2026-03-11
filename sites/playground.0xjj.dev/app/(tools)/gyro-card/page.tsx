@@ -22,7 +22,7 @@ export default function Page() {
 
         <div className="mt-8 flex items-center justify-center rounded-xl bg-black/5 py-16 dark:bg-white/5">
           <GyroCard
-            src="https://assets.xross-stars.com/card/BP02/BP02-087_e065c07289840e4acafe8ee5cfa59ac8.png"
+            src="https://assets.xross-stars.com/card/BP01/BP01-124_0eba741fe2b68901705ed306b46e64e5.png"
             alt="サンプルトレーディングカード"
           />
         </div>

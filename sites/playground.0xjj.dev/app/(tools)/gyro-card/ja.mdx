@@ -1,27 +1,86 @@
 ## Gyro Card
 
-スマートフォンの**加速度センサー（ジャイロスコープ）**を使って、デバイスの傾きに応じてカードがリアルタイムに3D回転するインタラクティブデモです。
+スマートフォンの加速度センサー（ジャイロスコープ）を使って、デバイスの傾きに応じてカードがリアルタイムに 3D 回転するインタラクティブデモです。
 
 ### 仕組み
 
 ブラウザの [`DeviceOrientationEvent`](https://developer.mozilla.org/ja/docs/Web/API/DeviceOrientationEvent) API を使用しています。
 
-- **`beta`** (前後の傾き: -180°〜180°) → カードの `rotateX`
-- **`gamma`** (左右の傾き: -90°〜90°) → カードの `rotateY`
+- `beta` — 前後の傾き（-180° 〜 180°）→ カードの `rotateX`
+- `gamma` — 左右の傾き（-90° 〜 90°）→ カードの `rotateY`
 
-初回のセンサー値を基準点としてキャリブレーションし、相対的な傾き（±25°）をカードの3D回転に変換します。
+初回のセンサー値を基準点としてキャリブレーションし、相対的な傾き（±25°）をカードの 3D 回転に変換します。
+
+```ts
+const handleOrientation = (e: DeviceOrientationEvent) => {
+  const beta = e.beta ?? 0;
+  const gamma = e.gamma ?? 0;
+
+  // 初回値を基準点として保持
+  if (initialBeta.current === null) {
+    initialBeta.current = beta;
+    initialGamma.current = gamma;
+  }
+
+  // 相対傾きを ±MAX_TILT にクランプ
+  const relativeBeta = beta - initialBeta.current;
+  const relativeGamma = gamma - initialGamma.current;
+  const clampedBeta = Math.max(-MAX_TILT, Math.min(MAX_TILT, relativeBeta));
+  const clampedGamma = Math.max(-MAX_TILT, Math.min(MAX_TILT, relativeGamma));
+
+  // スプリングアニメーションで反映
+  rotateX.set(-clampedBeta);
+  rotateY.set(clampedGamma);
+};
+```
+
+### スプリングアニメーション
+
+Motion の `useSpring` を使い、センサー値の変化をバネ物理でなめらかに補間しています。`stiffness`・`damping`・`mass` の 3 パラメータで手触りを調整できます。
+
+```ts
+const SPRING_CONFIG = { stiffness: 150, damping: 20, mass: 0.5 };
+
+const rotateX = useSpring(0, SPRING_CONFIG);
+const rotateY = useSpring(0, SPRING_CONFIG);
+```
 
 ### 光沢エフェクト
 
-傾きに応じてカード表面を移動するホログラフィックな光沢は、`radial-gradient` の位置をセンサー値にリンクさせることで実現しています。Motion の `useSpring` による物理ベースの補間で、なめらかな追従を実現。
+傾きに応じてカード表面を移動するホログラフィックな光沢は、`radial-gradient` の位置をセンサー値にリンクさせています。CSS 変数を `motion.on('change')` で毎フレーム更新することで、DOM 操作を最小限に抑えつつリアクティブに追従します。
+
+```ts
+const unsubX = sheenX.on('change', (v) => {
+  el.style.setProperty('--sheen-x', `${v}%`);
+});
+```
+
+```css
+background: radial-gradient(
+  circle at var(--sheen-x) var(--sheen-y),
+  rgba(255, 255, 255, 0.4) 0%,
+  transparent 60%
+);
+```
 
 ### iOS の権限
 
 iOS 13 以降では、モーションセンサーへのアクセスにユーザーの明示的な許可が必要です。「Activate Gyroscope」ボタンをタップすると `DeviceOrientationEvent.requestPermission()` が呼び出され、許可ダイアログが表示されます。
 
+```ts
+const DOE = DeviceOrientationEvent as unknown as {
+  requestPermission?: () => Promise<'granted' | 'denied'>;
+};
+
+if (typeof DOE.requestPermission === 'function') {
+  const perm = await DOE.requestPermission();
+  if (perm !== 'granted') return;
+}
+```
+
 ### デスクトップ環境
 
-加速度センサーを搭載していない PC やデスクトップブラウザでは、センサーが利用できない旨のメッセージが表示されます。スマートフォンからアクセスしてお楽しみください。
+加速度センサーを搭載していない PC やデスクトップブラウザでは、センサーが利用できない旨のメッセージが表示されます。デスクトップブラウザにも `DeviceOrientationEvent` API 自体は存在するため、1 秒間イベントの発火を監視し、タッチ対応でなければ非対応と判定しています。
 
 ### Recalibrate
 

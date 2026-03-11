@@ -161,15 +161,6 @@ export const GyroCard: React.FC<{
             draggable={false}
           />
           {/* Holographic sheen overlay */}
-          {sensorState === 'active' && (
-            <motion.div
-              className="pointer-events-none absolute inset-0 mix-blend-overlay"
-              style={{
-                background: `radial-gradient(circle at calc(var(--sx) * 1%) calc(var(--sy) * 1%), rgba(255,255,255,0.35) 0%, transparent 60%)`,
-                // Workaround: use CSS variable approach via inline style
-              }}
-            />
-          )}
           {sensorState === 'active' && <SheenLayer sheenX={sheenX} sheenY={sheenY} />}
         </motion.div>
       </div>
