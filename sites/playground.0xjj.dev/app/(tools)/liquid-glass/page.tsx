@@ -1,8 +1,7 @@
 import { createToolMetadata, createToolJsonLd } from '../../lib/metadata';
 import { trackView } from '../../lib/views';
-import Article from '../../lib/Article';
+import '../../lib/prose.css';
 import Demo from './Demo';
-import En from './en.mdx';
 import Ja from './ja.mdx';
 
 export const metadata = createToolMetadata('liquid-glass');
@@ -23,7 +22,9 @@ export default function Page() {
 
         <Demo />
 
-        <Article en={<En />} ja={<Ja />} />
+        <article className="prose mt-12 max-w-3xl">
+          <Ja />
+        </article>
       </div>
     </>
   );
