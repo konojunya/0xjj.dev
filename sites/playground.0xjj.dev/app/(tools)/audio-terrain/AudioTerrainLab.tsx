@@ -457,7 +457,7 @@ export function AudioTerrainLab() {
     const bassSway = bass * 0.2;
     const rx = orbit.rotX - bassSway * 0.08;
     const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(orbit.rotY), sy = Math.sin(orbit.rotY);
-    const dist = 3.8 - bassSway * 0.3;
+    const dist = 2.6 - bassSway * 0.2;
     const eye = [dist * sy * cx, dist * -sx + 1.0 + bassSway, dist * cy * cx];
     const canvas = canvasRef.current!;
     const proj = mat4Perspective(Math.PI / 4, canvas.width / canvas.height, 0.1, 50.0);
