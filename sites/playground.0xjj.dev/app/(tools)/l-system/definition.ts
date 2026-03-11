@@ -13,168 +13,139 @@ function mulberry32(seed: number) {
   };
 }
 
-// ── Tree-constrained random L-System generation ──
+// ── Proven plant L-System templates ──
+// Each template is known to produce beautiful plant-like patterns.
+// The seed selects a template and perturbs the angle.
+
+interface PlantTemplate {
+  name: string;
+  axiom: string;
+  rules: Record<string, string>;
+  baseAngle: number;
+  angleRange: [number, number]; // min/max perturbation
+}
+
+const TEMPLATES: PlantTemplate[] = [
+  // Fractal plant (the most iconic L-System plant)
+  {
+    name: 'plant',
+    axiom: 'X',
+    rules: { X: 'F+[[X]-X]-F[-FX]+X', F: 'FF' },
+    baseAngle: 25,
+    angleRange: [20, 30],
+  },
+  // Simple branching tree
+  {
+    name: 'tree',
+    axiom: 'X',
+    rules: { X: 'F[+X]F[-X]+X', F: 'FF' },
+    baseAngle: 20,
+    angleRange: [15, 28],
+  },
+  // Symmetric tree
+  {
+    name: 'tree-sym',
+    axiom: 'X',
+    rules: { X: 'F[+X][-X]FX', F: 'FF' },
+    baseAngle: 25.7,
+    angleRange: [22, 30],
+  },
+  // Dense bushy tree
+  {
+    name: 'bush',
+    axiom: 'F',
+    rules: { F: 'FF+[+F-F-F]-[-F+F+F]' },
+    baseAngle: 22.5,
+    angleRange: [18, 28],
+  },
+  // Tall tree with canopy
+  {
+    name: 'canopy',
+    axiom: 'X',
+    rules: { X: 'F[-X][+X]FX', F: 'FF' },
+    baseAngle: 22,
+    angleRange: [18, 28],
+  },
+  // Weeping willow style
+  {
+    name: 'willow',
+    axiom: 'X',
+    rules: { X: 'F[+X]F[-X]-X', F: 'FF' },
+    baseAngle: 18,
+    angleRange: [14, 24],
+  },
+  // Fern (asymmetric fronds)
+  {
+    name: 'fern',
+    axiom: 'X',
+    rules: { X: 'F-[[X]+X]+F[+FX]-X', F: 'FF' },
+    baseAngle: 22.5,
+    angleRange: [18, 28],
+  },
+  // Stochastic-like branching
+  {
+    name: 'branch',
+    axiom: 'X',
+    rules: { X: 'F[++X][-X]F[-FX]+X', F: 'FF' },
+    baseAngle: 20,
+    angleRange: [16, 26],
+  },
+  // Spreading bush
+  {
+    name: 'spread',
+    axiom: 'F',
+    rules: { F: 'F[+F]F[-F]F' },
+    baseAngle: 25.7,
+    angleRange: [20, 32],
+  },
+  // Kelp / seaweed
+  {
+    name: 'kelp',
+    axiom: 'X',
+    rules: { X: 'F[+X][-X]FX', F: 'F+F' },
+    baseAngle: 15,
+    angleRange: [10, 22],
+  },
+];
 
 interface TreeGrammar {
   axiom: string;
   rules: Record<string, string>;
   angle: number;
-  style: PlantStyle;
 }
 
-type PlantStyle = 'tree' | 'bush' | 'fern' | 'seaweed' | 'vine' | 'coral';
-
-function generateTreeGrammar(seed: number, density: number): TreeGrammar {
+function generateTreeGrammar(seed: number): TreeGrammar {
   const rng = mulberry32(seed);
-  const pick = <T>(arr: T[]): T => arr[Math.floor(rng() * arr.length)];
-  const chance = (p: number) => rng() < p;
-  const rangeInt = (lo: number, hi: number) => lo + Math.floor(rng() * (hi - lo + 1));
 
-  // Pick a plant style — gives structural variety
-  const style: PlantStyle = pick(['tree', 'tree', 'bush', 'fern', 'seaweed', 'vine', 'coral']);
+  // Pick template based on seed
+  const template = TEMPLATES[Math.floor(rng() * TEMPLATES.length)];
 
-  // Angle varies by style
-  const angleMap: Record<PlantStyle, number[]> = {
-    tree:    [18, 20, 22, 25, 28, 30, 35],
-    bush:    [20, 25, 30, 35, 40, 45],
-    fern:    [10, 12, 15, 18, 20, 25],
-    seaweed: [12, 15, 18, 22, 28, 30, 35],
-    vine:    [15, 20, 25, 30, 35, 45],
-    coral:   [25, 30, 35, 40, 45, 60, 72, 90],
-  };
-  const angle = pick(angleMap[style]);
+  // Perturb angle within the template's range
+  const [minA, maxA] = template.angleRange;
+  const angle = minA + rng() * (maxA - minA);
 
+  // Small rule mutations for variety while preserving plant structure
   const rules: Record<string, string> = {};
-  let axiom: string;
+  for (const [key, rule] of Object.entries(template.rules)) {
+    let mutated = rule;
 
-  switch (style) {
-    case 'tree': {
-      // Classic tree: trunk + symmetric branch pairs
-      const trunk = pick(['F', 'FF', 'FFF']);
-      const branchCount = 1 + Math.floor(density * 2.5);
-      const parts: string[] = [];
-      if (chance(0.6)) parts.push(trunk);
-
-      for (let i = 0; i < branchCount; i++) {
-        const content = pick(['F', 'FF', 'F+F', 'F-F', 'FF+F', 'F-FF']);
-        const asym = chance(0.3); // asymmetric branches
-        parts.push(`[+${asym && chance(0.5) ? '+' : ''}${content}]`);
-        if (i < branchCount - 1 && chance(0.7)) parts.push('F');
-        parts.push(`[-${asym && chance(0.5) ? '-' : ''}${content}]`);
-        if (chance(0.5)) parts.push('F');
+    // Occasionally add an extra F for longer segments
+    if (rng() < 0.3) {
+      const insertAt = Math.floor(rng() * mutated.length);
+      if (mutated[insertAt] === 'F' && rng() < 0.5) {
+        mutated = mutated.slice(0, insertAt) + 'FF' + mutated.slice(insertAt + 1);
       }
-      if (chance(0.4)) parts.push(trunk);
-
-      rules.F = parts.join('');
-
-      // 50% chance of X-based meta-branching
-      if (chance(0.5)) {
-        const xParts: string[] = ['F'];
-        const xN = 1 + Math.floor(density * 1.8);
-        for (let i = 0; i < xN; i++) {
-          xParts.push(pick(['[+X]', '[++X]']));
-          if (chance(0.6)) xParts.push('F');
-          xParts.push(pick(['[-X]', '[--X]']));
-        }
-        if (chance(0.5)) xParts.push('X');
-        rules.X = xParts.join('');
-        axiom = 'X';
-      } else {
-        axiom = 'F';
-      }
-      break;
     }
 
-    case 'bush': {
-      // Dense, wide, multi-branching from base
-      const branchCount = 2 + Math.floor(density * 2);
-      const parts: string[] = [];
-      for (let i = 0; i < branchCount; i++) {
-        const turns = pick(['+', '-', '++', '--', '']);
-        const content = pick(['F', 'FF', 'F[+F]F', 'F[-F]F']);
-        parts.push(`[${turns}${content}]`);
-        if (chance(0.4)) parts.push('F');
-      }
-      rules.F = parts.join('');
-      // Multi-stem axiom
-      const stems = rangeInt(2, 4);
-      const axiomParts: string[] = [];
-      for (let i = 0; i < stems; i++) {
-        axiomParts.push('F');
-        if (i < stems - 1) axiomParts.push(pick(['+', '-']));
-      }
-      axiom = axiomParts.join('');
-      break;
+    // Occasionally swap + and - for mirroring
+    if (rng() < 0.2) {
+      mutated = mutated.split('').map(c => c === '+' ? '-' : c === '-' ? '+' : c).join('');
     }
 
-    case 'fern': {
-      // Asymmetric: one side has longer fronds
-      const mainSide = pick(['+', '-']);
-      const otherSide = mainSide === '+' ? '-' : '+';
-      const frondLen = pick(['FF', 'FFF', 'FF+F', 'FF-F']);
-      const smallFrond = pick(['F', 'F+F', 'F-F']);
-      rules.F = `F[${mainSide}${mainSide}${frondLen}][${otherSide}${smallFrond}]F`;
-      if (chance(0.5)) {
-        rules.X = `F[${mainSide}${mainSide}X]F[${otherSide}X]FX`;
-        axiom = 'X';
-      } else {
-        axiom = 'F';
-      }
-      break;
-    }
-
-    case 'seaweed': {
-      // Flowing, curved, gentle branching
-      const curve = pick(['+', '-']);
-      const wobble = chance(0.5) ? `${curve}F${curve}` : `F${curve}F`;
-      const branch = pick([
-        `[${curve}${curve}F]F`,
-        `F[${curve}F]`,
-        `[${curve}F[${curve}F]]`,
-      ]);
-      rules.F = `${wobble}${branch}`;
-      if (chance(0.6)) {
-        rules.X = `F[+X][-X]${chance(0.5) ? 'FX' : 'X'}`;
-        axiom = 'X';
-      } else {
-        axiom = 'F';
-      }
-      break;
-    }
-
-    case 'vine': {
-      // Long trailing growth with sporadic branching
-      const mainDir = pick(['+', '-']);
-      const trailLen = pick(['FFF', 'FFFF', 'FFF+F', 'FFF-F']);
-      const leaf = pick(['[+F]', '[-F]', '[+FF]', '[-FF]', `[${mainDir}F[${mainDir}F]]`]);
-      rules.F = `F${mainDir}F${leaf}F`;
-      if (chance(0.5)) {
-        rules.X = `FX${leaf}`;
-        axiom = 'X';
-      } else {
-        axiom = 'F';
-      }
-      break;
-    }
-
-    case 'coral': {
-      // Wide angles, dense branching, space-filling
-      const branchCount = 2 + Math.floor(density * 3);
-      const parts: string[] = ['F'];
-      for (let i = 0; i < branchCount; i++) {
-        const nTurns = rangeInt(1, 3);
-        const dir = chance(0.5) ? '+' : '-';
-        const turns = dir.repeat(nTurns);
-        const content = pick(['F', 'FF', 'F+F-F', 'F-F+F']);
-        parts.push(`[${turns}${content}]`);
-      }
-      rules.F = parts.join('');
-      axiom = 'F';
-      break;
-    }
+    rules[key] = mutated;
   }
 
-  return { axiom, rules, angle, style };
+  return { axiom: template.axiom, rules, angle };
 }
 
 // ── L-System expansion ──
@@ -204,7 +175,7 @@ interface TurtleSegment {
 function interpretTurtle(lstr: string, angleDeg: number): TurtleSegment[] {
   const segments: TurtleSegment[] = [];
   const angleRad = (angleDeg * Math.PI) / 180;
-  let x = 0, y = 0, a = Math.PI / 2; // facing up
+  let x = 0, y = 0, a = Math.PI / 2;
   let bracketDepth = 0;
   const stack: { x: number; y: number; a: number; d: number }[] = [];
   let step = 0;
@@ -311,7 +282,7 @@ export const lSystemDefinition: OGLSceneDefinition = {
     {
       key: 'spread',
       label: 'Seed',
-      description: 'Random seed — each value grows a unique tree. Seeded from current time on load.',
+      description: 'Random seed — each value grows a unique plant. Randomized on page load.',
       min: 0,
       max: 9999,
       step: 1,
@@ -319,20 +290,9 @@ export const lSystemDefinition: OGLSceneDefinition = {
       precision: 0,
     },
     {
-      key: 'twist',
-      label: 'Density',
-      description: 'Branch density — sparse sapling to lush canopy.',
-      min: 0,
-      max: 100,
-      step: 1,
-      defaultValue: 50,
-      precision: 0,
-      unit: '%',
-    },
-    {
       key: 'detail',
       label: 'Growth',
-      description: 'Growth stage — how many generations the tree has developed.',
+      description: 'Growth stage — how many generations the plant has developed.',
       min: 1,
       max: 7,
       step: 1,
@@ -413,14 +373,12 @@ export const lSystemDefinition: OGLSceneDefinition = {
 
     let mesh: Mesh | null = null;
     let prevSeed = -1;
-    let prevDensity = -1;
     let prevGrowth = -1;
-    // Cache segments per growth level for smooth animation
     let grammarCache: TreeGrammar | null = null;
     let segmentsByLevel: TurtleSegment[][] = [];
 
-    function buildAllLevels(seed: number, density: number, maxLevel: number) {
-      const grammar = generateTreeGrammar(seed, density);
+    function buildAllLevels(seed: number, maxLevel: number) {
+      const grammar = generateTreeGrammar(seed);
       grammarCache = grammar;
       segmentsByLevel = [];
       for (let i = 1; i <= maxLevel; i++) {
@@ -430,22 +388,11 @@ export const lSystemDefinition: OGLSceneDefinition = {
       }
     }
 
-    // Style-based color palettes: [trunkHue, trunkSat, tipHue, tipSat]
-    const palettes: Record<PlantStyle, [number, number, number, number]> = {
-      tree:    [0.08, 0.50, 0.33, 0.75], // brown → green
-      bush:    [0.25, 0.55, 0.38, 0.80], // olive → bright green
-      fern:    [0.30, 0.40, 0.42, 0.70], // muted green → vibrant green
-      seaweed: [0.45, 0.40, 0.55, 0.65], // teal → blue-green
-      vine:    [0.10, 0.50, 0.35, 0.70], // amber → green
-      coral:   [0.95, 0.55, 0.05, 0.75], // pink-red → orange
-    };
-
-    function rebuildGeometry(segments: TurtleSegment[], lineWidth: number, drawRatio: number, hueShift: number, maxBranchDepth: number, style: PlantStyle) {
+    function rebuildGeometry(segments: TurtleSegment[], lineWidth: number, drawRatio: number, hueShift: number, maxBranchDepth: number) {
       const drawCount = Math.max(1, Math.floor(segments.length * drawRatio));
 
       const positions: number[] = [];
       const colors: number[] = [];
-      const [hue0, sat0, hue1, sat1] = palettes[style];
 
       for (let i = 0; i < drawCount; i++) {
         const s = segments[i];
@@ -469,11 +416,11 @@ export const lSystemDefinition: OGLSceneDefinition = {
         positions.push(ax, ay, 0, bx, by, 0, cx, cy, 0);
         positions.push(bx, by, 0, ddx, ddy, 0, cx, cy, 0);
 
-        // Color: interpolate trunk → tip based on branch depth
+        // Color: brown trunk → green tips
         const branchRatio = maxBranchDepth > 0 ? s.branchDepth / maxBranchDepth : 0;
-        const baseHue = hue0 + (hue1 - hue0) * branchRatio;
+        const baseHue = 0.08 + branchRatio * 0.25;
         const hue = ((baseHue + hueShift) % 1.0 + 1.0) % 1.0;
-        const sat = sat0 + (sat1 - sat0) * branchRatio;
+        const sat = 0.50 + branchRatio * 0.30;
         const val = 0.92 - branchRatio * 0.12;
         const [r, g, b] = hsv2rgb(hue, sat, val);
         for (let j = 0; j < 6; j++) {
@@ -518,7 +465,6 @@ export const lSystemDefinition: OGLSceneDefinition = {
       render(time) {
         const values = getValues();
         const seed = Math.round(values.spread ?? 0);
-        const density = (values.twist ?? 50) / 100;
         const manualGrowth = Math.round(values.detail ?? 1);
         const lineWidth = values.bloom ?? 1.5;
         const speedN = (values.motion ?? 40) / 100;
@@ -527,27 +473,24 @@ export const lSystemDefinition: OGLSceneDefinition = {
         const maxGrowth = 7;
 
         // Auto-growth: increment level over time
-        const growthInterval = Math.max(0.5, 4 - speedN * 3.5); // 0.5s – 4s per level
+        const growthInterval = Math.max(0.5, 4 - speedN * 3.5);
         if (time - lastGrowthTime > growthInterval && autoGrowthLevel < maxGrowth) {
           autoGrowthLevel++;
           lastGrowthTime = time;
         }
 
-        // Use the higher of manual slider and auto-growth
         const effectiveGrowth = Math.max(manualGrowth, autoGrowthLevel);
 
-        // Rebuild if generation params changed
-        if (seed !== prevSeed || density !== prevDensity || effectiveGrowth !== prevGrowth) {
-          // Reset auto-growth if seed or density changed
-          if (seed !== prevSeed || density !== prevDensity) {
+        // Rebuild if params changed
+        if (seed !== prevSeed || effectiveGrowth !== prevGrowth) {
+          if (seed !== prevSeed) {
             autoGrowthLevel = 1;
             lastGrowthTime = time;
           }
           prevSeed = seed;
-          prevDensity = density;
           prevGrowth = effectiveGrowth;
 
-          buildAllLevels(seed, density, effectiveGrowth);
+          buildAllLevels(seed, effectiveGrowth);
         }
 
         const currentSegments = segmentsByLevel[segmentsByLevel.length - 1] ?? [];
@@ -556,11 +499,9 @@ export const lSystemDefinition: OGLSceneDefinition = {
         // Draw progress within current growth level
         const levelProgress = Math.min((time - lastGrowthTime) / growthInterval, 1.0);
         const eased = levelProgress < 1 ? levelProgress * levelProgress * (3 - 2 * levelProgress) : 1;
-
-        // If at max growth, show everything; otherwise progressive draw
         const drawRatio = effectiveGrowth >= maxGrowth ? 1.0 : eased;
 
-        rebuildGeometry(currentSegments, lineWidth, drawRatio, hueShift, maxBranchDepth, grammarCache?.style ?? 'tree');
+        rebuildGeometry(currentSegments, lineWidth, drawRatio, hueShift, maxBranchDepth);
 
         resize();
         gl.clear(gl.COLOR_BUFFER_BIT);
