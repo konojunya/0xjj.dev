@@ -11,11 +11,11 @@ const DESKTOP_FFT = 2048;
 const MOBILE_FFT = 1024;
 const DESKTOP_DPR_CAP = 2.0;
 const MOBILE_DPR_CAP = 1.5;
-const SMOOTHING = 0.72;
-const EMA_WEIGHT = 0.38;
-const NOISE_GATE = 0.06;
+const SMOOTHING = 0.6;
+const EMA_WEIGHT = 0.45;
+const NOISE_GATE = 0.01;
 
-const BEAT_THRESHOLD = 1.5;
+const BEAT_THRESHOLD = 1.35;
 const BEAT_DECAY = 0.92;
 
 function isMobile() {
@@ -174,7 +174,7 @@ void main() {
   int maxSteps = int(u_maxSteps);
 
   // Energy gates animation speed: silence → near-frozen
-  float energyGate = smoothstep(0.0, 0.15, u_energy); // 0→1 ramp
+  float energyGate = smoothstep(0.0, 0.04, u_energy); // 0→1 ramp (low threshold)
   float timeScale = 0.05 + energyGate * 0.95; // silence=5% speed, full=100%
   float time = u_time * speed * timeScale;
 
@@ -218,7 +218,7 @@ void main() {
     vec3 glowColor = palette(t, u_bass * 1.0);
 
     // Saturation scales with energy: silence → grayscale
-    float sat = smoothstep(0.0, 0.1, u_energy);
+    float sat = smoothstep(0.0, 0.03, u_energy);
     vec3 gray = vec3(dot(glowColor, vec3(0.299, 0.587, 0.114)));
     glowColor = mix(gray, glowColor, sat);
 
@@ -250,7 +250,7 @@ void main() {
   }
 
   // Overall brightness: energy cubed for dramatic on/off
-  float brightness = u_energy * u_energy * 3.0 + 0.02;
+  float brightness = u_energy * 4.0 + 0.05;
   color *= brightness;
 
   // Vignette (stronger when silent)
