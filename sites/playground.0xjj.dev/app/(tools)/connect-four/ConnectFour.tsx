@@ -113,20 +113,20 @@ export default function ConnectFour() {
         const sid = sessionStorage.getItem(`${SESSION_KEY}-${roomIdRef.current}`);
         if (sid && reconnectAttemptsRef.current < MAX_RECONNECT) {
           reconnectAttemptsRef.current++;
-          setError('Reconnecting...');
+          setError('再接続中...');
           reconnectTimerRef.current = setTimeout(() => {
             connectWs(roomIdRef.current!, sid);
           }, RECONNECT_DELAY);
           return;
         }
         if (reconnectAttemptsRef.current >= MAX_RECONNECT) {
-          setError('Connection lost');
+          setError('接続が切れました');
         }
       }
     };
 
     ws.onerror = () => {
-      setError('Connection error');
+      setError('接続エラー');
     };
   }, []);
 
@@ -180,7 +180,7 @@ export default function ConnectFour() {
       window.history.replaceState(null, '', `?room=${room}`);
       connectWs(room);
     } catch {
-      setError('Failed to create room');
+      setError('ルームの作成に失敗しました');
     }
   };
 
@@ -251,7 +251,7 @@ export default function ConnectFour() {
   };
 
   const playerLabel = (player: Player): string => {
-    return player === 'R' ? 'Red' : 'Yellow';
+    return player === 'R' ? '赤' : '黄';
   };
 
   const isWinCell = (row: number, col: number): boolean => {
@@ -270,12 +270,12 @@ export default function ConnectFour() {
 
   const getStatusText = (): string => {
     if (!gameState || !playerId) return '';
-    if (gameState.status === 'waiting') return 'Waiting for opponent...';
+    if (gameState.status === 'waiting') return '対戦相手を待っています...';
     if (gameState.status === 'won') {
-      return gameState.winner === playerId ? 'You win!' : 'You lose...';
+      return gameState.winner === playerId ? 'あなたの勝ち!' : 'あなたの負け...';
     }
-    if (gameState.status === 'draw') return "It's a draw!";
-    return gameState.turn === playerId ? 'Your turn' : "Opponent's turn";
+    if (gameState.status === 'draw') return '引き分け!';
+    return gameState.turn === playerId ? 'あなたのターン' : '相手のターン';
   };
 
   // ── Render ──
@@ -285,7 +285,7 @@ export default function ConnectFour() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Connect Four</h1>
         <p className="mt-1 text-sm text-muted">
-          Drop discs to connect four in a row.
+          ディスクを落として縦・横・斜めに4つ並べよう。
         </p>
       </div>
 
@@ -310,12 +310,12 @@ export default function ConnectFour() {
             className="w-full rounded-lg px-4 py-3 font-mono text-sm font-medium transition-colors"
             style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
           >
-            Create Room
+            ルームを作成
           </button>
 
           <div className="flex items-center gap-3 text-xs text-muted">
             <div className="h-px flex-1" style={{ background: border }} />
-            <span className="font-mono">or join</span>
+            <span className="font-mono">または参加</span>
             <div className="h-px flex-1" style={{ background: border }} />
           </div>
 
@@ -325,7 +325,7 @@ export default function ConnectFour() {
               value={joinInput}
               onChange={(e) => setJoinInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
-              placeholder="Room ID or link"
+              placeholder="ルームIDまたはリンク"
               className="flex-1 rounded-lg border bg-transparent px-3 py-2.5 font-mono text-base text-fg outline-none transition-colors"
               style={{ borderColor: border }}
             />
@@ -334,7 +334,7 @@ export default function ConnectFour() {
               className="rounded-lg border px-4 py-2.5 font-mono text-sm transition-colors"
               style={{ borderColor: border, color: 'var(--color-fg)' }}
             >
-              Join
+              参加
             </button>
           </div>
         </div>
@@ -343,7 +343,7 @@ export default function ConnectFour() {
       {/* ── Waiting ── */}
       {screen === 'waiting' && (
         <div className="space-y-4 text-center">
-          <p className="text-sm text-muted">Share this link with your opponent:</p>
+          <p className="text-sm text-muted">このリンクを対戦相手に共有してください:</p>
           <div
             className="flex items-center gap-2 rounded-lg border px-3 py-2.5"
             style={{ borderColor: border }}
@@ -361,7 +361,7 @@ export default function ConnectFour() {
                 color: 'var(--color-muted)',
               }}
             >
-              {copied ? 'copied!' : 'copy'}
+              {copied ? 'コピー済み!' : 'コピー'}
             </button>
           </div>
           <div className="flex items-center justify-center gap-2 py-4">
@@ -369,13 +369,13 @@ export default function ConnectFour() {
               className="h-2 w-2 animate-pulse rounded-full"
               style={{ background: 'var(--color-muted)' }}
             />
-            <p className="font-mono text-xs text-muted">Waiting for opponent...</p>
+            <p className="font-mono text-xs text-muted">対戦相手を待っています...</p>
           </div>
           <button
             onClick={backToLobby}
             className="font-mono text-xs text-muted transition-colors hover:text-fg"
           >
-            Cancel
+            キャンセル
           </button>
         </div>
       )}
@@ -387,12 +387,12 @@ export default function ConnectFour() {
           <div className="text-center">
             <p className="font-mono text-sm text-fg">{getStatusText()}</p>
             <p className="mt-1 font-mono text-xs text-muted">
-              You are{' '}
+              あなたは{' '}
               <span style={{ color: playerColor(playerId), fontWeight: 600 }}>
                 {playerLabel(playerId)}
               </span>
               {' · '}
-              Room <span className="font-medium">{roomId}</span>
+              ルーム <span className="font-medium">{roomId}</span>
             </p>
           </div>
 
@@ -513,7 +513,7 @@ export default function ConnectFour() {
                   opacity: gameState.turn === 'R' && gameState.status === 'playing' ? 1 : 0.3,
                 }}
               />
-              <span>Red{playerId === 'R' ? ' (you)' : ''}</span>
+              <span>赤{playerId === 'R' ? ' (あなた)' : ''}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div
@@ -525,7 +525,7 @@ export default function ConnectFour() {
                   opacity: gameState.turn === 'Y' && gameState.status === 'playing' ? 1 : 0.3,
                 }}
               />
-              <span>Yellow{playerId === 'Y' ? ' (you)' : ''}</span>
+              <span>黄{playerId === 'Y' ? ' (あなた)' : ''}</span>
             </div>
           </div>
 
@@ -534,7 +534,7 @@ export default function ConnectFour() {
             <div className="space-y-3 text-center">
               {gameState.rematchRequested[playerId] ? (
                 <p className="font-mono text-xs text-muted">
-                  Waiting for opponent to accept rematch...
+                  相手のリマッチ承諾を待っています...
                 </p>
               ) : (
                 <button
@@ -542,7 +542,7 @@ export default function ConnectFour() {
                   className="rounded-lg px-6 py-2.5 font-mono text-sm font-medium transition-colors"
                   style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
                 >
-                  Rematch
+                  リマッチ
                 </button>
               )}
               <div>
@@ -550,7 +550,7 @@ export default function ConnectFour() {
                   onClick={backToLobby}
                   className="font-mono text-xs text-muted transition-colors hover:text-fg"
                 >
-                  Back to lobby
+                  ロビーに戻る
                 </button>
               </div>
             </div>

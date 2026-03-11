@@ -114,20 +114,20 @@ export default function DotsAndBoxes() {
         const sid = sessionStorage.getItem(`${SESSION_KEY}-${roomIdRef.current}`);
         if (sid && reconnectAttemptsRef.current < MAX_RECONNECT) {
           reconnectAttemptsRef.current++;
-          setError('Reconnecting...');
+          setError('再接続中...');
           reconnectTimerRef.current = setTimeout(() => {
             connectWs(roomIdRef.current!, sid);
           }, RECONNECT_DELAY);
           return;
         }
         if (reconnectAttemptsRef.current >= MAX_RECONNECT) {
-          setError('Connection lost');
+          setError('接続が切れました');
         }
       }
     };
 
     ws.onerror = () => {
-      setError('Connection error');
+      setError('接続エラー');
     };
   }, []);
 
@@ -181,7 +181,7 @@ export default function DotsAndBoxes() {
       window.history.replaceState(null, '', `?room=${room}`);
       connectWs(room);
     } catch {
-      setError('Failed to create room');
+      setError('ルームの作成に失敗しました');
     }
   };
 
@@ -241,12 +241,12 @@ export default function DotsAndBoxes() {
 
   const getStatusText = (): string => {
     if (!gameState || !playerId) return '';
-    if (gameState.status === 'waiting') return 'Waiting for opponent...';
+    if (gameState.status === 'waiting') return '対戦相手を待っています...';
     if (gameState.status === 'ended') {
-      if (gameState.winner === 'draw') return "It's a draw!";
-      return gameState.winner === playerId ? 'You win!' : 'You lose...';
+      if (gameState.winner === 'draw') return '引き分け!';
+      return gameState.winner === playerId ? 'あなたの勝ち!' : 'あなたの負け...';
     }
-    return gameState.turn === playerId ? 'Your turn' : "Opponent's turn";
+    return gameState.turn === playerId ? 'あなたのターン' : '相手のターン';
   };
 
   const getPlayerColor = (mark: Mark): string => {
@@ -477,7 +477,7 @@ export default function DotsAndBoxes() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Dots & Boxes</h1>
         <p className="mt-1 text-sm text-muted">
-          Draw lines to complete boxes and outscore your opponent.
+          線を引いてボックスを完成させ、相手より多くのボックスを取ろう。
         </p>
       </div>
 
@@ -502,12 +502,12 @@ export default function DotsAndBoxes() {
             className="w-full rounded-lg px-4 py-3 font-mono text-sm font-medium transition-colors"
             style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
           >
-            Create Room
+            ルームを作成
           </button>
 
           <div className="flex items-center gap-3 text-xs text-muted">
             <div className="h-px flex-1" style={{ background: border }} />
-            <span className="font-mono">or join</span>
+            <span className="font-mono">または参加</span>
             <div className="h-px flex-1" style={{ background: border }} />
           </div>
 
@@ -517,7 +517,7 @@ export default function DotsAndBoxes() {
               value={joinInput}
               onChange={(e) => setJoinInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
-              placeholder="Room ID or link"
+              placeholder="ルームIDまたはリンク"
               className="flex-1 rounded-lg border bg-transparent px-3 py-2.5 font-mono text-base text-fg outline-none transition-colors"
               style={{ borderColor: border }}
             />
@@ -526,7 +526,7 @@ export default function DotsAndBoxes() {
               className="rounded-lg border px-4 py-2.5 font-mono text-sm transition-colors"
               style={{ borderColor: border, color: 'var(--color-fg)' }}
             >
-              Join
+              参加
             </button>
           </div>
         </div>
@@ -535,7 +535,7 @@ export default function DotsAndBoxes() {
       {/* ── Waiting ── */}
       {screen === 'waiting' && (
         <div className="space-y-4 text-center">
-          <p className="text-sm text-muted">Share this link with your opponent:</p>
+          <p className="text-sm text-muted">このリンクを対戦相手に共有してください:</p>
           <div
             className="flex items-center gap-2 rounded-lg border px-3 py-2.5"
             style={{ borderColor: border }}
@@ -553,7 +553,7 @@ export default function DotsAndBoxes() {
                 color: 'var(--color-muted)',
               }}
             >
-              {copied ? 'copied!' : 'copy'}
+              {copied ? 'コピー済み!' : 'コピー'}
             </button>
           </div>
           <div className="flex items-center justify-center gap-2 py-4">
@@ -561,13 +561,13 @@ export default function DotsAndBoxes() {
               className="h-2 w-2 animate-pulse rounded-full"
               style={{ background: 'var(--color-muted)' }}
             />
-            <p className="font-mono text-xs text-muted">Waiting for opponent...</p>
+            <p className="font-mono text-xs text-muted">対戦相手を待っています...</p>
           </div>
           <button
             onClick={backToLobby}
             className="font-mono text-xs text-muted transition-colors hover:text-fg"
           >
-            Cancel
+            キャンセル
           </button>
         </div>
       )}
@@ -579,12 +579,12 @@ export default function DotsAndBoxes() {
           <div className="text-center">
             <p className="font-mono text-sm text-fg">{getStatusText()}</p>
             <p className="mt-1 font-mono text-xs text-muted">
-              You are{' '}
+              あなたは{' '}
               <span style={{ color: getPlayerColor(playerId), fontWeight: 600 }}>
-                Player {playerId}
+                プレイヤー{playerId}
               </span>
               {' · '}
-              Room <span className="font-medium">{roomId}</span>
+              ルーム <span className="font-medium">{roomId}</span>
             </p>
           </div>
 
@@ -595,7 +595,7 @@ export default function DotsAndBoxes() {
                 className="font-mono text-xs font-medium"
                 style={{ color: PLAYER_A_COLOR }}
               >
-                Player A{playerId === 'A' ? ' (you)' : ''}
+                プレイヤーA{playerId === 'A' ? ' (あなた)' : ''}
               </p>
               <p
                 className="mt-0.5 font-mono text-2xl font-bold"
@@ -613,7 +613,7 @@ export default function DotsAndBoxes() {
                 className="font-mono text-xs font-medium"
                 style={{ color: PLAYER_B_COLOR }}
               >
-                Player B{playerId === 'B' ? ' (you)' : ''}
+                プレイヤーB{playerId === 'B' ? ' (あなた)' : ''}
               </p>
               <p
                 className="mt-0.5 font-mono text-2xl font-bold"
@@ -635,10 +635,10 @@ export default function DotsAndBoxes() {
                 }}
               />
               <p className="font-mono text-xs text-muted">
-                {gameState.turn === playerId ? 'Your turn' : "Opponent's turn"}
+                {gameState.turn === playerId ? 'あなたのターン' : '相手のターン'}
                 {' — '}
                 <span style={{ color: getPlayerColor(gameState.turn), fontWeight: 600 }}>
-                  Player {gameState.turn}
+                  プレイヤー{gameState.turn}
                 </span>
               </p>
             </div>
@@ -654,7 +654,7 @@ export default function DotsAndBoxes() {
             <div className="space-y-3 text-center">
               {gameState.rematchRequested[playerId] ? (
                 <p className="font-mono text-xs text-muted">
-                  Waiting for opponent to accept rematch...
+                  相手のリマッチ承諾を待っています...
                 </p>
               ) : (
                 <button
@@ -662,7 +662,7 @@ export default function DotsAndBoxes() {
                   className="rounded-lg px-6 py-2.5 font-mono text-sm font-medium transition-colors"
                   style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
                 >
-                  Rematch
+                  リマッチ
                 </button>
               )}
               <div>
@@ -670,7 +670,7 @@ export default function DotsAndBoxes() {
                   onClick={backToLobby}
                   className="font-mono text-xs text-muted transition-colors hover:text-fg"
                 >
-                  Back to lobby
+                  ロビーに戻る
                 </button>
               </div>
             </div>

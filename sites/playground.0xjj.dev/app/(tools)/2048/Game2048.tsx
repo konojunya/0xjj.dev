@@ -258,7 +258,7 @@ export default function Game2048() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">2048</h1>
         <p className="mt-1 text-sm text-muted">
-          Slide and merge tiles to reach 2048.
+          タイルをスライド・結合して2048を目指そう。
         </p>
       </div>
 
@@ -268,14 +268,14 @@ export default function Game2048() {
           className="flex-1 rounded-lg border px-3 py-2 text-center"
           style={{ borderColor: border }}
         >
-          <p className="font-mono text-[10px] uppercase text-muted">Score</p>
+          <p className="font-mono text-[10px] uppercase text-muted">スコア</p>
           <p className="font-mono text-lg font-bold tabular-nums text-fg">{score}</p>
         </div>
         <div
           className="flex-1 rounded-lg border px-3 py-2 text-center"
           style={{ borderColor: border }}
         >
-          <p className="font-mono text-[10px] uppercase text-muted">Best</p>
+          <p className="font-mono text-[10px] uppercase text-muted">ベスト</p>
           <p className="font-mono text-lg font-bold tabular-nums text-fg">{best}</p>
         </div>
         <button
@@ -283,7 +283,7 @@ export default function Game2048() {
           className="rounded-lg border px-4 py-3.5 font-mono text-xs transition-colors"
           style={{ borderColor: border, color: 'var(--color-fg)' }}
         >
-          New Game
+          ニューゲーム
         </button>
       </div>
 
@@ -316,21 +316,21 @@ export default function Game2048() {
         {/* Win overlay */}
         {won && !keepPlaying && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl bg-[color-mix(in_srgb,var(--color-bg)_80%,transparent)]">
-            <p className="text-3xl font-bold text-fg">You Win!</p>
+            <p className="text-3xl font-bold text-fg">クリア!</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setKeepPlaying(true)}
                 className="rounded-lg px-4 py-2 font-mono text-sm font-medium transition-colors"
                 style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
               >
-                Keep Playing
+                続ける
               </button>
               <button
                 onClick={restart}
                 className="rounded-lg border px-4 py-2 font-mono text-sm transition-colors"
                 style={{ borderColor: border, color: 'var(--color-fg)' }}
               >
-                New Game
+                ニューゲーム
               </button>
             </div>
           </div>
@@ -339,20 +339,20 @@ export default function Game2048() {
         {/* Game over overlay */}
         {gameOver && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-xl bg-[color-mix(in_srgb,var(--color-bg)_80%,transparent)]">
-            <p className="text-3xl font-bold text-fg">Game Over</p>
+            <p className="text-3xl font-bold text-fg">ゲームオーバー</p>
             <button
               onClick={restart}
               className="rounded-lg px-4 py-2 font-mono text-sm font-medium transition-colors"
               style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
             >
-              Try Again
+              もう一度
             </button>
           </div>
         )}
       </div>
 
       <p className="mt-4 text-center font-mono text-xs text-muted">
-        Use arrow keys or swipe to move tiles.
+        矢印キーまたはスワイプでタイルを動かします。
       </p>
     </main>
   );

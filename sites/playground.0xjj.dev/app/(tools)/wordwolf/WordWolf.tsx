@@ -171,19 +171,19 @@ export default function WordWolf() {
         const sid = sessionStorage.getItem(`${SESSION_KEY}-${roomIdRef.current}`);
         if (sid && reconnectAttemptsRef.current < MAX_RECONNECT) {
           reconnectAttemptsRef.current++;
-          setError('Reconnecting...');
+          setError('再接続中...');
           reconnectTimerRef.current = setTimeout(() => {
             connectWs(roomIdRef.current!, sid);
           }, RECONNECT_DELAY);
           return;
         }
         if (reconnectAttemptsRef.current >= MAX_RECONNECT) {
-          setError('Connection lost');
+          setError('接続が切れました');
         }
       }
     };
     ws.onerror = () => {
-      if (reconnectAttemptsRef.current === 0) setError('Connection error');
+      if (reconnectAttemptsRef.current === 0) setError('接続エラー');
     };
   }, []);
 
@@ -232,7 +232,7 @@ export default function WordWolf() {
 
   const createRoom = async () => {
     if (!nameInput.trim()) {
-      setError('Please enter your name');
+      setError('名前を入力してください');
       return;
     }
     setError(null);
@@ -246,13 +246,13 @@ export default function WordWolf() {
       window.history.replaceState(null, '', `?room=${room}`);
       connectWs(room);
     } catch {
-      setError('Failed to create room');
+      setError('ルームの作成に失敗しました');
     }
   };
 
   const joinRoom = () => {
     if (!nameInput.trim()) {
-      setError('Please enter your name');
+      setError('名前を入力してください');
       return;
     }
     let room = joinInput.trim();
@@ -341,7 +341,7 @@ export default function WordWolf() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Word Wolf</h1>
         <p className="mt-1 text-sm text-muted">
-          Find the wolf hiding among your friends!
+          友達の中に紛れたウルフを見つけ出そう!
         </p>
       </div>
 
@@ -362,12 +362,12 @@ export default function WordWolf() {
       {screen === 'lobby' && (
         <div className="space-y-6">
           <div>
-            <label className="mb-1.5 block font-mono text-xs text-muted">Name</label>
+            <label className="mb-1.5 block font-mono text-xs text-muted">名前</label>
             <input
               type="text"
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
-              placeholder="Your name"
+              placeholder="あなたの名前"
               className="w-full rounded-lg border bg-transparent px-3 py-2.5 font-mono text-base text-fg outline-none transition-colors"
               style={{ borderColor: border }}
             />
@@ -378,12 +378,12 @@ export default function WordWolf() {
             className="w-full rounded-lg px-4 py-3 font-mono text-sm font-medium transition-colors"
             style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
           >
-            Create Room
+            ルームを作成
           </button>
 
           <div className="flex items-center gap-3 text-xs text-muted">
             <div className="h-px flex-1" style={{ background: border }} />
-            <span className="font-mono">or join</span>
+            <span className="font-mono">または参加</span>
             <div className="h-px flex-1" style={{ background: border }} />
           </div>
 
@@ -393,7 +393,7 @@ export default function WordWolf() {
               value={joinInput}
               onChange={(e) => setJoinInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
-              placeholder="Room ID or link"
+              placeholder="ルームIDまたはリンク"
               className="flex-1 rounded-lg border bg-transparent px-3 py-2.5 font-mono text-base text-fg outline-none transition-colors"
               style={{ borderColor: border }}
             />
@@ -402,7 +402,7 @@ export default function WordWolf() {
               className="rounded-lg border px-4 py-2.5 font-mono text-sm transition-colors"
               style={{ borderColor: border, color: 'var(--color-fg)' }}
             >
-              Join
+              参加
             </button>
           </div>
         </div>
@@ -429,14 +429,14 @@ export default function WordWolf() {
                 color: 'var(--color-muted)',
               }}
             >
-              {copied ? 'copied!' : 'copy'}
+              {copied ? 'コピー済み!' : 'コピー'}
             </button>
           </div>
 
           {/* Player list */}
           <div>
             <p className="mb-2 font-mono text-xs text-muted">
-              Players ({playerList.length}/8)
+              プレイヤー ({playerList.length}/8)
             </p>
             <ul className="space-y-1.5">
               {playerList.map((p) => (
@@ -454,10 +454,10 @@ export default function WordWolf() {
                   />
                   <span className="font-mono text-sm text-fg">{p.name}</span>
                   {p.id === hostId && (
-                    <span className="ml-auto font-mono text-xs text-muted">host</span>
+                    <span className="ml-auto font-mono text-xs text-muted">ホスト</span>
                   )}
                   {p.id === playerId && p.id !== hostId && (
-                    <span className="ml-auto font-mono text-xs text-muted">you</span>
+                    <span className="ml-auto font-mono text-xs text-muted">あなた</span>
                   )}
                 </li>
               ))}
@@ -473,10 +473,10 @@ export default function WordWolf() {
                 className="w-full rounded-lg px-4 py-3 font-mono text-sm font-medium transition-colors disabled:opacity-40"
                 style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
               >
-                Start Game
+                ゲーム開始
               </button>
               {playerList.length < 3 && (
-                <p className="font-mono text-xs text-muted">Need at least 3 players to start</p>
+                <p className="font-mono text-xs text-muted">3人以上でゲームを開始できます</p>
               )}
             </div>
           ) : (
@@ -485,7 +485,7 @@ export default function WordWolf() {
                 className="h-2 w-2 animate-pulse rounded-full"
                 style={{ background: 'var(--color-muted)' }}
               />
-              <p className="font-mono text-xs text-muted">Waiting for the host to start the game...</p>
+              <p className="font-mono text-xs text-muted">ホストがゲームを開始するのを待っています...</p>
             </div>
           )}
 
@@ -493,7 +493,7 @@ export default function WordWolf() {
             onClick={backToLobby}
             className="block w-full text-center font-mono text-xs text-muted transition-colors hover:text-fg"
           >
-            Leave
+            退出
           </button>
         </div>
       )}
@@ -509,7 +509,7 @@ export default function WordWolf() {
             >
               {formatTime(timeLeft)}
             </p>
-            <p className="mt-1 font-mono text-xs text-muted">Time remaining</p>
+            <p className="mt-1 font-mono text-xs text-muted">残り時間</p>
           </div>
 
           {/* Word card */}
@@ -520,7 +520,7 @@ export default function WordWolf() {
               background: 'color-mix(in srgb, var(--color-accent) 8%, transparent)',
             }}
           >
-            <p className="mb-2 font-mono text-xs text-muted">Your word</p>
+            <p className="mb-2 font-mono text-xs text-muted">あなたのお題</p>
             <p className="text-3xl font-bold text-fg">{myWord}</p>
           </div>
 
@@ -531,12 +531,12 @@ export default function WordWolf() {
               background: 'color-mix(in srgb, var(--color-fg) 4%, transparent)',
             }}
           >
-            Talk about your word without saying it directly!
+            お題について直接言わずに話しましょう!
           </p>
 
           {/* Player list */}
           <div>
-            <p className="mb-2 font-mono text-xs text-muted">Players</p>
+            <p className="mb-2 font-mono text-xs text-muted">プレイヤー</p>
             <div className="flex flex-wrap gap-2">
               {playerList.map((p) => (
                 <span
@@ -560,9 +560,9 @@ export default function WordWolf() {
       {screen === 'voting' && (
         <div className="space-y-6">
           <div className="text-center">
-            <p className="text-lg font-semibold text-fg">Vote</p>
+            <p className="text-lg font-semibold text-fg">投票</p>
             <p className="mt-1 font-mono text-xs text-muted">
-              Vote for who you think is the wolf
+              ウルフだと思う人に投票してください
             </p>
           </div>
 
@@ -594,7 +594,7 @@ export default function WordWolf() {
                         background: 'color-mix(in srgb, var(--color-fg) 10%, transparent)',
                         color: 'var(--color-muted)',
                       }}>
-                        {votes} {votes === 1 ? 'vote' : 'votes'}
+                        {votes}票
                       </span>
                     )}
                   </button>
@@ -608,7 +608,7 @@ export default function WordWolf() {
                 className="h-2 w-2 animate-pulse rounded-full"
                 style={{ background: 'var(--color-muted)' }}
               />
-              <p className="font-mono text-xs text-muted">Waiting for other players to vote...</p>
+              <p className="font-mono text-xs text-muted">他のプレイヤーの投票を待っています...</p>
             </div>
           )}
         </div>
@@ -620,7 +620,7 @@ export default function WordWolf() {
           {/* Winner */}
           <div className="text-center">
             <p className="text-2xl font-bold text-fg">
-              {resultData.winner === 'citizen' ? 'Citizens Win!' : 'Wolf Wins!'}
+              {resultData.winner === 'citizen' ? '市民の勝ち!' : 'ウルフの勝ち!'}
             </p>
           </div>
 
@@ -632,7 +632,7 @@ export default function WordWolf() {
               background: 'color-mix(in srgb, var(--color-fg) 4%, transparent)',
             }}
           >
-            <p className="mb-3 font-mono text-xs text-muted">The wolf was...</p>
+            <p className="mb-3 font-mono text-xs text-muted">ウルフは...</p>
             <p className="text-xl font-bold text-fg">
               {players[resultData.wolfId]?.name ?? '???'}
             </p>
@@ -644,21 +644,21 @@ export default function WordWolf() {
               className="rounded-lg border px-3 py-3 text-center"
               style={{ borderColor: border }}
             >
-              <p className="mb-1 font-mono text-xs text-muted">Citizens&apos; word</p>
+              <p className="mb-1 font-mono text-xs text-muted">市民のお題</p>
               <p className="text-lg font-bold text-fg">{resultData.citizenWord}</p>
             </div>
             <div
               className="rounded-lg border px-3 py-3 text-center"
               style={{ borderColor: border }}
             >
-              <p className="mb-1 font-mono text-xs text-muted">Wolf&apos;s word</p>
+              <p className="mb-1 font-mono text-xs text-muted">ウルフのお題</p>
               <p className="text-lg font-bold text-fg">{resultData.wolfWord}</p>
             </div>
           </div>
 
           {/* Vote breakdown */}
           <div>
-            <p className="mb-2 font-mono text-xs text-muted">Vote results</p>
+            <p className="mb-2 font-mono text-xs text-muted">投票結果</p>
             <div className="space-y-1">
               {playerList.map((p) => {
                 const votedFor = resultData.votes[p.id];
@@ -679,11 +679,11 @@ export default function WordWolf() {
                     <span className="text-fg">
                       {p.name}
                       {p.id === resultData.wolfId && (
-                        <span className="ml-1.5" style={{ color: '#ef4444' }}>Wolf</span>
+                        <span className="ml-1.5" style={{ color: '#ef4444' }}>ウルフ</span>
                       )}
                     </span>
                     <span className="text-muted">
-                      → {targetName} ({receivedVotes} {receivedVotes === 1 ? 'vote' : 'votes'})
+                      → {targetName} ({receivedVotes}票)
                     </span>
                   </div>
                 );
@@ -701,7 +701,7 @@ export default function WordWolf() {
               }}
             >
               <p className="mb-3 text-center font-mono text-xs text-muted">
-                Last chance! Guess the citizens&apos; word to win
+                最後のチャンス! 市民のお題を当てれば逆転勝利
               </p>
               <div className="flex gap-2">
                 <input
@@ -709,7 +709,7 @@ export default function WordWolf() {
                   value={guessInput}
                   onChange={(e) => setGuessInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && submitGuess()}
-                  placeholder="Citizens' word is..."
+                  placeholder="市民のお題は..."
                   className="flex-1 rounded-lg border bg-transparent px-3 py-2.5 font-mono text-base text-fg outline-none"
                   style={{ borderColor: border }}
                 />
@@ -718,7 +718,7 @@ export default function WordWolf() {
                   className="rounded-lg px-4 py-2.5 font-mono text-sm font-medium transition-colors"
                   style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
                 >
-                  Guess
+                  回答
                 </button>
               </div>
             </div>
@@ -730,7 +730,7 @@ export default function WordWolf() {
               className="text-center font-mono text-sm font-bold"
               style={{ color: guessResult.correct ? '#22c55e' : '#ef4444' }}
             >
-              {guessResult.correct ? 'Correct! Wolf wins by reversal!' : 'Wrong... Citizens win!'}
+              {guessResult.correct ? '正解! ウルフの逆転勝利!' : '不正解... 市民の勝ち!'}
             </p>
           )}
 
@@ -742,7 +742,7 @@ export default function WordWolf() {
                 className="w-full rounded-lg px-4 py-3 font-mono text-sm font-medium transition-colors"
                 style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
               >
-                Play Again
+                もう一度遊ぶ
               </button>
             )}
             {!isHost && (
@@ -751,14 +751,14 @@ export default function WordWolf() {
                   className="h-2 w-2 animate-pulse rounded-full"
                   style={{ background: 'var(--color-muted)' }}
                 />
-                <p className="font-mono text-xs text-muted">Waiting for the host to start the next game...</p>
+                <p className="font-mono text-xs text-muted">ホストが次のゲームを開始するのを待っています...</p>
               </div>
             )}
             <button
               onClick={backToLobby}
               className="font-mono text-xs text-muted transition-colors hover:text-fg"
             >
-              Back to Lobby
+              ロビーに戻る
             </button>
           </div>
         </div>

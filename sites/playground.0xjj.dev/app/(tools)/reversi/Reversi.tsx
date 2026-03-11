@@ -119,20 +119,20 @@ export default function Reversi() {
         const sid = sessionStorage.getItem(`${SESSION_KEY}-${roomIdRef.current}`);
         if (sid && reconnectAttemptsRef.current < MAX_RECONNECT) {
           reconnectAttemptsRef.current++;
-          setError('Reconnecting...');
+          setError('再接続中...');
           reconnectTimerRef.current = setTimeout(() => {
             connectWs(roomIdRef.current!, sid);
           }, RECONNECT_DELAY);
           return;
         }
         if (reconnectAttemptsRef.current >= MAX_RECONNECT) {
-          setError('Connection lost');
+          setError('接続が切れました');
         }
       }
     };
 
     ws.onerror = () => {
-      setError('Connection error');
+      setError('接続エラー');
     };
   }, []);
 
@@ -186,7 +186,7 @@ export default function Reversi() {
       window.history.replaceState(null, '', `?room=${room}`);
       connectWs(room);
     } catch {
-      setError('Failed to create room');
+      setError('ルームの作成に失敗しました');
     }
   };
 
@@ -246,12 +246,12 @@ export default function Reversi() {
 
   const getStatusText = (): string => {
     if (!gameState || !playerId) return '';
-    if (gameState.status === 'waiting') return 'Waiting for opponent...';
+    if (gameState.status === 'waiting') return '対戦相手を待っています...';
     if (gameState.status === 'ended') {
-      if (gameState.winner === 'draw') return "It's a draw!";
-      return gameState.winner === playerId ? 'You win!' : 'You lose...';
+      if (gameState.winner === 'draw') return '引き分け!';
+      return gameState.winner === playerId ? 'あなたの勝ち!' : 'あなたの負け...';
     }
-    return gameState.turn === playerId ? 'Your turn' : "Opponent's turn";
+    return gameState.turn === playerId ? 'あなたのターン' : '相手のターン';
   };
 
   // ── Render ──
@@ -260,7 +260,7 @@ export default function Reversi() {
     <main className=" py-10">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-fg">Reversi</h1>
-        <p className="mt-1 text-sm text-muted">Classic disc-flipping strategy game.</p>
+        <p className="mt-1 text-sm text-muted">ディスクを挟んでひっくり返す定番の戦略ゲーム。</p>
       </div>
 
       {error && (
@@ -284,12 +284,12 @@ export default function Reversi() {
             className="w-full rounded-lg px-4 py-3 font-mono text-sm font-medium transition-colors"
             style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
           >
-            Create Room
+            ルームを作成
           </button>
 
           <div className="flex items-center gap-3 text-xs text-muted">
             <div className="h-px flex-1" style={{ background: border }} />
-            <span className="font-mono">or join</span>
+            <span className="font-mono">または参加</span>
             <div className="h-px flex-1" style={{ background: border }} />
           </div>
 
@@ -299,7 +299,7 @@ export default function Reversi() {
               value={joinInput}
               onChange={(e) => setJoinInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
-              placeholder="Room ID or link"
+              placeholder="ルームIDまたはリンク"
               className="flex-1 rounded-lg border bg-transparent px-3 py-2.5 font-mono text-base text-fg outline-none transition-colors"
               style={{ borderColor: border }}
             />
@@ -308,7 +308,7 @@ export default function Reversi() {
               className="rounded-lg border px-4 py-2.5 font-mono text-sm transition-colors"
               style={{ borderColor: border, color: 'var(--color-fg)' }}
             >
-              Join
+              参加
             </button>
           </div>
         </div>
@@ -317,7 +317,7 @@ export default function Reversi() {
       {/* ── Waiting ── */}
       {screen === 'waiting' && (
         <div className="space-y-4 text-center">
-          <p className="text-sm text-muted">Share this link with your opponent:</p>
+          <p className="text-sm text-muted">このリンクを対戦相手に共有してください:</p>
           <div
             className="flex items-center gap-2 rounded-lg border px-3 py-2.5"
             style={{ borderColor: border }}
@@ -335,7 +335,7 @@ export default function Reversi() {
                 color: 'var(--color-muted)',
               }}
             >
-              {copied ? 'copied!' : 'copy'}
+              {copied ? 'コピー済み!' : 'コピー'}
             </button>
           </div>
           <div className="flex items-center justify-center gap-2 py-4">
@@ -343,13 +343,13 @@ export default function Reversi() {
               className="h-2 w-2 animate-pulse rounded-full"
               style={{ background: 'var(--color-muted)' }}
             />
-            <p className="font-mono text-xs text-muted">Waiting for opponent...</p>
+            <p className="font-mono text-xs text-muted">対戦相手を待っています...</p>
           </div>
           <button
             onClick={backToLobby}
             className="font-mono text-xs text-muted transition-colors hover:text-fg"
           >
-            Cancel
+            キャンセル
           </button>
         </div>
       )}
@@ -361,12 +361,12 @@ export default function Reversi() {
           <div className="text-center">
             <p className="font-mono text-sm text-fg">{getStatusText()}</p>
             <p className="mt-1 font-mono text-xs text-muted">
-              You are{' '}
+              あなたは{' '}
               <span style={{ fontWeight: 600 }}>
-                {playerId === 'B' ? 'Black' : 'White'}
+                {playerId === 'B' ? '黒' : '白'}
               </span>
               {' · '}
-              Room <span className="font-medium">{roomId}</span>
+              ルーム <span className="font-medium">{roomId}</span>
             </p>
           </div>
 
@@ -389,7 +389,7 @@ export default function Reversi() {
                   color: playerId === 'B' ? 'var(--color-fg)' : 'var(--color-muted)',
                 }}
               >
-                Black: {gameState.scores.B}
+                黒: {gameState.scores.B}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -409,7 +409,7 @@ export default function Reversi() {
                   color: playerId === 'W' ? 'var(--color-fg)' : 'var(--color-muted)',
                 }}
               >
-                White: {gameState.scores.W}
+                白: {gameState.scores.W}
               </span>
             </div>
           </div>
@@ -427,7 +427,7 @@ export default function Reversi() {
                 }}
               />
               <span className="font-mono text-xs text-muted">
-                {gameState.turn === 'B' ? 'Black' : 'White'}&apos;s turn
+                {gameState.turn === 'B' ? '黒' : '白'}のターン
               </span>
             </div>
           )}
@@ -512,7 +512,7 @@ export default function Reversi() {
             <div className="space-y-3 text-center">
               {gameState.rematchRequested[playerId] ? (
                 <p className="font-mono text-xs text-muted">
-                  Waiting for opponent to accept rematch...
+                  相手のリマッチ承諾を待っています...
                 </p>
               ) : (
                 <button
@@ -520,7 +520,7 @@ export default function Reversi() {
                   className="rounded-lg px-6 py-2.5 font-mono text-sm font-medium transition-colors"
                   style={{ background: 'var(--color-fg)', color: 'var(--color-bg)' }}
                 >
-                  Rematch
+                  リマッチ
                 </button>
               )}
               <div>
@@ -528,7 +528,7 @@ export default function Reversi() {
                   onClick={backToLobby}
                   className="font-mono text-xs text-muted transition-colors hover:text-fg"
                 >
-                  Back to lobby
+                  ロビーに戻る
                 </button>
               </div>
             </div>
