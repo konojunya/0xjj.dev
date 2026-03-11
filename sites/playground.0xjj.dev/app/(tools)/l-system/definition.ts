@@ -379,11 +379,13 @@ export const lSystemDefinition: OGLSceneDefinition = {
 
         // Color: dark brown trunk → pink blossoms (桜/梅)
         const branchRatio = maxBranchDepth > 0 ? s.branchDepth / maxBranchDepth : 0;
-        const hue = branchRatio < 0.5
-          ? 0.06 + branchRatio * 0.04          // brown range for branches
-          : 0.95 + (branchRatio - 0.5) * 0.06; // pink for tips (wraps around 1.0)
-        const sat = 0.55 - branchRatio * 0.20;
-        const val = 0.30 + branchRatio * 0.65;
+        const hue = branchRatio < 0.3
+          ? 0.06                                // brown trunk
+          : 0.94 + (branchRatio - 0.3) * 0.04; // pink from mid-branch onward
+        const sat = branchRatio < 0.3
+          ? 0.55
+          : 0.35 + (1.0 - branchRatio) * 0.15;
+        const val = 0.25 + branchRatio * 0.70;
         const [r, g, b] = hsv2rgb(hue, sat, val);
         for (let j = 0; j < 6; j++) {
           colors.push(r, g, b);
