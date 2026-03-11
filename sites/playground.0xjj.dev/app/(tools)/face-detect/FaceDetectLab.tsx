@@ -8,19 +8,29 @@ const PREVIEW_MAX_WIDTH = 640;
 const OPENCV_WORKER_PATH = '/opencv/opencv.worker.js';
 const OPENCV_LOAD_TIMEOUT_MS = 30_000;
 
+// Zoom parameters
+const ZOOM_PADDING = 3.0; // face fills ~1/3 of viewport
+const LERP_SPEED = 0.06;
+const MIN_VIEWPORT = 0.2; // max 5x zoom
+const NO_FACE_ZOOM_OUT_FRAMES = 60; // ~1 sec at 60fps
+
 type FaceRect = { x: number; y: number; w: number; h: number };
+type Viewport = { x: number; y: number; w: number; h: number };
+
+const FULL_VIEW: Viewport = { x: 0, y: 0, w: 1, h: 1 };
+
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
 
 function formatError(error: unknown): string {
   if (error instanceof DOMException) {
-    if (error.name === 'NotAllowedError') {
+    if (error.name === 'NotAllowedError')
       return 'カメラ権限が拒否されました。ブラウザの設定から camera を許可してください。';
-    }
-    if (error.name === 'NotFoundError') {
+    if (error.name === 'NotFoundError')
       return '利用可能なカメラが見つかりませんでした。';
-    }
-    if (error.name === 'NotReadableError') {
+    if (error.name === 'NotReadableError')
       return '他のアプリがカメラを使用中のため開始できませんでした。';
-    }
   }
   if (error instanceof Error) return error.message;
   return 'カメラの起動に失敗しました。';
@@ -29,6 +39,7 @@ function formatError(error: unknown): string {
 export function FaceDetectLab() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const detectCanvasRef = useRef<OffscreenCanvas | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const isRunningRef = useRef(false);
@@ -36,6 +47,9 @@ export function FaceDetectLab() {
   const workerReadyRef = useRef(false);
   const detectingRef = useRef(false);
   const facesRef = useRef<FaceRect[]>([]);
+  const viewportRef = useRef<Viewport>({ ...FULL_VIEW });
+  const targetViewportRef = useRef<Viewport>({ ...FULL_VIEW });
+  const noFaceFramesRef = useRef(0);
 
   const [isStarting, setIsStarting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -44,6 +58,7 @@ export function FaceDetectLab() {
   const [openCvStatus, setOpenCvStatus] = useState('未読み込み');
   const [resolution, setResolution] = useState<string | null>(null);
   const [faceCount, setFaceCount] = useState(0);
+  const [zoomLevel, setZoomLevel] = useState('1.0x');
 
   const pausePreviewLoop = useCallback(() => {
     if (animationFrameRef.current !== null) {
@@ -60,8 +75,12 @@ export function FaceDetectLab() {
       isRunningRef.current = false;
       detectingRef.current = false;
       facesRef.current = [];
+      viewportRef.current = { ...FULL_VIEW };
+      targetViewportRef.current = { ...FULL_VIEW };
+      noFaceFramesRef.current = 0;
       setIsRunning(false);
       setFaceCount(0);
+      setZoomLevel('1.0x');
       setStatus(reason === 'failed' ? '開始に失敗しました' : '停止しました');
 
       const canvas = canvasRef.current;
@@ -80,36 +99,105 @@ export function FaceDetectLab() {
     };
   }, []);
 
+  const updateZoomTarget = useCallback((faces: FaceRect[], cw: number, ch: number) => {
+    // Bounding box of all faces
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = 0;
+    let maxY = 0;
+    for (const f of faces) {
+      minX = Math.min(minX, f.x);
+      minY = Math.min(minY, f.y);
+      maxX = Math.max(maxX, f.x + f.w);
+      maxY = Math.max(maxY, f.y + f.h);
+    }
+
+    // Normalize to 0-1
+    const nCx = (minX + maxX) / 2 / cw;
+    const nCy = (minY + maxY) / 2 / ch;
+    const nFaceW = (maxX - minX) / cw;
+    const nFaceH = (maxY - minY) / ch;
+
+    // Target viewport size with padding, maintaining aspect ratio
+    const aspectRatio = cw / ch;
+    let tw = Math.max(nFaceW * ZOOM_PADDING, nFaceH * ZOOM_PADDING * aspectRatio);
+    tw = Math.max(MIN_VIEWPORT, Math.min(1, tw));
+    let th = tw / aspectRatio;
+    if (th > 1) {
+      th = 1;
+      tw = th * aspectRatio;
+    }
+
+    // Center on faces, clamped to bounds
+    const tx = Math.max(0, Math.min(1 - tw, nCx - tw / 2));
+    const ty = Math.max(0, Math.min(1 - th, nCy - th / 2));
+
+    targetViewportRef.current = { x: tx, y: ty, w: tw, h: th };
+  }, []);
+
   const drawLoop = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
+    const detectCanvas = detectCanvasRef.current;
 
     if (!video || !canvas || !ctx || !isRunningRef.current) return;
 
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Lerp viewport towards target
+      const vp = viewportRef.current;
+      const target = targetViewportRef.current;
+      vp.x = lerp(vp.x, target.x, LERP_SPEED);
+      vp.y = lerp(vp.y, target.y, LERP_SPEED);
+      vp.w = lerp(vp.w, target.w, LERP_SPEED);
+      vp.h = lerp(vp.h, target.h, LERP_SPEED);
 
-      // Draw face rectangles
+      // Draw zoomed video to visible canvas
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      ctx.drawImage(
+        video,
+        vp.x * vw, vp.y * vh, vp.w * vw, vp.h * vh,
+        0, 0, canvas.width, canvas.height,
+      );
+
+      // Draw face rectangles (mapped from detection coords to zoomed canvas coords)
       const faces = facesRef.current;
-      if (faces.length > 0) {
+      if (faces.length > 0 && detectCanvas) {
         ctx.strokeStyle = '#22c55e';
         ctx.lineWidth = 2;
-        ctx.setLineDash([]);
         for (const f of faces) {
-          ctx.strokeRect(f.x, f.y, f.w, f.h);
+          const nx = f.x / detectCanvas.width;
+          const ny = f.y / detectCanvas.height;
+          const nw = f.w / detectCanvas.width;
+          const nh = f.h / detectCanvas.height;
+
+          const dx = ((nx - vp.x) / vp.w) * canvas.width;
+          const dy = ((ny - vp.y) / vp.h) * canvas.height;
+          const dw = (nw / vp.w) * canvas.width;
+          const dh = (nh / vp.h) * canvas.height;
+
+          ctx.strokeRect(dx, dy, dw, dh);
         }
       }
 
-      // Send frame to worker for detection (one at a time)
+      // Update zoom level display (throttled to avoid excessive re-renders)
+      const currentZoom = 1 / vp.w;
+      setZoomLevel(`${currentZoom.toFixed(1)}x`);
+
+      // Send full frame to worker for detection
       const worker = workerRef.current;
-      if (worker && workerReadyRef.current && !detectingRef.current) {
-        detectingRef.current = true;
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        worker.postMessage(
-          { type: 'detect', buffer: imageData.data.buffer, width: canvas.width, height: canvas.height },
-          [imageData.data.buffer],
-        );
+      if (worker && workerReadyRef.current && !detectingRef.current && detectCanvas) {
+        const detectCtx = detectCanvas.getContext('2d');
+        if (detectCtx) {
+          detectCtx.drawImage(video, 0, 0, detectCanvas.width, detectCanvas.height);
+          detectingRef.current = true;
+          const imageData = detectCtx.getImageData(0, 0, detectCanvas.width, detectCanvas.height);
+          worker.postMessage(
+            { type: 'detect', buffer: imageData.data.buffer, width: detectCanvas.width, height: detectCanvas.height },
+            [imageData.data.buffer],
+          );
+        }
       }
     }
 
@@ -142,9 +230,21 @@ export function FaceDetectLab() {
           // Switch to detection message handler
           worker.onmessage = (ev: MessageEvent) => {
             if (ev.data.type === 'detect-result') {
-              facesRef.current = ev.data.faces;
+              const faces: FaceRect[] = ev.data.faces;
+              facesRef.current = faces;
               detectingRef.current = false;
-              setFaceCount(ev.data.faces.length);
+              setFaceCount(faces.length);
+
+              const dc = detectCanvasRef.current;
+              if (faces.length > 0 && dc) {
+                noFaceFramesRef.current = 0;
+                updateZoomTarget(faces, dc.width, dc.height);
+              } else {
+                noFaceFramesRef.current++;
+                if (noFaceFramesRef.current > NO_FACE_ZOOM_OUT_FRAMES) {
+                  targetViewportRef.current = { ...FULL_VIEW };
+                }
+              }
             }
           };
 
@@ -160,7 +260,7 @@ export function FaceDetectLab() {
         reject(new Error('OpenCV Worker の起動に失敗しました。'));
       };
     });
-  }, []);
+  }, [updateZoomTarget]);
 
   const startCamera = useCallback(async (): Promise<void> => {
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -200,6 +300,9 @@ export function FaceDetectLab() {
     canvas.width = previewWidth;
     canvas.height = previewHeight;
 
+    // Create off-screen canvas for detection (always full frame)
+    detectCanvasRef.current = new OffscreenCanvas(previewWidth, previewHeight);
+
     setResolution(`${video.videoWidth} × ${video.videoHeight}`);
   }, []);
 
@@ -210,16 +313,12 @@ export function FaceDetectLab() {
     setIsStarting(true);
 
     try {
-      // Start camera and load OpenCV in parallel
-      const [, worker] = await Promise.all([startCamera(), loadOpenCv()]);
+      await Promise.all([startCamera(), loadOpenCv()]);
 
       setStatus('顔検出中');
       isRunningRef.current = true;
       setIsRunning(true);
       resumePreviewLoop();
-
-      // Set up detection handler (already done in loadOpenCv, but ensure reference)
-      void worker;
     } catch (err) {
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
@@ -240,12 +339,13 @@ export function FaceDetectLab() {
     workerRef.current?.terminate();
     workerRef.current = null;
     workerReadyRef.current = false;
+    detectCanvasRef.current = null;
     setOpenCvStatus('未読み込み');
   };
 
   return (
     <section className="mt-8 space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
           <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted">Status</div>
           <div className="mt-2 text-sm text-fg">{status}</div>
@@ -262,6 +362,10 @@ export function FaceDetectLab() {
           <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted">Faces</div>
           <div className="mt-2 text-sm text-fg">{isRunning ? faceCount : '-'}</div>
         </div>
+        <div className="rounded-xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03]">
+          <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted">Zoom</div>
+          <div className="mt-2 text-sm text-fg">{isRunning ? zoomLevel : '-'}</div>
+        </div>
       </div>
 
       <div className="rounded-xl border border-black/10 bg-black/[0.02] p-4 dark:border-white/10 dark:bg-white/[0.03] sm:p-5">
@@ -271,10 +375,10 @@ export function FaceDetectLab() {
           </div>
           <div>
             <h2 className="text-base font-medium text-fg">
-              リアルタイム顔検出
+              リアルタイム顔検出 + オートズーム
             </h2>
             <p className="mt-1 text-sm leading-relaxed text-muted">
-              カメラ映像はどのサーバーにもアップロードせず、保存もしません。OpenCV.js (Haar Cascade) によるブラウザ内処理です。
+              顔を検出すると自動でズームイン。顔が消えると約1秒後にズームアウトします。処理はすべてブラウザ内で完結します。
             </p>
           </div>
         </div>
