@@ -27,49 +27,49 @@ const TEMPLATES: LeafTemplate[] = [
   {
     axiom: 'X',
     rules: { X: 'F[+X]F[-X]+X', F: 'FF' },
-    angleRange: [22, 32],
+    angleRange: [30, 45],
   },
   // Broad leaf: dense branching fills area
   {
     axiom: 'X',
     rules: { X: 'F+[[X]-X]-F[-FX]+X', F: 'FF' },
-    angleRange: [20, 28],
+    angleRange: [25, 40],
   },
   // Palmate leaf: veins fan out from base
   {
     axiom: 'F',
     rules: { F: 'FF+[+F-F-F]-[-F+F+F]' },
-    angleRange: [18, 26],
+    angleRange: [25, 38],
   },
   // Fern frond: asymmetric side veins
   {
     axiom: 'X',
     rules: { X: 'F-[[X]+X]+F[+FX]-X', F: 'FF' },
-    angleRange: [20, 28],
+    angleRange: [28, 42],
   },
-  // Elm leaf: tight branching veins
+  // Elm leaf: wide branching veins
   {
     axiom: 'X',
     rules: { X: 'F[+X][-X]FX', F: 'FF' },
-    angleRange: [24, 34],
+    angleRange: [35, 50],
   },
-  // Willow leaf: narrow, drooping veins
+  // Drooping leaf: sweeping curves
   {
     axiom: 'X',
     rules: { X: 'F[+X]F[-X]-X', F: 'FF' },
-    angleRange: [14, 22],
+    angleRange: [25, 38],
   },
   // Maple leaf: wide spreading veins
   {
     axiom: 'X',
     rules: { X: 'F[-X][+X]FX', F: 'FF' },
-    angleRange: [26, 38],
+    angleRange: [35, 55],
   },
   // Dense venation: many small veins
   {
     axiom: 'X',
     rules: { X: 'F[+F+X][-F-X]FX', F: 'FF' },
-    angleRange: [18, 26],
+    angleRange: [28, 42],
   },
 ];
 
