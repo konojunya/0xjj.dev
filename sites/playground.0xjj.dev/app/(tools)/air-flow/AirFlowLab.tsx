@@ -108,6 +108,7 @@ export function AirFlowLab() {
   const [isStarting, setIsStarting] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [canFullscreen, setCanFullscreen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Initialize particles
@@ -441,6 +442,7 @@ export function AirFlowLab() {
 
   // Sync fullscreen state
   useEffect(() => {
+    setCanFullscreen(!!document.fullscreenEnabled);
     const onChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
@@ -539,15 +541,17 @@ export function AirFlowLab() {
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-black/10 bg-black/[0.02] px-4 py-3 dark:border-white/10 dark:bg-white/[0.02]">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleFullscreen}
-            className="font-mono text-xs"
-          >
-            {isFullscreen ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
-            {isFullscreen ? '縮小' : '全画面'}
-          </Button>
+          {canFullscreen && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleFullscreen}
+              className="font-mono text-xs"
+            >
+              {isFullscreen ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
+              {isFullscreen ? '縮小' : '全画面'}
+            </Button>
+          )}
           <Button
             type="button"
             onClick={handleStart}
